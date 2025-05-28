@@ -743,7 +743,7 @@ footer {
 }
 
 #features-card {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('image/features.jpg'), url('../image/features.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('image/features.png'), url('../image/features.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -763,7 +763,7 @@ footer {
 }
 
 #features-card:hover {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('image/features.jpg'), url('../image/features.jpg');
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('image/features.png'), url('../image/features.png');
     transform: scale(1.05);
     transition: all 0.3s ease;
 }
