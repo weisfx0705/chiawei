@@ -471,6 +471,7 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
+/* University Logo Styles */
 .university-link {
     margin-top: 2rem;
     display: flex;
@@ -481,26 +482,32 @@ body {
 .isu-logo {
     display: inline-block;
     transition: all 0.3s ease;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .isu-logo img {
-    height: 80px;
+    height: 60px;
     width: auto;
     transition: all 0.3s ease;
     filter: brightness(0.9);
 }
 
 .isu-logo:hover {
-    transform: scale(1.1) translateY(-5px);
-    box-shadow: 0 8px 25px rgba(255,51,102,0.3);
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3);
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .isu-logo:hover img {
     filter: brightness(1.1);
+    transform: scale(1.1);
 }
 
 .isu-logo::before {
@@ -513,7 +520,7 @@ body {
     background: linear-gradient(
         90deg,
         transparent,
-        rgba(255,255,255,0.2),
+        rgba(255, 255, 255, 0.2),
         transparent
     );
     transition: 0.5s;
