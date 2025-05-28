@@ -471,6 +471,58 @@ body {
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
 }
 
+.university-link {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.isu-logo {
+    display: inline-block;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+.isu-logo img {
+    height: 80px;
+    width: auto;
+    transition: all 0.3s ease;
+    filter: brightness(0.9);
+}
+
+.isu-logo:hover {
+    transform: scale(1.1) translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255,51,102,0.3);
+}
+
+.isu-logo:hover img {
+    filter: brightness(1.1);
+}
+
+.isu-logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.2),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.isu-logo:hover::before {
+    left: 100%;
+}
+
 .social-links {
     margin-top: 2rem;
 }
