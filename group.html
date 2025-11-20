@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校園分組名單工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 簡單的動畫效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">校園分組名單工具</h1>
+        <p class="text-center text-gray-500 mb-8">輕鬆三步驟，完成班級分組</p>
+
+        <!-- Page 1: 輸入名單與組數 -->
+        <div id="page1" class="page active fade-in">
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- 左側：輸入名單 -->
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-700 mb-2">步驟一：提供全班名單</h2>
+                        <p class="text-sm text-gray-500 mb-4">可以直接貼上文字，或上傳CSV檔案。每行應包含學號和姓名，用空格、逗號或Tab分隔。</p>
+                        <textarea id="roster-input"
+                            class="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"
+                            placeholder="例如：&#10;11211001A 吳佳蓁&#10;11211002A 林佩璇&#10;..."></textarea>
+                        <label for="csv-upload"
+                            class="mt-4 inline-block cursor-pointer bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-lg transition">
+                            <span>或點擊此處上傳 CSV 檔案</span>
+                            <input type="file" id="csv-upload" class="hidden" accept=".csv">
+                        </label>
+                    </div>
+
+                    <!-- 右側：設定組數與下一步 -->
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-700 mb-2">步驟二：設定組數</h2>
+                            <p class="text-sm text-gray-500 mb-4">請輸入您希望將學生分成的總組數。</p>
+                            <input type="number" id="num-groups-input" min="1"
+                                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition"
+                                placeholder="例如：8">
+                        </div>
+                        <button id="next-to-page2"
+                            class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                            下一步 →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 2: 填寫各組名單 -->
+        <div id="page2" class="page fade-in">
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">步驟三：貼上各組的期望名單</h2>
+                <p class="text-sm text-gray-500 mb-6">請將學生自行回報的名單草稿貼入對應的組別框中。系統會自動進行比對，姓名或學號有些許錯誤也沒關係。</p>
+                <div id="group-inputs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- JS 會在這裡動態生成 textareas -->
+                </div>
+                <div class="mt-8 flex justify-between items-center gap-4">
+                    <button id="back-to-page1"
+                        class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-400 transition">
+                        ← 返回上一步
+                    </button>
+                    <button id="process-groups"
+                        class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-transform transform hover:scale-105">
+                        完成分組，查看結果
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page 3: 顯示結果與下載 -->
+        <div id="page3" class="page fade-in">
+            <div class="bg-white p-8 rounded-xl shadow-lg">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">最終分組結果</h2>
+                <div class="mb-6 max-h-[50vh] overflow-y-auto border border-gray-200 rounded-lg">
+                    <table class="w-full text-sm text-left text-gray-600">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 sticky top-0">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">組別</th>
+                                <th scope="col" class="px-6 py-3">學號</th>
+                                <th scope="col" class="px-6 py-3">姓名</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody">
+                            <!-- JS 會在這裡動態生成結果 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex justify-between items-center gap-4">
+                    <button id="restart"
+                        class="bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg hover:bg-gray-400 transition">
+                        ↻ 重新開始
+                    </button>
+                    <button id="download-csv"
+                        class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-transform transform hover:scale-105">
+                        下載分組名單 (CSV)
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Footer -->
+        <footer class="mt-12 text-center text-gray-500 text-sm pb-4">
+            義守大學傳播與設計學院 <a href="index.html"
+                class="text-indigo-600 hover:text-indigo-800 transition font-medium">陳嘉暐</a>老師設計
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 全域變數來儲存狀態
+            let classRoster = [];
+            let finalGroups = [];
+
+            // 頁面元素
+            const pages = {
+                page1: document.getElementById('page1'),
+                page2: document.getElementById('page2'),
+                page3: document.getElementById('page3')
+            };
+
+            // 輸入元素
+            const rosterInput = document.getElementById('roster-input');
+            const csvUpload = document.getElementById('csv-upload');
+            const numGroupsInput = document.getElementById('num-groups-input');
+            const groupInputsContainer = document.getElementById('group-inputs-container');
+            const resultsTbody = document.getElementById('results-tbody');
+
+            // 按鈕元素
+            const nextToPage2Btn = document.getElementById('next-to-page2');
+            const backToPage1Btn = document.getElementById('back-to-page1');
+            const processGroupsBtn = document.getElementById('process-groups');
+            const downloadCsvBtn = document.getElementById('download-csv');
+            const restartBtn = document.getElementById('restart');
+
+            // 函數：切換頁面
+            const showPage = (pageId) => {
+                Object.values(pages).forEach(page => page.classList.remove('active'));
+                pages[pageId].classList.add('active');
+            };
+
+            // 函數：解析班級名單
+            const parseRoster = (text) => {
+                if (!text || text.trim() === '') return [];
+                const lines = text.trim().split('\n');
+                return lines.map(line => {
+                    const parts = line.trim().split(/[\s,，\t]+/).filter(Boolean);
+                    if (parts.length < 2) return null;
+
+                    // 新增保護機制：檢查學號格式，必須包含英文字母和數字，以過濾掉標題行
+                    const potentialId = parts[0];
+                    if (!/[a-zA-Z]/.test(potentialId) || !/[0-9]/.test(potentialId)) {
+                        return null;
+                    }
+
+                    const id = potentialId;
+                    const name = parts.slice(1).join(' ');
+                    return { id, name };
+                }).filter(Boolean); // 過濾掉解析失敗的行
+            };
+
+            // 事件：處理CSV檔案上傳
+            csvUpload.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        rosterInput.value = e.target.result;
+                    };
+                    reader.readAsText(file);
+                }
+            });
+
+            // 事件：點擊 "下一步"
+            nextToPage2Btn.addEventListener('click', () => {
+                classRoster = parseRoster(rosterInput.value);
+                const numGroups = parseInt(numGroupsInput.value, 10);
+
+                if (classRoster.length === 0) {
+                    alert('請先提供全班名單！');
+                    return;
+                }
+                if (isNaN(numGroups) || numGroups <= 0) {
+                    alert('請輸入有效的分組數量！');
+                    return;
+                }
+
+                // 動態生成組別輸入框
+                groupInputsContainer.innerHTML = '';
+                for (let i = 1; i <= numGroups; i++) {
+                    const groupDiv = document.createElement('div');
+                    groupDiv.innerHTML = `
+                        <label for="group-input-${i}" class="block text-md font-medium text-gray-700 mb-2">第 ${i} 組</label>
+                        <textarea id="group-input-${i}" class="w-full h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 transition" placeholder="貼上第 ${i} 組的名單..."></textarea>
+                    `;
+                    groupInputsContainer.appendChild(groupDiv);
+                }
+
+                showPage('page2');
+            });
+
+            // 事件：點擊 "返回上一步"
+            backToPage1Btn.addEventListener('click', () => showPage('page1'));
+
+            // 事件：點擊 "完成分組"
+            processGroupsBtn.addEventListener('click', () => {
+                // 初始化最終分組名單，預設組別為 0 (未分組)
+                finalGroups = classRoster.map(student => ({ ...student, group: 0 }));
+
+                const numGroups = groupInputsContainer.children.length;
+
+                for (let i = 1; i <= numGroups; i++) {
+                    const textarea = document.getElementById(`group-input-${i}`);
+                    const groupText = textarea.value;
+                    if (!groupText.trim()) continue;
+
+                    // 核心比對邏輯
+                    finalGroups.forEach(student => {
+                        // 如果學生已被分組，則跳過
+                        if (student.group !== 0) return;
+
+                        // 檢查姓名或學號是否存在於該組的文字中
+                        // 這裡使用 .includes() 進行模糊比對，容錯率較高
+                        const studentName = student.name.split(' ')[0]; // 處理英文名，只取第一部分比對
+                        if (groupText.includes(student.id) || groupText.includes(student.name) || groupText.includes(studentName)) {
+                            student.group = i;
+                        }
+                    });
+                }
+
+                // 排序：先按組別，再按學號
+                finalGroups.sort((a, b) => {
+                    if (a.group < b.group) return -1;
+                    if (a.group > b.group) return 1;
+                    return a.id.localeCompare(b.id);
+                });
+
+                // 渲染結果表格
+                resultsTbody.innerHTML = '';
+                finalGroups.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b hover:bg-gray-50';
+                    const groupText = student.group === 0 ? '<span class="text-red-500 font-semibold">未分組</span>' : student.group;
+                    row.innerHTML = `
+                        <td class="px-6 py-4 font-medium">${groupText}</td>
+                        <td class="px-6 py-4">${student.id}</td>
+                        <td class="px-6 py-4 text-gray-900 font-semibold">${student.name}</td>
+                    `;
+                    resultsTbody.appendChild(row);
+                });
+
+                showPage('page3');
+            });
+
+            // 事件：點擊 "下載CSV"
+            downloadCsvBtn.addEventListener('click', () => {
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // \uFEFF for BOM to support UTF-8 in Excel
+                csvContent += "組別,學號,姓名\n"; // CSV Header
+
+                finalGroups.forEach(student => {
+                    const group = student.group === 0 ? "未分組" : student.group;
+                    const row = [group, student.id, `"${student.name}"`].join(',');
+                    csvContent += row + "\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "分組名單.csv");
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+
+            // 事件：點擊 "重新開始"
+            restartBtn.addEventListener('click', () => {
+                // 重置所有狀態
+                classRoster = [];
+                finalGroups = [];
+                rosterInput.value = '';
+                numGroupsInput.value = '';
+                csvUpload.value = ''; // 清除已選檔案
+                showPage('page1');
+            });
+        });
+    </script>
+</body>
+
+</html>
