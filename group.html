@@ -273,12 +273,61 @@
                 finalGroups.forEach(student => {
                     const row = document.createElement('tr');
                     row.className = 'bg-white border-b hover:bg-gray-50';
-                    const groupText = student.group === 0 ? '<span class="text-red-500 font-semibold">未分組</span>' : student.group;
-                    row.innerHTML = `
-                        <td class="px-6 py-4 font-medium">${groupText}</td>
-                        <td class="px-6 py-4">${student.id}</td>
-                        <td class="px-6 py-4 text-gray-900 font-semibold">${student.name}</td>
-                    `;
+
+                    // Group Selection Cell
+                    const groupCell = document.createElement('td');
+                    groupCell.className = 'px-6 py-4 font-medium';
+
+                    const select = document.createElement('select');
+                    select.className = 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5';
+
+                    // Option: Unassigned
+                    const opt0 = document.createElement('option');
+                    opt0.value = 0;
+                    opt0.text = '未分組';
+                    if (student.group === 0) {
+                        opt0.selected = true;
+                        select.classList.add('text-red-500', 'font-bold');
+                    }
+                    select.appendChild(opt0);
+
+                    // Options: Groups 1..N
+                    for (let g = 1; g <= numGroups; g++) {
+                        const opt = document.createElement('option');
+                        opt.value = g;
+                        opt.text = `第 ${g} 組`;
+                        if (student.group === g) opt.selected = true;
+                        select.appendChild(opt);
+                    }
+
+                    // Event: Update data on change
+                    select.addEventListener('change', (e) => {
+                        const newVal = parseInt(e.target.value, 10);
+                        student.group = newVal;
+
+                        // Update visual style for "Unassigned"
+                        if (newVal === 0) {
+                            select.classList.add('text-red-500', 'font-bold');
+                        } else {
+                            select.classList.remove('text-red-500', 'font-bold');
+                        }
+                    });
+
+                    groupCell.appendChild(select);
+                    row.appendChild(groupCell);
+
+                    // ID Cell
+                    const idCell = document.createElement('td');
+                    idCell.className = 'px-6 py-4';
+                    idCell.textContent = student.id;
+                    row.appendChild(idCell);
+
+                    // Name Cell
+                    const nameCell = document.createElement('td');
+                    nameCell.className = 'px-6 py-4 text-gray-900 font-semibold';
+                    nameCell.textContent = student.name;
+                    row.appendChild(nameCell);
+
                     resultsTbody.appendChild(row);
                 });
 
