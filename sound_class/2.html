@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>聲學實驗室｜數位音效設計</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- Lucide Icons Shim ---
+    const Play = ({ size = 24, fill = "none" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+    );
+    const Square = ({ size = 24, fill = "none" }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+    );
+    const Volume2 = ({ size = 24 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+    );
+    const Info = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+    );
+    const HelpCircle = ({ className }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+    );
+    const CheckCircle = ({ size = 24 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    );
+    const XCircle = ({ size = 24 }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+    );
+    // --- End Icons Shim ---
+
+    const AcousticLab = () => {
+      // 狀態管理
+      const [isPlaying, setIsPlaying] = useState(false);
+      const [frequency, setFrequency] = useState(440); // 預設 A4 音高
+      const [volume, setVolume] = useState(0.5);
+      const canvasRef = useRef(null);
+
+      // Audio Context 參考
+      const audioContextRef = useRef(null);
+      const oscillatorRef = useRef(null);
+      const gainNodeRef = useRef(null);
+      const animationRef = useRef(null);
+
+      // 物理常數：空氣中的聲速 (大約 343 m/s)
+      const SPEED_OF_SOUND = 343;
+
+      // 計算波長 (公尺) = 聲速 / 頻率
+      const wavelength = SPEED_OF_SOUND / frequency;
+
+      // 初始化 Audio Context
+      const initAudio = () => {
+        if (!audioContextRef.current) {
+          audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+          gainNodeRef.current = audioContextRef.current.createGain();
+          gainNodeRef.current.connect(audioContextRef.current.destination);
+        }
+      };
+
+      // 處理播放/暫停
+      const togglePlay = () => {
+        initAudio();
+
+        if (isPlaying) {
+          // 停止
+          if (oscillatorRef.current) {
+            oscillatorRef.current.stop();
+            oscillatorRef.current.disconnect();
+            oscillatorRef.current = null;
+          }
+        } else {
+          // 播放
+          const osc = audioContextRef.current.createOscillator();
+          osc.type = 'sine'; // 正弦波
+          osc.frequency.setValueAtTime(frequency, audioContextRef.current.currentTime);
+          osc.connect(gainNodeRef.current);
+          osc.start();
+          oscillatorRef.current = osc;
+        }
+
+        setIsPlaying(!isPlaying);
+      };
+
+      // 當頻率改變時更新振盪器
+      useEffect(() => {
+        if (oscillatorRef.current && isPlaying) {
+          oscillatorRef.current.frequency.setTargetAtTime(frequency, audioContextRef.current.currentTime, 0.05);
+        }
+      }, [frequency, isPlaying]);
+
+      // 當音量改變時更新 Gain
+      useEffect(() => {
+        if (gainNodeRef.current) {
+          gainNodeRef.current.gain.setTargetAtTime(volume, audioContextRef.current.currentTime, 0.05);
+        }
+      }, [volume]);
+
+      // Canvas 動畫：繪製波形
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        let animationFrameId;
+        let phase = 0;
+
+        const draw = () => {
+          // RWD 寬度調整
+          const width = canvas.offsetWidth;
+          const height = canvas.offsetHeight;
+          canvas.width = width;
+          canvas.height = height;
+
+          ctx.clearRect(0, 0, width, height);
+
+          // 繪製格線 (背景)
+          ctx.strokeStyle = '#e5e7eb';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          // 中線
+          ctx.moveTo(0, height / 2);
+          ctx.lineTo(width, height / 2);
+          ctx.stroke();
+
+          // 繪製正弦波
+          ctx.beginPath();
+          ctx.lineWidth = 3;
+          // 頻率越高，顏色越偏紅；頻率越低，顏色越偏藍
+          // 簡單的顏色插值
+          const hue = Math.max(0, Math.min(240, 240 - ((frequency - 100) / 1000) * 240));
+          ctx.strokeStyle = `hsl(${hue}, 70%, 50%)`;
+
+          // 模擬視覺上的波長：
+          // 我們假設 Canvas 的寬度代表一個固定的物理距離 (例如 5 公尺)
+          // frequency 越高，波長越短，畫面上的波浪就越密集
+          const physicalWidthRepresented = 5; // 假設畫布寬度代表 5 公尺
+          const pixelsPerMeter = width / physicalWidthRepresented;
+
+          // 波長 (pixels) = (聲速 / 頻率) * pixelsPerMeter
+          // 為了視覺效果，我們稍微調整比例係數讓波看起來清楚
+          const wavelengthInPixels = (SPEED_OF_SOUND / frequency) * pixelsPerMeter;
+
+          for (let x = 0; x < width; x++) {
+            // y = A * sin(2π * x / λ - phase)
+            const y = (height / 2) + Math.sin((2 * Math.PI * x) / wavelengthInPixels - phase) * (height / 3);
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          // 繪製標記波長的箭頭 (只畫第一個完整的波)
+          if (wavelengthInPixels < width) {
+            const yPos = height / 2 + 10;
+            ctx.fillStyle = '#6b7280';
+            ctx.strokeStyle = '#6b7280';
+            ctx.lineWidth = 1;
+            ctx.font = '12px sans-serif';
+
+            // 起點和終點 (一個波長)
+            // 我們追蹤相位移動後的波峰到波峰或是零點到零點
+            // 這裡簡單畫出視覺上的波長示意
+            const startX = (phase / (2 * Math.PI)) * wavelengthInPixels % wavelengthInPixels;
+            // 確保線條在畫面內
+            let visualStartX = startX;
+            if (visualStartX < 20) visualStartX += wavelengthInPixels;
+
+            const visualEndX = visualStartX + wavelengthInPixels;
+
+            if (visualEndX < width) {
+              ctx.beginPath();
+              ctx.moveTo(visualStartX, height / 2 + 20);
+              ctx.lineTo(visualEndX, height / 2 + 20);
+              ctx.stroke();
+
+              // 箭頭
+              ctx.beginPath();
+              ctx.moveTo(visualStartX + 5, height / 2 + 15);
+              ctx.lineTo(visualStartX, height / 2 + 20);
+              ctx.lineTo(visualStartX + 5, height / 2 + 25);
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.moveTo(visualEndX - 5, height / 2 + 15);
+              ctx.lineTo(visualEndX, height / 2 + 20);
+              ctx.lineTo(visualEndX - 5, height / 2 + 25);
+              ctx.stroke();
+
+              ctx.fillText("一個波長 (λ)", visualStartX + (wavelengthInPixels / 2) - 30, height / 2 + 40);
+            }
+          }
+
+          // 讓波移動 (相速度)
+          // 速度 = 頻率 * 波長，但在這裡我們只需要視覺上的移動
+          // 頻率越高，震動越快
+          phase += (frequency / 2000) * Math.PI;
+
+          animationFrameId = requestAnimationFrame(draw);
+        };
+
+        draw();
+
+        return () => {
+          cancelAnimationFrame(animationFrameId);
+        };
+      }, [frequency]);
+
+      return (
+        <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-800">
+          {/* Back Link */}
+          <div className="max-w-4xl mx-auto mb-4">
+            <a href="index.html" className="inline-flex items-center text-slate-500 hover:text-indigo-600 font-bold transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              回總整理
+            </a>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+
+            {/* Header */}
+            <header className="mb-8 text-center">
+              <h1 className="text-3xl font-bold text-indigo-700 mb-2">數位音效設計：聲學互動實驗室</h1>
+              <p className="text-slate-600">操作下方的滑桿，觀察波長與頻率、音高之間的關係。</p>
+            </header>
+
+            {/* Main Interface Card */}
+            <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8 border border-slate-200">
+
+              {/* Visualization Area */}
+              <div className="relative w-full h-64 bg-slate-100 border-b border-slate-200">
+                <canvas ref={canvasRef} className="w-full h-full block" />
+                <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded shadow text-sm font-mono text-indigo-600">
+                  波型：正弦波 (Sine Wave)
+                </div>
+                {!isPlaying && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/5">
+                    <p className="text-slate-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm">
+                      按下播放以開始實驗
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Controls Area */}
+              <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8 items-center">
+
+                {/* Left: Sliders */}
+                <div className="space-y-6">
+
+                  {/* Frequency Control */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="font-bold text-slate-700 flex items-center gap-2">
+                        <span className="w-2 h-6 bg-indigo-500 rounded-sm inline-block"></span>
+                        頻率 (Frequency)
+                      </label>
+                      <span className="text-indigo-600 font-mono font-bold text-lg">{frequency} Hz</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="100"
+                      max="1000"
+                      step="1"
+                      value={frequency}
+                      onChange={(e) => setFrequency(Number(e.target.value))}
+                      className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                    />
+                    <div className="flex justify-between text-xs text-slate-400 mt-1">
+                      <span>100Hz (低音)</span>
+                      <span>1000Hz (高音)</span>
+                    </div>
+                  </div>
+
+                  {/* Volume Control */}
+                  <div>
+                    <div className="flex justify-between mb-2">
+                      <label className="text-slate-600 flex items-center gap-2">
+                        <Volume2 size={18} />
+                        音量 (Volume)
+                      </label>
+                      <span className="text-slate-500 text-sm">{Math.round(volume * 100)}%</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={volume}
+                      onChange={(e) => setVolume(Number(e.target.value))}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-400"
+                    />
+                  </div>
+
+                  {/* Play Button */}
+                  <button
+                    onClick={togglePlay}
+                    className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg transform active:scale-95 ${isPlaying
+                        ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                        : 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                      }`}
+                  >
+                    {isPlaying ? <><Square size={20} fill="currentColor" /> 停止聲音</> : <><Play size={20} fill="currentColor" /> 播放聲音</>}
+                  </button>
+                </div>
+
+                {/* Right: Data & Explanation */}
+                <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-200 pb-2">物理數據即時運算</h3>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border border-slate-100">
+                      <span className="text-slate-500">聲速 (v)</span>
+                      <span className="font-mono font-bold text-slate-700">{SPEED_OF_SOUND} m/s</span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-white rounded-lg shadow-sm border border-slate-100">
+                      <span className="text-slate-500">頻率 (f)</span>
+                      <span className="font-mono font-bold text-indigo-600">{frequency} Hz (1/s)</span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg shadow-sm border border-indigo-100">
+                      <span className="text-indigo-800 font-medium">波長 (λ)</span>
+                      <span className="font-mono font-bold text-indigo-700 text-xl">{wavelength.toFixed(2)} m</span>
+                    </div>
+
+                    <div className="text-xs text-slate-500 text-center mt-2 bg-slate-100 p-2 rounded">
+                      公式：波長 (λ) = 聲速 (v) / 頻率 (f)
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Concept Check Section */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500">
+                <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2 mb-3">
+                  <Info className="text-indigo-500" />
+                  觀念重點整理
+                </h3>
+                <ul className="space-y-3 text-slate-700">
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                    <span>
+                      頻率與波長成<strong>反比</strong>。
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                    <span>
+                      <strong>波長越短</strong> (λ↓)，代表頻率越高 (f↑)，聲音聽起來<strong>越高亢</strong>。
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="mt-1 w-2 h-2 bg-indigo-500 rounded-full flex-shrink-0"></span>
+                    <span>
+                      <strong>波長越長</strong> (λ↑)，代表頻率越低 (f↓)，聲音聽起來<strong>越低沉</strong>。
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-white p-6 rounded-xl shadow border border-slate-200">
+                <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2 mb-3">
+                  <HelpCircle className="text-amber-500" />
+                  隨堂測驗：回答您的問題
+                </h3>
+                <div className="space-y-4">
+                  <p className="font-medium text-slate-900 italic border-l-2 border-slate-300 pl-3">
+                    「正弦波波長越短，聽起來的聲音會低沉。」
+                  </p>
+
+                  <div className="flex gap-4">
+                    <div className={`flex-1 p-3 rounded-lg border flex flex-col items-center justify-center gap-2 transition-colors ${frequency > 500 ? 'bg-red-50 border-red-200 opacity-50' : 'bg-slate-50 border-slate-200'}`}>
+                      <span className="font-bold text-slate-700">正確？</span>
+                      {frequency < 500 && <span className="text-xs text-slate-500">(請將滑桿拉高試試)</span>}
+                    </div>
+                    <div className={`flex-1 p-3 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-colors ${frequency > 500 ? 'bg-green-50 border-green-500' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className="flex items-center gap-2 text-green-700 font-bold">
+                        <CheckCircle size={20} /> 錯誤！
+                      </div>
+                      <span className="text-xs text-green-600 text-center">
+                        實驗證明：波長變短 (數值變小)，聲音變高了！
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-slate-600 mt-2">
+                    <strong>解析：</strong> 波長變短意味著波在單位時間內振動次數變多（頻率變高），因此音調會變高，而非低沉。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <footer className="mt-12 text-center text-slate-500 text-sm border-t border-slate-200 pt-6 pb-2">
+              <p>義守大學電影與電視學系陳嘉暐老師課程提供</p>
+            </footer>
+
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AcousticLab />);
+  </script>
+</body>
+
+</html>

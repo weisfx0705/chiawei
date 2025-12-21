@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位音效效果器教學示範</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .active-btn {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* Compressor Diagram Styles */
+        .comp-diagram {
+            position: relative;
+            height: 150px;
+            width: 100%;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .comp-threshold {
+            position: absolute;
+            top: 60px;
+            /* Threshold line lowered visually */
+            width: 100%;
+            height: 2px;
+            background-color: #ef4444;
+            z-index: 10;
+        }
+
+        .comp-label {
+            position: absolute;
+            right: 10px;
+            top: 35px;
+            color: #ef4444;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .comp-makeup-label {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            color: #059669;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .comp-bar {
+            position: absolute;
+            bottom: 0;
+            background-color: #60a5fa;
+            width: 20px;
+            transition: height 0.2s;
+        }
+
+        .comp-bar.squashed {
+            background-color: #ef4444;
+            /* Turns red when compressed */
+        }
+
+        .comp-bar.boosted {
+            border-top: 3px solid #059669;
+            /* Visual cue for makeup gain */
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-slate-800 text-white p-6 shadow-lg">
+        <div class="container mx-auto max-w-4xl mb-4">
+            <a href="index.html"
+                class="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                <i class="fas fa-arrow-left mr-2"></i> 回總整理
+            </a>
+        </div>
+        <div class="container mx-auto max-w-4xl flex items-center justify-between flex-wrap">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold"><i class="fas fa-wave-square mr-2"></i>數位音效設計</h1>
+                <p class="text-slate-400 mt-2">聲音效果器 (Audio Effects) 互動實驗室</p>
+            </div>
+            <div id="status-badge"
+                class="mt-4 md:mt-0 px-4 py-1 rounded-full text-sm bg-yellow-500 text-white font-bold animate-pulse">
+                等待啟動
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto max-w-4xl p-6">
+
+        <!-- Audio Source & Start -->
+        <div class="bg-white p-6 rounded-xl shadow-md mb-6 text-center">
+            <p class="mb-4 text-gray-600">請點擊下方按鈕載入教學範例音檔，開始進行實驗。</p>
+            <div class="flex justify-center gap-4">
+                <button id="init-btn"
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition transform hover:scale-105">
+                    <i class="fas fa-play-circle mr-2"></i> 開始課程 / 載入音檔
+                </button>
+                <button id="stop-btn"
+                    class="hidden bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-full text-lg shadow-lg transition transform hover:scale-105"
+                    onclick="stopAudioUI()">
+                    <i class="fas fa-stop mr-2"></i> 停止播放
+                </button>
+            </div>
+            <p id="loading-text" class="hidden mt-3 text-blue-500 font-bold"><i class="fas fa-spinner fa-spin"></i>
+                正在下載並解碼音訊...</p>
+        </div>
+
+        <!-- Controls Grid -->
+        <!-- Changed to grid-cols-2 md:grid-cols-3 to accommodate 6 buttons -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            <button onclick="applyEffect('original')" id="btn-original"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-gray-600"><i class="fas fa-microphone"></i></div>
+                <div class="font-bold">Original</div>
+                <div class="text-xs text-gray-500">原始乾聲</div>
+            </button>
+
+            <button onclick="applyEffect('reverb')" id="btn-reverb"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-purple-500"><i class="fas fa-church"></i></div>
+                <div class="font-bold">Reverb</div>
+                <div class="text-xs text-gray-500">殘響/空間感</div>
+            </button>
+
+            <button onclick="applyEffect('eq')" id="btn-eq"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-blue-500"><i class="fas fa-phone-alt"></i></div>
+                <div class="font-bold">Graphic EQ</div>
+                <div class="text-xs text-gray-500">電話效果 (強)</div>
+            </button>
+
+            <button onclick="applyEffect('reverse')" id="btn-reverse"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-orange-500"><i class="fas fa-backward"></i></div>
+                <div class="font-bold">Reverse</div>
+                <div class="text-xs text-gray-500">聲音倒轉</div>
+            </button>
+
+            <button onclick="applyEffect('compressor')" id="btn-compressor"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-red-500"><i class="fas fa-compress-arrows-alt"></i></div>
+                <div class="font-bold">Compressor</div>
+                <div class="text-xs text-gray-500">動態壓縮 + Gain</div>
+            </button>
+
+            <button onclick="applyEffect('pitch')" id="btn-pitch"
+                class="effect-btn p-4 rounded-lg bg-white shadow hover:bg-gray-50 border border-gray-200 transition text-center disabled:opacity-50"
+                disabled>
+                <div class="text-2xl mb-2 text-teal-500"><i class="fas fa-arrow-up"></i></div>
+                <div class="font-bold">Pitch Shift</div>
+                <div class="text-xs text-gray-500">音高 +2 Semitones</div>
+            </button>
+        </div>
+
+        <!-- Explanation Panel -->
+        <div id="info-panel" class="bg-white p-6 rounded-xl shadow-lg border-l-8 border-gray-300">
+            <h3 id="info-title" class="text-2xl font-bold mb-3 text-gray-800">準備就緒</h3>
+            <div id="info-content" class="text-gray-600 leading-relaxed text-lg">
+                請點擊上方的綠色按鈕載入音訊檔案。載入後，您可以點擊不同的效果器按鈕，聆聽聲音經過數位處理後的變化。
+            </div>
+
+            <!-- Specific Visual for Compressor -->
+            <div id="compressor-visual" class="mt-6 comp-diagram">
+                <div class="comp-threshold"></div>
+                <div class="comp-label">Threshold (-40dB)</div>
+                <div class="comp-makeup-label"><i class="fas fa-level-up-alt"></i> Makeup Gain Active</div>
+                <div class="flex justify-center items-end h-full space-x-2 px-10 pb-0" id="comp-bars-container">
+                    <!-- JavaScript will generate bars here -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-6 mt-auto">
+        <div class="container mx-auto text-center">
+            <p class="text-sm md:text-base font-light tracking-wide">
+                義守大學電影與電視學系 <span class="font-bold text-yellow-400">陳嘉暐老師</span> 課程提供
+            </p>
+            <p class="text-xs text-slate-500 mt-2">Designed for Educational Purposes</p>
+        </div>
+    </footer>
+
+    <!-- Logic -->
+    <script>
+        // --- Configuration ---
+        const audioUrl = 'https://weisfx0705.github.io/ob_vo/vo/mp3/ob_100.mp3';
+
+        // --- Web Audio API Context ---
+        let audioCtx;
+        let originalBuffer = null;
+        let currentSource = null;
+        let isPlaying = false;
+        let compressorAnimationId = null;
+
+        // --- UI Elements ---
+        const statusBadge = document.getElementById('status-badge');
+        const initBtn = document.getElementById('init-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const loadingText = document.getElementById('loading-text');
+        const buttons = document.querySelectorAll('.effect-btn');
+        const infoTitle = document.getElementById('info-title');
+        const infoContent = document.getElementById('info-content');
+        const infoPanel = document.getElementById('info-panel');
+        const compressorVisual = document.getElementById('compressor-visual');
+
+        // --- Descriptions ---
+        const descriptions = {
+            original: {
+                title: "Original (原始音訊)",
+                text: "這是未經任何處理的原始錄音 (Dry Signal)。聽起來就是直接對著麥克風說話的聲音，沒有特殊的空間感或頻率修飾。",
+                color: "border-gray-500"
+            },
+            reverb: {
+                title: "Reverb (殘響效果)",
+                text: "Reverb 模擬聲音在空間中反射的物理現象。這裡我們加上了較長的殘響時間（Decay），聽起來是不是很像在<b>大教堂、洞穴</b>或是空曠的體育館裡講話？這種效果常用於營造浩大、夢幻或距離感。",
+                color: "border-purple-500"
+            },
+            eq: {
+                title: "Graphic EQ (電話濾波效果 - 強)",
+                text: "EQ (Equalizer) 可以調整不同頻率的音量。為了讓效果更誇張，我們將<b>Low Cut (低頻切除)</b> 的頻率大幅提高到 1000Hz。這讓聲音聽起來非常單薄、尖銳，就像是從很老舊的電話筒或壞掉的收音機傳出來的聲音。",
+                color: "border-blue-500"
+            },
+            reverse: {
+                title: "Reverse (倒轉效果)",
+                text: "這是將數位取樣點的順序完全顛倒播放。雖然簡單，但在恐怖片、夢境橋段或特殊的轉場音效設計中非常常用。聽起來語言完全失去了意義，變得神祕怪誕。",
+                color: "border-orange-500"
+            },
+            compressor: {
+                title: "Compressor (壓縮器 + Makeup Gain)",
+                text: "我們將 Threshold 設得很低 (-40dB)，所以幾乎所有的聲音都會被壓縮，變得非常扁平。為了彌補音量損失，我們加上了 <b>Makeup Gain (補償增益)</b>。<br><br>結果就是：<b>原本小聲的細節被放大了，大聲的地方被壓住了</b>，整體聲音聽起來充滿能量、非常貼耳，這就是廣播主持人聲音聽起來很有磁性的秘密之一。",
+                color: "border-red-500"
+            },
+            pitch: {
+                title: "Pitch Shift (音高偏移)",
+                text: "Pitch Shifting 是改變聲音頻率的技術。這裡我們將播放速度加快，使音高上升了 <b>2個 Semitones (半音)</b>。<br><br>這在修飾走音、創造卡通人物聲音，或是設計怪獸聲音（調低 Pitch）時非常重要。",
+                color: "border-teal-500"
+            }
+        };
+
+        // --- Initialization ---
+        initBtn.addEventListener('click', async () => {
+            initBtn.classList.add('hidden');
+            loadingText.classList.remove('hidden');
+
+            try {
+                // 1. Create Audio Context
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+
+                // 2. Fetch Audio
+                const response = await fetch(audioUrl);
+                const arrayBuffer = await response.arrayBuffer();
+
+                // 3. Decode Audio
+                originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+                // 4. Ready UI
+                loadingText.classList.add('hidden');
+                stopBtn.classList.remove('hidden'); // Show Stop button
+                statusBadge.textContent = "系統就緒";
+                statusBadge.classList.remove('bg-yellow-500', 'animate-pulse');
+                statusBadge.classList.add('bg-green-500');
+
+                buttons.forEach(btn => btn.disabled = false);
+
+                // Auto play original
+                applyEffect('original');
+
+            } catch (err) {
+                console.error(err);
+                loadingText.textContent = "載入失敗，請檢查網路或音檔連結。";
+                loadingText.classList.remove('text-blue-500');
+                loadingText.classList.add('text-red-500');
+            }
+        });
+
+        // --- Core Audio Logic ---
+        function stopAudio() {
+            if (currentSource) {
+                try { currentSource.stop(); } catch (e) { }
+                currentSource = null;
+            }
+            isPlaying = false;
+            // Stop animation loop if running
+            if (compressorAnimationId) {
+                cancelAnimationFrame(compressorAnimationId);
+                compressorAnimationId = null;
+            }
+        }
+
+        // UI Wrapper for Stop Button
+        function stopAudioUI() {
+            stopAudio();
+            // Reset active buttons visually
+            buttons.forEach(b => {
+                b.classList.remove('active-btn');
+                b.classList.add('bg-white', 'text-gray-800');
+            });
+            infoTitle.textContent = "已停止";
+            infoContent.textContent = "播放已停止。請點擊上方按鈕重新選擇效果。";
+            infoPanel.className = `bg-white p-6 rounded-xl shadow-lg border-l-8 border-gray-300 transition-colors duration-500`;
+            compressorVisual.style.display = 'none';
+        }
+
+        function applyEffect(type) {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Reset UI
+            buttons.forEach(b => {
+                b.classList.remove('active-btn');
+                b.classList.add('bg-white', 'text-gray-800');
+            });
+            const activeBtn = document.getElementById(`btn-${type}`);
+            activeBtn.classList.remove('bg-white', 'text-gray-800');
+            activeBtn.classList.add('active-btn');
+
+            // Update Info Text
+            const info = descriptions[type];
+            infoTitle.textContent = info.title;
+            infoContent.innerHTML = info.text;
+            infoPanel.className = `bg-white p-6 rounded-xl shadow-lg border-l-8 ${info.color} transition-colors duration-500`;
+
+            // Handle Compressor Visual Visibility
+            if (type === 'compressor') {
+                compressorVisual.style.display = 'block';
+                animateCompressorDiagram();
+            } else {
+                compressorVisual.style.display = 'none';
+                if (compressorAnimationId) {
+                    cancelAnimationFrame(compressorAnimationId);
+                    compressorAnimationId = null;
+                }
+            }
+
+            // Audio Routing
+            stopAudio();
+            const source = audioCtx.createBufferSource();
+
+            // Effect Processing
+            switch (type) {
+                case 'original':
+                    source.buffer = originalBuffer;
+                    source.connect(audioCtx.destination);
+                    break;
+
+                case 'reverb':
+                    source.buffer = originalBuffer;
+                    const convolver = audioCtx.createConvolver();
+                    convolver.buffer = impulseResponse(2.5, 2.5); // duration, decay
+                    source.connect(convolver);
+                    convolver.connect(audioCtx.destination);
+                    break;
+
+                case 'eq':
+                    source.buffer = originalBuffer;
+                    // Telephone Effect: Stronger High Pass
+                    const highPass = audioCtx.createBiquadFilter();
+                    highPass.type = "highpass";
+                    highPass.frequency.value = 1000; // Increased from 500 to 1000 for exaggerated effect
+
+                    const lowPass = audioCtx.createBiquadFilter();
+                    lowPass.type = "lowpass";
+                    lowPass.frequency.value = 3000;
+
+                    source.connect(highPass);
+                    highPass.connect(lowPass);
+                    lowPass.connect(audioCtx.destination);
+                    break;
+
+                case 'reverse':
+                    const reversedBuffer = cloneAudioBuffer(originalBuffer);
+                    for (let i = 0; i < reversedBuffer.numberOfChannels; i++) {
+                        Array.prototype.reverse.call(reversedBuffer.getChannelData(i));
+                    }
+                    source.buffer = reversedBuffer;
+                    source.connect(audioCtx.destination);
+                    break;
+
+                case 'compressor':
+                    source.buffer = originalBuffer;
+                    const compressor = audioCtx.createDynamicsCompressor();
+                    const makeupGain = audioCtx.createGain();
+
+                    // Aggressive compression settings
+                    compressor.threshold.value = -40; // Lower threshold as requested
+                    compressor.knee.value = 0;
+                    compressor.ratio.value = 12; // High ratio
+                    compressor.attack.value = 0;
+                    compressor.release.value = 0.25;
+
+                    // Makeup Gain
+                    makeupGain.gain.value = 2.5; // Boost volume back up
+
+                    source.connect(compressor);
+                    compressor.connect(makeupGain);
+                    makeupGain.connect(audioCtx.destination);
+                    break;
+
+                case 'pitch':
+                    source.buffer = originalBuffer;
+                    // Pitch Shift via playbackRate
+                    // Formula: 2^(semitones/12)
+                    // +2 semitones
+                    source.playbackRate.value = Math.pow(2, 2 / 12);
+                    source.connect(audioCtx.destination);
+                    break;
+            }
+
+            source.loop = true;
+            source.start(0);
+            currentSource = source;
+            isPlaying = true;
+        }
+
+        // --- Utilities ---
+
+        function impulseResponse(duration, decay, reverse) {
+            const sampleRate = audioCtx.sampleRate;
+            const length = sampleRate * duration;
+            const impulse = audioCtx.createBuffer(2, length, sampleRate);
+            const left = impulse.getChannelData(0);
+            const right = impulse.getChannelData(1);
+
+            for (let i = 0; i < length; i++) {
+                const n = reverse ? length - i : i;
+                left[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+                right[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+            }
+            return impulse;
+        }
+
+        function cloneAudioBuffer(fromBuffer) {
+            const newBuffer = audioCtx.createBuffer(
+                fromBuffer.numberOfChannels,
+                fromBuffer.length,
+                fromBuffer.sampleRate
+            );
+            for (let channel = 0; channel < fromBuffer.numberOfChannels; channel++) {
+                newBuffer.copyToChannel(fromBuffer.getChannelData(channel), channel);
+            }
+            return newBuffer;
+        }
+
+        // --- Compressor Animation (Simulated) ---
+        function animateCompressorDiagram() {
+            const container = document.getElementById('comp-bars-container');
+            container.innerHTML = '';
+
+            // Create bars
+            const barCount = 15;
+            const bars = [];
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'comp-bar rounded-t';
+                bar.style.height = '10px';
+                container.appendChild(bar);
+                bars.push(bar);
+            }
+
+            let tick = 0;
+            function loop() {
+                if (compressorVisual.style.display === 'none') return;
+
+                tick += 0.1;
+                bars.forEach((bar, index) => {
+                    // Simulate a wave
+                    let rawHeight = Math.abs(Math.sin(tick + index)) * 140;
+
+                    // Threshold visual logic (approximate for visual demo)
+                    // Threshold line is at top:60px, container is 150px.
+                    // So allowable height is approx 90px before hitting threshold.
+                    const thresholdLimit = 90;
+
+                    if (rawHeight > thresholdLimit) {
+                        bar.style.height = (thresholdLimit + 15) + 'px'; // Squashed slightly above limit
+                        bar.classList.add('squashed');
+                        bar.classList.remove('boosted');
+                    } else {
+                        // Apply simulated makeup gain to quiet parts
+                        // Make quiet parts taller than they would be naturally
+                        let boostedHeight = rawHeight * 1.5;
+                        if (boostedHeight > thresholdLimit) boostedHeight = thresholdLimit;
+
+                        bar.style.height = boostedHeight + 'px';
+                        bar.classList.remove('squashed');
+                        bar.classList.add('boosted');
+                    }
+                });
+
+                compressorAnimationId = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+    </script>
+</body>
+
+</html>

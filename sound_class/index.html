@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>數位音效設計｜期末概念總整理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Background Decor -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob">
+        </div>
+        <div
+            class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000">
+        </div>
+        <div
+            class="absolute bottom-[-20%] left-[20%] w-[40%] h-[40%] bg-pink-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000">
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="container mx-auto px-6 py-12 text-center relative z-10">
+        <div class="inline-block p-1 border border-blue-500/30 rounded-full mb-6 bg-blue-900/10 backdrop-blur-sm">
+            <span class="px-3 py-1 text-xs font-bold tracking-widest text-blue-400 uppercase">Interactive Course
+                Material</span>
+        </div>
+        <h1
+            class="text-4xl md:text-6xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+            數位音效設計
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 font-light mb-2">期末概念重點整理</p>
+        <div class="flex items-center justify-center gap-4 text-sm text-gray-500 mt-4">
+            <span class="flex items-center"><i class="fas fa-university mr-2"></i> 義守大學 電影與電視學系</span>
+            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+            <span class="flex items-center"><i class="fas fa-chalkboard-teacher mr-2"></i> 陳嘉暐 老師</span>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="container mx-auto px-6 pb-20 max-w-6xl z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1 -->
+            <a href="1.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center mb-4 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-wave-square text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-blue-300 transition-colors">基礎實驗室１</h2>
+                <p class="text-gray-400 text-sm flex-grow">喇叭到底要開多大聲？</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-blue-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="2.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-indigo-500/20 flex items-center justify-center mb-4 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-project-diagram text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-indigo-300 transition-colors">基礎實驗室２</h2>
+                <p class="text-gray-400 text-sm flex-grow">了解波長與頻率的基礎關係</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="3.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center mb-4 text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-film text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-purple-300 transition-colors">電影聲音部門</h2>
+                <p class="text-gray-400 text-sm flex-grow">深入解析製片錄音、對白用剪、ADR 等電影聲音製作流程與分工。</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-purple-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="4.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-pink-500/20 flex items-center justify-center mb-4 text-pink-400 group-hover:bg-pink-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-sliders-h text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-pink-300 transition-colors">EQ 互動實驗室</h2>
+                <p class="text-gray-400 text-sm flex-grow">均衡器 (Equalizer) 原理教學，實際操作頻率調整對聲音的影響。</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-pink-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="5.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center mb-4 text-red-400 group-hover:bg-red-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-magic text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-red-300 transition-colors">數位音效效果器</h2>
+                <p class="text-gray-400 text-sm flex-grow">Compressor、Reverb、Delay 等常見效果器的原理與應用示範。</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-red-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="6.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center mb-4 text-yellow-400 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-microphone-alt text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-yellow-300 transition-colors">麥克風原理</h2>
+                <p class="text-gray-400 text-sm flex-grow">麥克風構造、指向性、48V 幻象電源與錄音實務知識。</p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-yellow-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 7 -->
+            <a href="7.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center mb-4 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-chart-bar text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-emerald-300 transition-colors">響度與標準</h2>
+                <p class="text-gray-400 text-sm flex-grow">認識 LUFS 響度單位、True Peak，掌握 YouTube, Netflix, Podcast 等各平台交件標準。
+                </p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-emerald-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black/50 py-8 text-center text-gray-500 text-sm border-t border-gray-800">
+        <p>&copy; 2025 Digital Sound Design Course. Department of Film and Television, I-Shou University.</p>
+    </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EQ 互動實驗室｜數位音效設計</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- Lucide Icons Shim ---
+    const IconBase = ({ size = 24, className, children, ...props }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+    );
+    const Play = (props) => <IconBase {...props}><polygon points="5 3 19 12 5 21 5 3"></polygon></IconBase>;
+    const Square = (props) => <IconBase {...props}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></IconBase>;
+    const Volume2 = (props) => <IconBase {...props}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></IconBase>;
+    const Phone = (props) => <IconBase {...props}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></IconBase>;
+    const ChevronsRight = (props) => <IconBase {...props}><polyline points="13 17 18 12 13 7"></polyline><polyline points="6 17 11 12 6 7"></polyline></IconBase>;
+    const ChevronsLeft = (props) => <IconBase {...props}><polyline points="11 17 6 12 11 7"></polyline><polyline points="18 17 13 12 18 7"></polyline></IconBase>;
+    const RotateCcw = (props) => <IconBase {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></IconBase>;
+    const Loader2 = (props) => <IconBase {...props}><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></IconBase>;
+    const Activity = (props) => <IconBase {...props}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></IconBase>;
+    // --- End Icons Shim ---
+
+    const EQInteractiveLab = () => {
+      const [isPlaying, setIsPlaying] = useState(false);
+      const [volume, setVolume] = useState(0.8);
+      const [isLoading, setIsLoading] = useState(false);
+      const [audioBuffer, setAudioBuffer] = useState(null);
+      const [loadingError, setLoadingError] = useState(null);
+
+      // Frequency States
+      // HPF: High Pass Filter (Low Cut)
+      // LPF: Low Pass Filter (High Cut)
+      // Mid: Peaking Filter (1kHz Boost/Cut)
+      const [hpfFreq, setHpfFreq] = useState(20);
+      const [lpfFreq, setLpfFreq] = useState(6000); // Default adjusted to 6000Hz
+      const [midGain, setMidGain] = useState(0); // dB
+      const [presetName, setPresetName] = useState('Flat (原音)');
+
+      // Audio Refs
+      const audioContextRef = useRef(null);
+      const sourceNodeRef = useRef(null);
+      const gainNodeRef = useRef(null);
+      const hpfNodeRef = useRef(null);
+      const lpfNodeRef = useRef(null);
+      const midNodeRef = useRef(null);
+
+      const AUDIO_URL = 'https://weisfx0705.github.io/ob_vo/vo/mp3/ob_100.mp3';
+
+      // Initialize Audio Context & Load File
+      useEffect(() => {
+        const loadAudio = async () => {
+          setIsLoading(true);
+          try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!audioContextRef.current) {
+              audioContextRef.current = new AudioContext();
+            }
+
+            const response = await fetch(AUDIO_URL);
+            if (!response.ok) throw new Error('Audio fetch failed');
+
+            const arrayBuffer = await response.arrayBuffer();
+            const decodedBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+
+            setAudioBuffer(decodedBuffer);
+            setIsLoading(false);
+          } catch (err) {
+            console.error("Error loading audio:", err);
+            setLoadingError("音檔載入失敗，請檢查網路連線");
+            setIsLoading(false);
+          }
+        };
+
+        loadAudio();
+
+        return () => {
+          if (audioContextRef.current) {
+            audioContextRef.current.close();
+          }
+        };
+      }, []);
+
+      // Setup Audio Nodes
+      const setupAudioChain = () => {
+        if (!audioContextRef.current || !audioBuffer) return;
+
+        // Create Nodes
+        sourceNodeRef.current = audioContextRef.current.createBufferSource();
+        sourceNodeRef.current.buffer = audioBuffer;
+        sourceNodeRef.current.loop = true;
+
+        // 1. High Pass Filter (Low Cut)
+        hpfNodeRef.current = audioContextRef.current.createBiquadFilter();
+        hpfNodeRef.current.type = 'highpass';
+        hpfNodeRef.current.frequency.value = hpfFreq;
+        hpfNodeRef.current.Q.value = 0.7;
+
+        // 2. Mid Boost/Cut (Peaking)
+        midNodeRef.current = audioContextRef.current.createBiquadFilter();
+        midNodeRef.current.type = 'peaking';
+        midNodeRef.current.frequency.value = 1000; // Fixed at 1kHz for teaching purpose
+        midNodeRef.current.Q.value = 1.0; // Slightly wider Q for more dramatic effect
+        midNodeRef.current.gain.value = midGain;
+
+        // 3. Low Pass Filter (High Cut)
+        lpfNodeRef.current = audioContextRef.current.createBiquadFilter();
+        lpfNodeRef.current.type = 'lowpass';
+        lpfNodeRef.current.frequency.value = lpfFreq;
+        lpfNodeRef.current.Q.value = 0.7;
+
+        // 4. Master Gain
+        gainNodeRef.current = audioContextRef.current.createGain();
+        gainNodeRef.current.gain.value = volume;
+
+        // Connect Chain: Source -> HPF -> Mid -> LPF -> Gain -> Destination
+        sourceNodeRef.current.connect(hpfNodeRef.current);
+        hpfNodeRef.current.connect(midNodeRef.current);
+        midNodeRef.current.connect(lpfNodeRef.current);
+        lpfNodeRef.current.connect(gainNodeRef.current);
+        gainNodeRef.current.connect(audioContextRef.current.destination);
+
+        sourceNodeRef.current.start();
+      };
+
+      const togglePlay = async () => {
+        if (!audioContextRef.current) return;
+
+        if (audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+        }
+
+        if (isPlaying) {
+          if (sourceNodeRef.current) {
+            sourceNodeRef.current.stop();
+            sourceNodeRef.current.disconnect();
+          }
+          setIsPlaying(false);
+        } else {
+          setupAudioChain();
+          setIsPlaying(true);
+        }
+      };
+
+      // Update Filters in Real-time
+      useEffect(() => {
+        if (hpfNodeRef.current && audioContextRef.current) {
+          // Use exponential ramp for frequency changes to sound smoother and match log slider feel
+          hpfNodeRef.current.frequency.setTargetAtTime(Math.max(20, hpfFreq), audioContextRef.current.currentTime, 0.1);
+        }
+      }, [hpfFreq]);
+
+      useEffect(() => {
+        if (lpfNodeRef.current && audioContextRef.current) {
+          lpfNodeRef.current.frequency.setTargetAtTime(Math.max(20, lpfFreq), audioContextRef.current.currentTime, 0.1);
+        }
+      }, [lpfFreq]);
+
+      useEffect(() => {
+        if (midNodeRef.current && audioContextRef.current) {
+          midNodeRef.current.gain.setTargetAtTime(midGain, audioContextRef.current.currentTime, 0.1);
+        }
+      }, [midGain]);
+
+      // Handle Volume
+      useEffect(() => {
+        if (gainNodeRef.current && audioContextRef.current) {
+          gainNodeRef.current.gain.setTargetAtTime(volume, audioContextRef.current.currentTime, 0.1);
+        }
+      }, [volume]);
+
+      // Presets Logic
+      const applyPreset = (type) => {
+        switch (type) {
+          case 'telephone':
+            setHpfFreq(500);
+            setLpfFreq(3500);  // Adjusted to 3.5kHz (Standard telephone bandwidth)
+            setMidGain(20);    // Max boost
+            setPresetName('電話效果 (Telephone)');
+            break;
+          case 'warm':
+            setHpfFreq(20);
+            setLpfFreq(2000);  // Warm keeps mids, cuts high-mids
+            setMidGain(5);
+            setPresetName('溫暖/悶音 (Warm)');
+            break;
+          case 'radio':
+            setHpfFreq(800);
+            setLpfFreq(4000);  // AM Radio range
+            setMidGain(10);
+            setPresetName('AM 收音機 (Radio)');
+            break;
+          case 'hollow': // New preset for cut
+            setHpfFreq(20);
+            setLpfFreq(6000);  // Open wide
+            setMidGain(-20);
+            setPresetName('中頻挖空 (Hollow)');
+            break;
+          case 'flat':
+          default:
+            setHpfFreq(20);
+            setLpfFreq(6000);  // Max open
+            setMidGain(0);
+            setPresetName('Flat (重置)');
+            break;
+        }
+      };
+
+      // Logarithmic Scale Helpers for Visualization
+      const minLogHz = 20;
+      const maxLogHz = 6000; // Updated for visualization reference if needed
+      const getLogPercent = (freq) => {
+        // For visualization consistency across the bar, we might want to keep the visual range wide 
+        // or map it specifically. Let's map it to the full visual width for HPF, 
+        // but for LPF visual, it might look weird if we mix scales.
+        // For simplicity in this specific "extreme" lab, let's keep the bar visual simple or just clamp.
+        // Actually, simply using the filter value for the visual bar works best.
+        const safeFreq = Math.max(20, Math.min(20000, freq));
+        // Visualizing 20Hz to 20kHz on the bar still makes sense for context
+        const VISUAL_MAX = 20000;
+        const minL = Math.log10(20);
+        const maxL = Math.log10(VISUAL_MAX);
+        const valL = Math.log10(safeFreq);
+        return ((valL - minL) / (maxL - minL)) * 100;
+      };
+
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white p-4 md:p-8 font-sans flex items-center justify-center">
+          <div className="w-full max-w-5xl bg-slate-900/80 backdrop-blur-md rounded-3xl shadow-2xl border border-slate-700 overflow-hidden">
+
+            {/* Back Link */}
+            <div className="bg-slate-950/30 px-6 py-2 border-b border-slate-800">
+              <a href="index.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                回總整理
+              </a>
+            </div>
+
+            {/* Header */}
+            <div className="bg-slate-950/50 p-6 border-b border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+                  EQ 概念實驗室
+                </h1>
+                <p className="text-slate-400 text-sm mt-1">High Pass / Low Pass / 1kHz +/-20dB</p>
+              </div>
+
+              <button
+                onClick={togglePlay}
+                disabled={isLoading || !!loadingError}
+                className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg shadow-lg transition-all transform active:scale-95 ${isLoading ? 'bg-slate-700 text-slate-400 cursor-not-allowed' :
+                    isPlaying
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/30'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-500/30'
+                  }`}
+              >
+                {isLoading ? <Loader2 className="animate-spin" /> : isPlaying ? <Square fill="currentColor" size={20} /> : <Play fill="currentColor" size={20} />}
+                {isLoading ? '載入音檔中...' : isPlaying ? '停止播放' : '播放測試音'}
+              </button>
+            </div>
+
+            {loadingError && (
+              <div className="bg-red-500/20 text-red-200 p-2 text-center text-sm">
+                {loadingError}
+              </div>
+            )}
+
+            <div className="p-6 md:p-8 space-y-8">
+
+              {/* Status Bar */}
+              <div className="flex flex-wrap justify-between items-center bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 gap-4">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <Volume2 size={18} className="text-teal-400" />
+                  <span className="text-sm font-medium">音量</span>
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.05"
+                    value={volume}
+                    onChange={e => setVolume(parseFloat(e.target.value))}
+                    className="w-24 accent-teal-400 h-1.5 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-slate-500 uppercase tracking-wider">Current Preset</div>
+                  <div className="text-teal-300 font-mono font-bold">{presetName}</div>
+                </div>
+              </div>
+
+              {/* Visualization Bar */}
+              <div className="relative h-20 bg-slate-800 rounded-lg overflow-hidden border border-slate-700 flex flex-col justify-center">
+                {/* Frequency Markers */}
+                <div className="absolute top-1 left-2 text-[10px] text-slate-500">20Hz</div>
+                <div className="absolute top-1 left-[50%] -translate-x-1/2 text-[10px] text-yellow-500 font-bold">1kHz</div>
+                <div className="absolute top-1 right-2 text-[10px] text-slate-500">20kHz</div>
+
+                {/* Base Line */}
+                <div className="absolute w-full h-[2px] bg-slate-700 top-1/2 -translate-y-1/2"></div>
+
+                {/* Pass Band (Green Zone) */}
+                <div
+                  className="absolute h-full bg-teal-500/10 border-x border-teal-500/30 transition-all duration-100 ease-out z-10"
+                  style={{
+                    left: `${getLogPercent(hpfFreq)}%`,
+                    right: `${100 - getLogPercent(lpfFreq)}%`
+                  }}
+                ></div>
+
+                {/* 1kHz Boost/Cut Marker (Yellow Peak) */}
+                <div
+                  className="absolute w-4 rounded-full transition-all duration-100 ease-out z-20 top-1/2 -translate-x-1/2 flex items-center justify-center"
+                  style={{
+                    left: `${getLogPercent(1000)}%`,
+                    height: `${Math.max(4, Math.abs(midGain) * 2.5)}px`,
+                    backgroundColor: midGain >= 0 ? 'rgba(250, 204, 21, 0.8)' : 'rgba(150, 150, 150, 0.5)', // Yellow if boost, Grey if cut
+                    transform: `translate(-50%, -50%)`,
+                    boxShadow: midGain > 0 ? '0 0 15px rgba(250,204,21,0.5)' : 'none',
+                    border: midGain < 0 ? '1px solid rgba(255,255,255,0.3)' : 'none'
+                  }}
+                >
+                  {/* Direction indicator for cut vs boost */}
+                  <div className={`w-[2px] h-full ${midGain >= 0 ? 'bg-yellow-200' : 'bg-slate-400'}`}></div>
+                </div>
+              </div>
+
+              {/* Controls Grid - 3 Columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+
+                {/* 1. Low Cut (High Pass) */}
+                <div className="relative group bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 hover:border-blue-500/50 transition-colors flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-blue-400 font-bold flex items-center gap-2 text-sm md:text-base">
+                        <ChevronsRight size={18} /> Low Cut
+                      </h3>
+                      <span className="font-mono font-bold text-white text-lg">
+                        {hpfFreq >= 1000 ? (hpfFreq / 1000).toFixed(1) + 'k' : hpfFreq}
+                        <span className="text-xs text-slate-500 ml-1">Hz</span>
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="20"
+                      max="10000" // Increased dramatically
+                      step="10"
+                      value={hpfFreq}
+                      onChange={(e) => { setHpfFreq(Number(e.target.value)); setPresetName('Custom'); }}
+                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                    />
+                  </div>
+                  <p className="mt-4 text-xs text-slate-400 leading-relaxed">
+                    範圍：20Hz ~ 10kHz。<br />
+                    推到底只會剩下極高頻的聲音，人聲會幾乎消失。
+                  </p>
+                </div>
+
+                {/* 2. 1kHz Boost/Cut (Mid Peaking) */}
+                <div className="relative group bg-slate-800/50 p-5 rounded-2xl border border-yellow-500/30 shadow-[0_0_15px_rgba(234,179,8,0.05)] transition-colors flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-yellow-400 font-bold flex items-center gap-2 text-sm md:text-base">
+                        <Activity size={18} /> 1kHz (+/-)
+                      </h3>
+                      <span className={`font-mono font-bold text-lg ${midGain > 0 ? 'text-yellow-400' : midGain < 0 ? 'text-red-400' : 'text-white'}`}>
+                        {midGain > 0 ? '+' : ''}{midGain}<span className="text-xs text-slate-500 ml-1">dB</span>
+                      </span>
+                    </div>
+
+                    <input
+                      type="range"
+                      min="-20"
+                      max="20"
+                      step="1"
+                      value={midGain}
+                      onChange={(e) => { setMidGain(Number(e.target.value)); setPresetName('Custom'); }}
+                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-400"
+                    />
+
+                    {/* Center marker for 0dB */}
+                    <div className="w-full flex justify-between text-[10px] text-slate-600 mt-1 px-1">
+                      <span>-20</span>
+                      <span>0</span>
+                      <span>+20</span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400">
+                    範圍：+/- 20dB。<br />
+                    <span className="text-yellow-400">+20dB</span>: 極度電話音。<br />
+                    <span className="text-red-400">-20dB</span>: 聲音空洞、中頻凹陷。
+                  </p>
+                </div>
+
+                {/* 3. High Cut (Low Pass) */}
+                <div className="relative group bg-slate-800/30 p-5 rounded-2xl border border-slate-700/50 hover:border-orange-500/50 transition-colors flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-orange-400 font-bold flex items-center gap-2 text-sm md:text-base">
+                        <ChevronsLeft size={18} /> High Cut
+                      </h3>
+                      <span className="font-mono font-bold text-white text-lg">
+                        {lpfFreq >= 1000 ? (lpfFreq / 1000).toFixed(1) + 'k' : lpfFreq}
+                        <span className="text-xs text-slate-500 ml-1">Hz</span>
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="50"    // Min 50Hz
+                      max="6000"  // Max 6kHz
+                      step="50"
+                      value={lpfFreq}
+                      onChange={(e) => { setLpfFreq(Number(e.target.value)); setPresetName('Custom'); }}
+                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                      style={{ direction: 'rtl' }}
+                    />
+                  </div>
+                  <p className="mt-4 text-xs text-slate-400 leading-relaxed">
+                    範圍：6kHz ~ 50Hz。<br />
+                    保留語音清晰度，或往左拉到底(50Hz)只剩極低頻震動。
+                  </p>
+                </div>
+
+              </div>
+
+              {/* Quick Presets */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-slate-700/50">
+                <button
+                  onClick={() => applyPreset('flat')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-transparent hover:border-slate-500"
+                >
+                  <RotateCcw size={16} /> 原音重置
+                </button>
+                <button
+                  onClick={() => applyPreset('telephone')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 hover:bg-yellow-900/30 text-yellow-500 transition-all border border-transparent hover:border-yellow-500/50 shadow-lg shadow-yellow-900/20"
+                >
+                  <Phone size={16} /> 電話效果
+                </button>
+                <button
+                  onClick={() => applyPreset('hollow')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 hover:bg-red-900/30 text-red-400 transition-all border border-transparent hover:border-red-500/50"
+                >
+                  <Activity size={16} /> 中頻挖空
+                </button>
+                <button
+                  onClick={() => applyPreset('radio')}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl bg-slate-800 hover:bg-blue-900/30 text-blue-400 transition-all border border-transparent hover:border-blue-500/50"
+                >
+                  <Activity size={16} /> AM 收音機
+                </button>
+              </div>
+
+              {/* Footer Info */}
+              <div className="mt-8 text-center border-t border-slate-800/50 pt-6">
+                <p className="text-slate-500 text-sm font-medium tracking-wide">
+                  義守大學電影與電視學系陳嘉暐老師課程提供
+                </p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<EQInteractiveLab />);
+  </script>
+</body>
+
+</html>

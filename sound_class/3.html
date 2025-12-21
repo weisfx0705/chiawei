@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電影聲音部門｜數位音效設計</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-900 text-slate-100">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // --- Lucide Icons Shim ---
+    const IconBase = ({ size = 24, className, children, ...props }) => (
+      <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+    );
+    const Mic = (props) => <IconBase {...props}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></IconBase>;
+    const Scissors = (props) => <IconBase {...props}><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></IconBase>;
+    const Mic2 = (props) => <IconBase {...props}><path d="m12 8-9.04 9.06a2.82 2.82 0 1 0 3.98 3.98L16 12"></path><circle cx="17" cy="7" r="5"></circle></IconBase>;
+    const Sparkles = (props) => <IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path></IconBase>;
+    const Footprints = (props) => <IconBase {...props}><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 11 3.8 11 8c0 1.25-.76 2.5-3 5-.67.76-1 1.5-1 4v3l-5-1.78Z"></path><path d="M14 18v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C8.63 4 7 5.8 7 10c0 1.25.76 2.5 3 5 .67.76 1 1.5 1 4v3l5-1.78Z" transform="translate(6, 2)"></path></IconBase>; // Simplified Footprints
+    const Wind = (props) => <IconBase {...props}><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"></path><path d="M9.6 4.6A2 2 0 1 1 11 8H2"></path><path d="M12.6 19.4A2 2 0 1 0 14 16H2"></path></IconBase>;
+    const Music = (props) => <IconBase {...props}><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></IconBase>;
+    const Sliders = (props) => <IconBase {...props}><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></IconBase>;
+    const Info = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></IconBase>;
+    const X = (props) => <IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></IconBase>;
+    const ChevronRight = (props) => <IconBase {...props}><polyline points="9 18 15 12 9 6"></polyline></IconBase>;
+    const PlayCircle = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></IconBase>;
+    const Layers = (props) => <IconBase {...props}><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></IconBase>;
+    const Users = (props) => <IconBase {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></IconBase>;
+    const ArrowDown = (props) => <IconBase {...props}><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></IconBase>;
+    // --- End Icons Shim ---
+
+    // 資料結構：聲音部門分類與詳細說明
+    const departments = [
+      {
+        id: 'production',
+        title: '現場收音',
+        engTitle: 'Production Sound',
+        category: 'voice',
+        phase: 'production',
+        icon: <Mic size={24} />,
+        color: 'bg-blue-500',
+        description: '電影聲音的源頭，捕捉演員最真實的表演。',
+        details: [
+          '核心任務：在拍攝現場收錄乾淨、清晰的對白。',
+          '工作挑戰：避開現場環境噪音（如冷氣聲、交通聲、劇組人員動作聲）、挑選理想的麥克風。',
+          '關鍵思考：首要目標是「對白」，其他音效當然能多收就多收。',
+          '與後期的關係：收音品質越好，後期ADR（補錄）的需求就越少，保留演員當下的情緒流動。'
+        ]
+      },
+      {
+        id: 'dialogue-edit',
+        title: '對白剪輯',
+        engTitle: 'Dialogue Editing',
+        category: 'voice',
+        phase: 'post',
+        icon: <Scissors size={24} />,
+        color: 'bg-indigo-500',
+        description: '聲音後期的基礎，確保語言傳達的清晰與連貫。',
+        details: [
+          '核心任務：修整、挑選並拼接現場收音的素材。',
+          '技術工作：去除爆音、衣服摩擦聲、麥克風碰撞聲等雜訊。',
+          '藝術工作：解決鏡頭切換時的聲音不連貫（使用Room Tone填補空隙），調整台詞音量動態，讓對白聽起來像是在同一個空間中自然發生。',
+          '重要性：對白是劇情的骨幹，對白剪輯師是演員表演的守護者。'
+        ]
+      },
+      {
+        id: 'adr',
+        title: '對白補錄 (ADR)',
+        engTitle: 'Automated Dialogue Replacement',
+        category: 'voice',
+        phase: 'post',
+        icon: <Mic2 size={24} />,
+        color: 'bg-indigo-600',
+        description: '當現場收音無法使用，或需要改變表演情緒時的救星。',
+        details: [
+          '定義：將演員找回錄音室，看著畫面重新配音。',
+          '使用時機：現場噪音過大、導演想要改變台詞內容、或是需要不同的表演情緒（Breathing life into the character）。',
+          '挑戰：演員必須在沒有對手戲的情況下，精準還原或超越拍攝當下的情緒與嘴型同步（Lip Sync）。',
+          '群眾雜音 (Walla)：ADR團隊通常也負責錄製背景的人群嘈雜聲。'
+        ]
+      },
+      {
+        id: 'sfx',
+        title: '特殊音效設計',
+        engTitle: 'Sound Effects Design (SFX)',
+        category: 'sfx',
+        phase: 'post',
+        icon: <Sparkles size={24} />,
+        color: 'bg-emerald-500',
+        description: '創造現實中不存在，或需要被誇張化的聲音。',
+        details: [
+          '核心任務：設計具備象徵意義、情緒渲染力或科幻/奇幻元素的聲音。',
+          '範例：光劍的聲音、恐龍的吼叫、變形金剛的機械聲、甚至是心理驚悚片中代表焦慮的低頻聲。',
+          '創意來源：往往來自意想不到的素材（如用乾冰摩擦金屬做成尖叫聲），透過合成器或數位處理創造全新聽覺體驗。',
+          '與Foley的區別：SFX處理的是「設計性」與「大事件」的聲音；Foley處理的是「寫實表演」的聲音。'
+        ]
+      },
+      {
+        id: 'foley',
+        title: '擬音',
+        engTitle: 'Foley',
+        category: 'sfx',
+        phase: 'post',
+        icon: <Footprints size={24} />,
+        color: 'bg-emerald-600',
+        description: '用表演來還原角色的物理存在感，最人性化的音效部門。',
+        details: [
+          '核心任務：看著畫面，同步表演並錄製角色與物體的接觸聲。',
+          '三大要素：腳步聲 (Footsteps)、布料摩擦聲 (Moves/Cloth)、手持道具聲 (Props)。',
+          '藝術性：Foley Artist 也是演員，他們透過腳步的輕重緩急表現角色的情緒（焦急、猶豫、自信）。',
+          '必要性：為了國際發行（配音版），M&E（Music & Effects）軌道必須包含所有動作聲音，因此不能只依賴現場收音。'
+        ]
+      },
+      {
+        id: 'ambience',
+        title: '環境音',
+        engTitle: 'Ambience',
+        category: 'sfx',
+        phase: 'post',
+        icon: <Wind size={24} />,
+        color: 'bg-emerald-700',
+        description: '建立電影的空間感、季節、時代與氛圍。',
+        details: [
+          '核心任務：鋪墊畫面的基底聲音，告訴觀眾「我們在哪裡」。',
+          '細節層次：區分室內/室外、城市/鄉村、白晝/夜晚、冷/熱（風聲的質感）。',
+          '敘事功能：蟲鳴鳥叫的疏密可以暗示角色的孤獨或生機；風聲的呼嘯可以強化危險感。',
+          '沉浸感：優秀的環境音設計是「隱形」的，觀眾不會特別注意到，但一旦拿掉，畫面就會變得虛假。'
+        ]
+      },
+      {
+        id: 'music',
+        title: '電影配樂',
+        engTitle: 'Music Score & Source',
+        category: 'music',
+        phase: 'post',
+        icon: <Music size={24} />,
+        color: 'bg-pink-500',
+        description: '引導觀眾情緒的指揮家，涵蓋原創與版權音樂。',
+        details: [
+          '組成內容：原創配樂 (Score)、既有歌曲 (Songs)、畫面內音樂 (Source Music，如收音機播出的歌)。',
+          '功能：提示劇情轉折、烘托潛台詞、建立節奏。',
+          '現代趨勢 - AI與科技：AI生成音樂的輔助創作、電子合成器的運用，以及如何將音效音樂化（Sound Design as Music）。',
+          '分工：包含作曲家 (Composer)、音樂編輯 (Music Editor)、音樂總監 (Music Supervisor)。'
+        ]
+      },
+      {
+        id: 're-recording-mixer',
+        title: '混音師 (Re-recording Mixer)',
+        engTitle: 'The Driver / Pre-Mix',
+        category: 'mix',
+        phase: 'mix',
+        icon: <Sliders size={24} />,
+        color: 'bg-amber-500',
+        description: '聲音的駕駛員，負責操作控制台，將龐大的素材整理至合理狀態。',
+        details: [
+          '核心角色：就像是「開車的人 (Driver)」，手握推桿，負責執行具體的混音操作。',
+          '工作階段：預混 (Pre-mix) 與整理。在導演進場前，先將對白、音效、音樂平衡到一個技術正確且合理的狀態。',
+          '技術任務：處理頻率打架、音量平衡、確保響度標準 (Loudness)，為最終決策做好準備。',
+          '專業能力：極度熟悉控台操作，能快速回應導演與聲音設計師的指令。'
+        ]
+      },
+      {
+        id: 'final-mix-stage',
+        title: '終極混音審核 (Final Mixing Stage)',
+        engTitle: 'Creative Sign-off',
+        category: 'mix',
+        phase: 'mix',
+        icon: <Users size={24} />,
+        color: 'bg-amber-600',
+        description: '創意決策的殿堂，導演、製片與聲音設計師共同定奪最終成品。',
+        details: [
+          '核心場景：眾人坐在混音棚 (Final Mixing Stage) 進行最後確認。',
+          '關鍵人物：Sound Designer (像是後座駕駛 Backseat Driver 提供方向)、導演 (最終決策者)、製片。',
+          '決策過程：逐場檢視，討論戲劇張力（如：這裡音樂要大一點還是對白清楚一點？），進行主觀的藝術判斷。',
+          '最終產出：Print Master，確認後就不再更動，交付影院播放。'
+        ]
+      }
+    ];
+
+    const SoundWorkflow = () => {
+      const [selectedId, setSelectedId] = useState(null);
+      const [showIntro, setShowIntro] = useState(true);
+
+      const selectedDept = departments.find(d => d.id === selectedId);
+
+      // 處理點擊
+      const handleSelect = (id) => {
+        setSelectedId(id);
+        setShowIntro(false);
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 font-sans selection:bg-purple-500 selection:text-white">
+
+          {/* Back Link */}
+          <div className="bg-slate-800 border-b border-slate-700 px-6 py-2">
+            <div className="max-w-7xl mx-auto">
+              <a href="index.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                回總整理
+              </a>
+            </div>
+          </div>
+
+          {/* 頁面標題 */}
+          <header className="bg-slate-800 border-b border-slate-700 p-6 sticky top-0 z-10 shadow-lg">
+            <div className="max-w-7xl mx-auto flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                  電影聲音工作流 (The Workflow)
+                </h1>
+                <p className="text-slate-400 text-sm mt-1">數位音效設計課程 | 基於《電影音效傳奇》人才分類</p>
+              </div>
+              <button
+                onClick={() => setShowIntro(true)}
+                className="hidden md:flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors text-sm"
+              >
+                <Info size={16} />
+                課程說明
+              </button>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8">
+
+            {/* 左側：工作流程圖 */}
+            <div className="flex-1 overflow-x-auto pb-8 lg:pb-0">
+              <div className="min-w-[320px] lg:min-w-0 flex flex-col gap-8 relative">
+
+                {/* 連結線 - 垂直與水平 (示意背景) */}
+                <div className="absolute inset-0 pointer-events-none hidden lg:block">
+                  {/* 連接 Production 到 Post 的線 */}
+                  <svg className="w-full h-full text-slate-700">
+                    {/* Production to Voice */}
+                    <path d="M 120 80 C 120 80, 150 80, 180 80 L 220 150" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="5,5" />
+                    {/* Production to SFX (Conceptual) */}
+                    <path d="M 120 80 C 120 80, 150 250, 180 350" fill="none" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3" />
+
+                    {/* Flow lines merging to RE-RECORDING MIXER (Top Card of Mix Column) */}
+                    {/* Target Y around 150-200 which is the top card center */}
+                    <path d="M 600 150 L 700 150" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <path d="M 600 350 L 650 350 L 700 150" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <path d="M 600 500 L 650 500 L 700 150" fill="none" stroke="currentColor" strokeWidth="2" />
+                  </svg>
+                </div>
+
+                {/* 階段標示 */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                  {/* 1. 現場拍攝階段 (Production) */}
+                  <div className="lg:col-span-2 flex flex-col justify-center items-center relative group">
+                    <div className="absolute -top-10 text-xs uppercase tracking-widest text-slate-500 font-bold">前期 Production</div>
+                    <DeptCard
+                      dept={departments.find(d => d.id === 'production')}
+                      isActive={selectedId === 'production'}
+                      onClick={handleSelect}
+                    />
+                    <div className="hidden lg:block absolute -right-4 top-1/2 transform -translate-y-1/2 text-slate-600">
+                      <ChevronRight size={24} />
+                    </div>
+                  </div>
+
+                  {/* 2. 後期製作階段 (Post-Production) - 平行處理 */}
+                  <div className="lg:col-span-7 flex flex-col gap-6 relative p-4 rounded-3xl bg-slate-800/30 border border-slate-700/50">
+                    <div className="absolute -top-10 left-0 w-full text-center text-xs uppercase tracking-widest text-slate-500 font-bold">
+                      後期製作 Post-Production (平行分工)
+                    </div>
+
+                    {/* TRACK 1: VOICE */}
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                      <div className="w-24 text-xs font-bold text-blue-300 uppercase tracking-wider text-center md:text-right px-2">
+                        人聲部門 <br /> Dialogue
+                      </div>
+                      <div className="flex-1 flex gap-4 w-full">
+                        <DeptCard dept={departments.find(d => d.id === 'dialogue-edit')} isActive={selectedId === 'dialogue-edit'} onClick={handleSelect} />
+                        <DeptCard dept={departments.find(d => d.id === 'adr')} isActive={selectedId === 'adr'} onClick={handleSelect} />
+                      </div>
+                    </div>
+
+                    {/* TRACK 2: SFX */}
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                      <div className="w-24 text-xs font-bold text-emerald-300 uppercase tracking-wider text-center md:text-right px-2">
+                        音效部門 <br /> Effects
+                      </div>
+                      <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                        <DeptCard dept={departments.find(d => d.id === 'sfx')} isActive={selectedId === 'sfx'} onClick={handleSelect} />
+                        <DeptCard dept={departments.find(d => d.id === 'foley')} isActive={selectedId === 'foley'} onClick={handleSelect} />
+                        <DeptCard dept={departments.find(d => d.id === 'ambience')} isActive={selectedId === 'ambience'} onClick={handleSelect} />
+                      </div>
+                    </div>
+
+                    {/* TRACK 3: MUSIC */}
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                      <div className="w-24 text-xs font-bold text-pink-300 uppercase tracking-wider text-center md:text-right px-2">
+                        音樂部門 <br /> Music
+                      </div>
+                      <div className="flex-1 flex w-full">
+                        <DeptCard dept={departments.find(d => d.id === 'music')} isActive={selectedId === 'music'} onClick={handleSelect} className="w-full" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. 混音階段 (Mixing) - 拆分為 Mixer 和 Final Stage */}
+                  <div className="lg:col-span-3 flex flex-col relative">
+                    <div className="hidden lg:block absolute -left-4 top-1/4 transform -translate-y-1/2 text-slate-600">
+                      <ChevronRight size={24} />
+                    </div>
+                    <div className="absolute -top-10 w-full text-center text-xs uppercase tracking-widest text-slate-500 font-bold">終極整合 Final Mix</div>
+
+                    {/* 垂直堆疊：先 Mixer，後 Final Stage */}
+                    <div className="flex flex-col gap-4 h-full">
+
+                      {/* Step 1: Re-recording Mixer */}
+                      <div className="flex-1 relative">
+                        <DeptCard
+                          dept={departments.find(d => d.id === 're-recording-mixer')}
+                          isActive={selectedId === 're-recording-mixer'}
+                          onClick={handleSelect}
+                          className="h-full flex items-center justify-center"
+                        />
+                        {/* 向下箭頭 */}
+                        <div className="absolute -bottom-5 left-1/2 transform -translate-x-1/2 text-slate-500 z-10 bg-slate-900 rounded-full p-1">
+                          <ArrowDown size={20} />
+                        </div>
+                      </div>
+
+                      {/* Step 2: Final Mixing Stage */}
+                      <div className="flex-1">
+                        <DeptCard
+                          dept={departments.find(d => d.id === 'final-mix-stage')}
+                          isActive={selectedId === 'final-mix-stage'}
+                          onClick={handleSelect}
+                          className="h-full flex items-center justify-center"
+                        />
+                      </div>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {/* 右側：詳細資訊面板 (或下方) */}
+            <div className="lg:w-1/3 min-w-[300px]">
+              <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 sticky top-28 shadow-2xl min-h-[500px]">
+                {showIntro ? (
+                  <IntroPanel onStart={() => setShowIntro(false)} />
+                ) : selectedDept ? (
+                  <DetailPanel dept={selectedDept} onClose={() => { setSelectedId(null); setShowIntro(true); }} />
+                ) : (
+                  <EmptyState />
+                )}
+              </div>
+            </div>
+          </main>
+
+          {/* Footer */}
+          <footer className="mt-12 py-8 text-center text-slate-600 text-sm">
+            <p>Inspired by "Making Waves: The Art of Cinematic Sound"</p>
+            <p>義守大學電影與電視學系陳嘉暐老師課程提供</p>
+          </footer>
+        </div>
+      );
+    };
+
+    // ---------------- 子元件 ----------------
+
+    // 1. 部門卡片元件
+    const DeptCard = ({ dept, isActive, onClick, className = "" }) => {
+      return (
+        <button
+          onClick={() => onClick(dept.id)}
+          className={`
+                relative group flex flex-col items-center justify-center p-4 rounded-xl border transition-all duration-300 w-full text-center
+                ${isActive
+              ? `bg-slate-700 border-${dept.color.split('-')[1]}-400 ring-2 ring-${dept.color.split('-')[1]}-400 shadow-[0_0_20px_rgba(0,0,0,0.5)] scale-105`
+              : 'bg-slate-800 border-slate-700 hover:bg-slate-750 hover:border-slate-600 hover:scale-105'
+            }
+                ${className}
+              `}
+        >
+          <div className={`
+                p-3 rounded-full mb-3 text-white shadow-lg transition-transform duration-300 group-hover:rotate-12
+                ${dept.color}
+              `}>
+            {dept.icon}
+          </div>
+          <h3 className="font-bold text-slate-200 text-sm md:text-base leading-tight">{dept.title}</h3>
+          <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">{dept.engTitle}</span>
+
+          {/* 狀態指示燈 */}
+          {isActive && (
+            <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+          )}
+        </button>
+      );
+    };
+
+    // 2. 詳細資訊面板
+    const DetailPanel = ({ dept, onClose }) => {
+      return (
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 h-full flex flex-col">
+          <div className="flex justify-between items-start mb-6 border-b border-slate-700 pb-4">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-lg text-white shadow-inner ${dept.color}`}>
+                {dept.icon}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">{dept.title}</h2>
+                <p className="text-slate-400 text-sm">{dept.engTitle}</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="mb-6">
+              <h4 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-2">部門簡介</h4>
+              <p className="text-lg text-slate-200 leading-relaxed font-light">
+                {dept.description}
+              </p>
+            </div>
+
+            <div>
+              <h4 className="text-xs uppercase tracking-widest text-slate-500 font-bold mb-3">具體工作內容 & 職責</h4>
+              <ul className="space-y-4">
+                {dept.details.map((item, index) => (
+                  <li key={index} className="flex gap-3 text-slate-300 text-sm leading-relaxed bg-slate-700/30 p-3 rounded-lg border border-slate-700/50">
+                    <div className={`mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0 ${dept.color.replace('bg-', 'bg-')}`}></div>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className={`mt-6 p-3 rounded text-center text-xs text-slate-400 bg-slate-900/50 border border-slate-700/50`}>
+            點擊其他卡片以查看不同部門
+          </div>
+        </div>
+      );
+    };
+
+    // 3. 課程介紹面板 (初始狀態)
+    const IntroPanel = ({ onStart }) => {
+      return (
+        <div className="h-full flex flex-col justify-center items-center text-center p-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-xl rotate-3">
+            <Layers size={32} className="text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">歡迎進入電影聲音的世界</h2>
+          <p className="text-slate-400 mb-8 leading-relaxed">
+            從現場收音到最終混音，電影聲音是一場精密的團體戰。
+            <br /><br />
+            左側的圖表展示了聲音製作的<b>「時間軸」</b>與<b>「分工層次」</b>。
+            請點擊任何一個部門卡片，深入了解每個環節的專業職責。
+          </p>
+          <button
+            onClick={onStart}
+            className="group flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold transition-all transform hover:scale-105 shadow-lg shadow-blue-900/50"
+          >
+            開始探索
+            <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+          </button>
+
+          <div className="mt-8 pt-6 border-t border-slate-700 w-full">
+            <div className="grid grid-cols-3 gap-2 text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+              <div>Voice</div>
+              <div>SFX</div>
+              <div>Music</div>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-2 h-1.5 w-full rounded-full overflow-hidden">
+              <div className="bg-blue-500/20"></div>
+              <div className="bg-emerald-500/20"></div>
+              <div className="bg-pink-500/20"></div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 4. 空狀態 (未選擇)
+    const EmptyState = () => {
+      return (
+        <div className="h-full flex flex-col justify-center items-center text-slate-500">
+          <PlayCircle size={48} className="mb-4 opacity-50" />
+          <p>請點擊左側流程圖中的部門</p>
+          <p className="text-sm">查看詳細工作內容</p>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<SoundWorkflow />);
+  </script>
+</body>
+
+</html>

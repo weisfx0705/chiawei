@@ -1,0 +1,483 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Volume2, VolumeX, Lock, Unlock, Play, Square, Info, CheckCircle, RotateCcw, Pause, BookOpen } from 'lucide-react';
+
+const AudioCalibrationLab = () => {
+  const [mode, setMode] = useState('calibration'); // 'calibration' or 'reference'
+  
+  // --- Calibration State ---
+  const [pinkNoiseOn, setPinkNoiseOn] = useState(false);
+  const [speakerVolume, setSpeakerVolume] = useState(0); // 0 to 100
+  const [splReading, setSplReading] = useState(40); // Base ambient noise
+  const [isCalibrated, setIsCalibrated] = useState(false);
+  
+  // --- Reference State ---
+  const [volumeLocked, setVolumeLocked] = useState(false);
+  const [refSuccess, setRefSuccess] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
+  // Refs
+  const audioContextRef = useRef(null);
+  const oscillatorRef = useRef(null);
+  const gainNodeRef = useRef(null);
+  const videoRef = useRef(null); // Native Video Reference
+
+  // --- Audio Logic (Pink Noise) ---
+  useEffect(() => {
+    // Update Gain (Volume) in real-time for Pink Noise
+    if (gainNodeRef.current) {
+      // Convert 0-100 linear knob to logarithmic-like gain for natural feel
+      gainNodeRef.current.gain.value = speakerVolume / 100;
+    }
+  }, [speakerVolume]);
+
+  useEffect(() => {
+    return () => stopSound();
+  }, []);
+
+  // --- SPL Calculation Logic ---
+  useEffect(() => {
+    const calculateSPL = () => {
+      const fluctuation = Math.random() * 0.5 - 0.25;
+      let targetSPL = 40;
+
+      if (pinkNoiseOn) {
+         if (speakerVolume > 0) {
+            targetSPL = 40 + (speakerVolume / 100) * 65; 
+         }
+      }
+
+      // Smooth transition
+      setSplReading(prev => {
+        const diff = targetSPL - prev;
+        return prev + diff * 0.2 + fluctuation;
+      });
+    };
+
+    const interval = setInterval(calculateSPL, 100);
+    return () => clearInterval(interval);
+  }, [pinkNoiseOn, speakerVolume]);
+
+  // Check for success in Calibration
+  useEffect(() => {
+    if (Math.abs(splReading - 85) < 1.5 && pinkNoiseOn) {
+      setIsCalibrated(true);
+    } else {
+      setIsCalibrated(false);
+    }
+  }, [splReading, pinkNoiseOn]);
+
+  // --- Web Audio API (Pink Noise) ---
+  const startPinkNoise = () => {
+    if (!window.AudioContext && !window.webkitAudioContext) return;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+    
+    const ctx = audioContextRef.current;
+    
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = speakerVolume / 100; 
+    gainNode.connect(ctx.destination);
+    gainNodeRef.current = gainNode;
+
+    const bufferSize = 4096;
+    const pinkNoise = (function() {
+        let b0, b1, b2, b3, b4, b5, b6;
+        b0 = b1 = b2 = b3 = b4 = b5 = b6 = 0.0;
+        const node = ctx.createScriptProcessor(bufferSize, 1, 1);
+        node.onaudioprocess = function(e) {
+            const output = e.outputBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99886 * b0 + white * 0.0555179;
+                b1 = 0.99332 * b1 + white * 0.0750759;
+                b2 = 0.96900 * b2 + white * 0.1538520;
+                b3 = 0.86650 * b3 + white * 0.3104856;
+                b4 = 0.55000 * b4 + white * 0.5329522;
+                b5 = -0.7616 * b5 - white * 0.0168980;
+                output[i] = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+                output[i] *= 0.11; 
+                b6 = white * 0.115926;
+            }
+        };
+        return node;
+    })();
+
+    pinkNoise.connect(gainNode); 
+    oscillatorRef.current = pinkNoise;
+    setPinkNoiseOn(true);
+  };
+
+  const stopSound = () => {
+    if (oscillatorRef.current) {
+      oscillatorRef.current.disconnect();
+      oscillatorRef.current = null;
+    }
+    setPinkNoiseOn(false);
+  };
+
+  const togglePinkNoise = () => {
+    if (pinkNoiseOn) {
+      stopSound();
+    } else {
+      startPinkNoise();
+    }
+  };
+
+  // --- HTML5 Video Integration ---
+  // Sync Hardware Knob to Video Volume directly
+  useEffect(() => {
+    if (mode === 'reference' && videoRef.current) {
+        // HTML5 video volume is 0.0 to 1.0
+        videoRef.current.volume = speakerVolume / 100;
+    }
+  }, [speakerVolume, mode]);
+
+  const toggleVideoPlay = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsVideoPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPlaying(false);
+      }
+    }
+  };
+
+  const resetAll = () => {
+    setSpeakerVolume(0);
+    setSplReading(40);
+    setIsCalibrated(false);
+    setVolumeLocked(false);
+    setRefSuccess(false);
+    setIsVideoPlaying(false);
+    stopSound();
+    if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans p-4 md:p-8 flex flex-col items-center select-none">
+      
+      {/* Header */}
+      <header className="w-full max-w-5xl mb-8 flex flex-col md:flex-row justify-between items-center border-b border-slate-700 pb-4 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-sky-400">舉手！喇叭到底要開多大聲啊？</h1>
+          <p className="text-sm text-slate-400">互動式學習：了解硬體與訊號的關係</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => { setMode('calibration'); stopSound(); setSpeakerVolume(0); setIsCalibrated(false); }}
+            className={`px-4 py-2 rounded-lg font-medium transition ${mode === 'calibration' ? 'bg-sky-600 text-white' : 'bg-slate-800 hover:bg-slate-700'}`}
+          >
+            1. 科學測量法
+          </button>
+          <button 
+            onClick={() => { setMode('reference'); stopSound(); setSpeakerVolume(30); setVolumeLocked(false); setIsVideoPlaying(false); }} 
+            className={`px-4 py-2 rounded-lg font-medium transition ${mode === 'reference' ? 'bg-emerald-600 text-white' : 'bg-slate-800 hover:bg-slate-700'}`}
+          >
+            2. 相對參考法
+          </button>
+        </div>
+      </header>
+
+      {/* Main Workspace */}
+      {/* Changed to flex-col to allow footer notes inside the card */}
+      <div className="w-full max-w-5xl bg-slate-950 rounded-xl shadow-2xl border border-slate-800 overflow-hidden flex flex-col relative">
+        
+        {/* === SCENARIO 1: CALIBRATION === */}
+        {mode === 'calibration' && (
+          <>
+            <div className="flex flex-col md:flex-row w-full border-b border-slate-800">
+                {/* Left Panel: Digital Source (Computer) */}
+                <div className="flex-1 p-6 border-r border-slate-800 bg-slate-900/50">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-sky-500"></div>
+                    <h2 className="font-bold text-lg">訊號源 (Input Signal)</h2>
+                </div>
+                
+                <div className="bg-slate-800 p-4 rounded-lg mb-6">
+                    <p className="text-xs text-slate-400 mb-2">DAW Output Meter (dBFS)</p>
+                    <div className="flex gap-4 items-end h-40 justify-center">
+                    {/* Single Meter Bar for simplicity */}
+                    <div className="w-12 bg-slate-950 rounded relative h-full overflow-hidden border border-slate-700">
+                        <div className="absolute top-2 right-1 text-[10px] text-slate-500 z-10">0</div>
+                        <div className="absolute top-[30%] right-1 text-[10px] text-slate-500 z-10">-20</div>
+                        <div 
+                            className={`w-full absolute bottom-0 transition-all duration-100 ${pinkNoiseOn ? 'h-[70%] bg-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.6)]' : 'h-0 bg-sky-900'}`}
+                        ></div>
+                    </div>
+                    </div>
+                    <div className="text-center mt-2 text-mono text-sky-400 font-bold">
+                        {pinkNoiseOn ? '-20.0 dBFS' : '- inf'}
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="bg-slate-800 p-4 rounded-lg">
+                    <h3 className="font-semibold mb-2 flex items-center gap-2">
+                        <Square size={16} /> 粉紅噪音產生器
+                    </h3>
+                    <button 
+                        onClick={togglePinkNoise}
+                        className={`w-full py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition ${pinkNoiseOn ? 'bg-red-500 hover:bg-red-600 text-white' : 'bg-slate-700 hover:bg-slate-600 text-slate-300'}`}
+                    >
+                        {pinkNoiseOn ? '停止發送訊號' : '開啟 Pink Noise (-20dB)'}
+                    </button>
+                    </div>
+                </div>
+                </div>
+
+                {/* Middle Panel: Physical Room (Speakers) */}
+                <div className="flex-1 p-6 border-r border-slate-800 flex flex-col items-center justify-center bg-gradient-to-b from-slate-900 to-slate-950">
+                <h2 className="font-bold text-lg mb-6">擴大機與喇叭 (Hardware)</h2>
+                
+                {/* Speaker Graphic */}
+                <div className="mb-8 relative">
+                        <Volume2 
+                            size={80} 
+                            className={`transition-all duration-100 ${
+                                pinkNoiseOn && speakerVolume > 5 
+                                ? 'text-sky-400 drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]' 
+                                : 'text-slate-700'
+                            }`} 
+                            strokeWidth={pinkNoiseOn && speakerVolume > 5 ? 2.5 : 1.5}
+                        />
+                        {/* Sound Waves Animation */}
+                        {pinkNoiseOn && speakerVolume > 5 && (
+                            <div className="absolute -right-4 top-0 bottom-0 flex items-center">
+                                <div className="w-1 h-8 bg-sky-400/50 rounded-full animate-ping" style={{animationDuration: '0.5s'}}></div>
+                            </div>
+                        )}
+                        
+                        {speakerVolume === 0 && (
+                            <div className="absolute -right-6 top-1/2 -translate-y-1/2 bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded">
+                                Muted
+                            </div>
+                        )}
+                </div>
+
+                {/* Volume Knob Simulation */}
+                <div className="relative w-40 h-40 flex items-center justify-center mb-4">
+                    <div className="absolute inset-0 rounded-full border-4 border-slate-700 bg-slate-900"></div>
+                    {/* Knob */}
+                    <div 
+                        className="w-28 h-28 rounded-full bg-slate-800 shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center border border-slate-600 cursor-pointer transform transition-transform duration-75 relative hover:border-sky-500/50"
+                        style={{ transform: `rotate(${speakerVolume * 2.7 - 135}deg)` }}
+                    >
+                        <div className="w-1.5 h-10 bg-sky-500 absolute top-2 rounded-full shadow-[0_0_5px_rgba(14,165,233,0.8)]"></div>
+                    </div>
+                </div>
+                
+                <div className="w-full px-8">
+                    <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value={speakerVolume} 
+                        onChange={(e) => setSpeakerVolume(Number(e.target.value))}
+                        className="w-full accent-sky-500 cursor-pointer h-2 bg-slate-700 rounded-lg appearance-none"
+                    />
+                    <div className="flex justify-between text-xs text-slate-500 mt-2">
+                        <span>Min (0)</span>
+                        <span className="text-sky-400 font-bold">{speakerVolume}%</span>
+                        <span>Max (100)</span>
+                    </div>
+                </div>
+                </div>
+
+                {/* Right Panel: SPL Meter (Measurement) */}
+                <div className="flex-1 p-6 flex flex-col items-center bg-slate-900/50">
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <h2 className="font-bold text-lg">音壓計 (SPL Meter)</h2>
+                </div>
+
+                {/* SPL Display */}
+                <div className="bg-black border-8 border-slate-700 rounded-2xl p-6 w-full max-w-[200px] mb-6 shadow-inner relative flex flex-col items-center">
+                    <div className="text-slate-500 text-[10px] w-full text-right mb-1">C-Weighting / Slow</div>
+                    <div className={`font-mono text-5xl text-center font-bold tracking-wider ${isCalibrated ? 'text-green-500' : 'text-red-500'}`}>
+                    {splReading.toFixed(1)}
+                    </div>
+                    <div className="text-slate-500 w-full text-right mt-1 font-mono">dB</div>
+                </div>
+
+                <div className="bg-slate-800 p-4 rounded-lg text-center w-full">
+                    <h4 className="text-slate-300 font-bold mb-2">任務指示</h4>
+                    <ul className="text-sm text-slate-400 space-y-2 text-left list-disc list-inside">
+                    <li className={pinkNoiseOn ? 'text-green-400' : ''}>開啟左側訊號 (-20dBFS)</li>
+                    <li className={speakerVolume > 0 ? 'text-green-400' : ''}>慢慢轉動中間的音量旋鈕</li>
+                    <li className={isCalibrated ? 'text-green-400 font-bold' : ''}>使音壓計讀數達到 85dB</li>
+                    </ul>
+                </div>
+
+                {isCalibrated && (
+                    <div className="mt-6 bg-green-500/20 text-green-300 p-4 rounded-lg border border-green-500/50 flex items-center gap-2 animate-bounce">
+                    <CheckCircle />
+                    校準完成！
+                    </div>
+                )}
+                </div>
+            </div>
+            
+            {/* Added Footer Note for Pro Context */}
+            <div className="p-6 bg-slate-900/50 text-slate-400 text-sm border-t border-slate-800">
+                <div className="flex gap-3">
+                    <div className="mt-1"><BookOpen size={18} className="text-sky-500" /></div>
+                    <div className="space-y-2 leading-relaxed">
+                        <h4 className="font-bold text-slate-300">專業監聽標準補充</h4>
+                        <p>
+                            在專業電影聲軌製作中，參考監聽標準必須以「單一聲道、單一喇叭」為校準對象，而非所有喇叭同時播放。
+                            標準作法是由系統輸出 <strong>-20 dBFS 的粉紅噪音</strong>，每次只播放一個聲道（例如 Left、Center、Right…），
+                            並在混音位置量測，使該喇叭單獨回放時達到 <strong>約 85 dB SPL（C-weighting、Slow）</strong>。
+                            如此可確保每一個 channel 在相同能量基準下工作，避免因喇叭效率或空間差異造成錯誤判斷。
+                        </p>
+                        <p>
+                            若無音壓計，實務上可使用同類型、已完成的電影或戲劇作品作為相對參考，調整監聽音量至最自然且不吃力的位置，
+                            並在整個工作流程中固定此音量設定，以建立可信的相對監聽基準。
+                        </p>
+                        <div className="pt-2 text-xs text-slate-500">
+                            參考來源：
+                            <a 
+                                href="https://cinemontage.org/technology-how-sound-crews-work-hard-to-get-the-right-levels-on-theatrical-mixes" 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="text-sky-500 hover:text-sky-400 ml-1 underline decoration-sky-500/30"
+                            >
+                                Dolby 電影聲軌校準標準說明（英文）
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </>
+        )}
+
+        {/* === SCENARIO 2: REFERENCE METHOD === */}
+        {mode === 'reference' && (
+          <div className="w-full flex flex-col md:flex-row h-[600px] md:h-[500px]">
+            
+            {/* Left: Direct Video Player */}
+            <div className="flex-[1.5] bg-black border-r border-slate-700 flex flex-col relative group">
+              <div className="absolute top-0 left-0 right-0 p-2 z-10 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center pointer-events-none">
+                 <div className="text-emerald-400 font-bold flex items-center gap-2 px-2">
+                    <Play size={16} /> Reference Project (Big Buck Bunny)
+                 </div>
+              </div>
+
+              {/* HTML5 Video Element - No external API, no blocking */}
+              <video 
+                ref={videoRef}
+                className="w-full h-full object-contain"
+                src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+                loop
+                playsInline
+                // Hide default controls to force user to use the UI button and knob
+                controls={false}
+              ></video>
+              
+              {/* Custom Play/Pause Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                {!isVideoPlaying && (
+                    <div className="bg-black/50 backdrop-blur-sm p-4 rounded-full text-white animate-pulse">
+                        <Play size={48} fill="currentColor" />
+                    </div>
+                )}
+              </div>
+
+              <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20">
+                 <button 
+                   onClick={toggleVideoPlay}
+                   className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 active:scale-95"
+                 >
+                   {isVideoPlaying ? <><Pause fill="currentColor"/> 暫停播放</> : <><Play fill="currentColor"/> 播放影片</>}
+                 </button>
+              </div>
+            </div>
+
+            {/* Right: User's Monitoring Environment */}
+            <div className="flex-1 bg-slate-800 p-6 flex flex-col items-center justify-center relative">
+               <h2 className="text-lg font-bold mb-4 text-slate-200">你的監聽控制 (Monitoring)</h2>
+               
+               <div className="bg-slate-900/50 p-3 rounded text-sm text-slate-400 mb-6 text-center border border-slate-700">
+                 <Info size={14} className="inline mr-1 text-sky-400"/>
+                 請播放左側影片，並閉上眼聆聽。<br/>轉動下方旋鈕，直到你覺得<strong>聽得最舒服</strong>。
+               </div>
+
+               {/* Knob */}
+               <div className={`relative transition-all duration-300 ${volumeLocked ? 'opacity-60 grayscale' : 'opacity-100'}`}>
+                 <div className="relative w-40 h-40 flex items-center justify-center mb-6 mx-auto">
+                    <div className="absolute inset-0 rounded-full border-4 border-slate-600 bg-slate-900"></div>
+                    <div 
+                      className="w-32 h-32 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 shadow-2xl flex items-center justify-center border border-slate-600 cursor-pointer transform transition-transform duration-75 relative"
+                      style={{ transform: `rotate(${speakerVolume * 2.7 - 135}deg)` }}
+                    >
+                      <div className={`w-1.5 h-10 absolute top-3 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)] ${volumeLocked ? 'bg-red-500' : 'bg-emerald-400'}`}></div>
+                    </div>
+                 </div>
+                 
+                 <input 
+                   type="range" 
+                   min="0" 
+                   max="100" 
+                   value={speakerVolume} 
+                   onChange={(e) => setSpeakerVolume(Number(e.target.value))}
+                   disabled={volumeLocked}
+                   className={`w-full cursor-pointer mb-2 h-2 rounded-lg appearance-none ${volumeLocked ? 'bg-red-900/50' : 'bg-slate-700 accent-emerald-500'}`}
+                 />
+                 <div className="text-center font-mono text-emerald-400 font-bold text-lg">
+                    {speakerVolume}%
+                 </div>
+               </div>
+
+               {/* Lock Button */}
+               <button 
+                 onClick={() => {
+                     setVolumeLocked(!volumeLocked);
+                     if (!volumeLocked) setRefSuccess(true);
+                 }}
+                 className={`w-full mt-4 py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${
+                    volumeLocked 
+                    ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-800' 
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                 }`}
+               >
+                 {volumeLocked ? <><Lock /> 已鎖定監聽音量</> : <><Unlock /> 確認音量並鎖定</>}
+               </button>
+
+               {refSuccess && volumeLocked && (
+                   <div className="mt-4 text-center animate-fade-in">
+                       <p className="text-xs text-slate-400 mb-1">校準完成</p>
+                       <p className="text-emerald-400 text-sm font-bold">
+                           現在這個旋鈕位置就是你的「相對可信的標準」。
+                       </p>
+                   </div>
+               )}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Footer / Reset */}
+      <div className="mt-12 flex flex-col items-center gap-4">
+         <button onClick={resetAll} className="flex items-center gap-2 text-slate-500 hover:text-white transition">
+            <RotateCcw size={16}/> 重置實驗
+         </button>
+         
+         <div className="text-slate-600 text-xs mt-2 border-t border-slate-800 pt-4 w-full text-center">
+            義守大學電影與電視學系陳嘉暐老師課程提供
+         </div>
+      </div>
+
+    </div>
+  );
+};
+
+export default AudioCalibrationLab;
