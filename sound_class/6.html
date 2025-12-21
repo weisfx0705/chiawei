@@ -386,6 +386,40 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {/* New Selection Guide Section */}
+                            <div className="bg-slate-800 text-slate-300 p-6 border-t border-slate-700">
+                                <h3 className="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                                    <Mic size={20} className="text-emerald-400" />
+                                    進階應用：如何挑選？
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="bg-slate-700/50 p-4 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded font-bold">錄音室首選</span>
+                                            <h4 className="font-bold text-purple-300">靈敏度與細節：電容式</h4>
+                                        </div>
+                                        <p className="text-sm leading-relaxed text-slate-400">
+                                            電容式麥克風靈敏度極高，能捕捉非常細微的聲音細節（高頻延伸佳）。
+                                            <br />
+                                            但這從來不是「絕對好」的選擇。因為<strong>太過靈敏</strong>，它會把房間的冷氣聲、電腦風扇聲、甚至房間的回音（殘響）都收進去。
+                                            一定要在<strong>吸音良好、安靜的錄音室</strong>使用才能發揮最大優勢。
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-700/50 p-4 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold">Podcast / 現場首選</span>
+                                            <h4 className="font-bold text-blue-300">隔絕噪音專家：動圈式</h4>
+                                        </div>
+                                        <p className="text-sm leading-relaxed text-slate-400">
+                                            動圈式麥克風反應較「遲鈍」（靈敏度低），這反而是它的優點！
+                                            <br />
+                                            因為收音範圍小，只要嘴巴貼近錄音，它就能<strong>有效忽略背景噪音與房間的回音</strong>。
+                                            這也是為什麼在吵雜的演唱會、或是<strong>家中環境未做隔音的 Podcast 錄製</strong>，動圈式麥克風往往比昂貴的電容式聽起來更乾淨、專業。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Quiz Section */}
@@ -408,8 +442,8 @@
                                         key={option.id}
                                         onClick={() => !quizSubmitted && handleQuizSelect(option.id)}
                                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all flex items-center justify-between ${quizSelected.includes(option.id)
-                                                ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
-                                                : 'border-slate-200 hover:border-slate-300'
+                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
+                                            : 'border-slate-200 hover:border-slate-300'
                                             } ${quizSubmitted ? 'cursor-default' : ''}`}
                                     >
                                         <span>{option.text}</span>
