@@ -213,7 +213,7 @@
         stopSound();
         if (videoRef.current) {
           videoRef.current.pause();
-          videoRef.current.currentTime = 0;
+          videoRef.current.currentTime = 180;
         }
       };
 
@@ -308,8 +308,8 @@
                       <Volume2
                         size={80}
                         className={`transition-all duration-100 ${pinkNoiseOn && speakerVolume > 5
-                            ? 'text-sky-400 drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]'
-                            : 'text-slate-700'
+                          ? 'text-sky-400 drop-shadow-[0_0_10px_rgba(56,189,248,0.8)]'
+                          : 'text-slate-700'
                           }`}
                         strokeWidth={pinkNoiseOn && speakerVolume > 5 ? 2.5 : 1.5}
                       />
@@ -439,7 +439,7 @@
                   <video
                     ref={videoRef}
                     className="w-full h-full object-contain"
-                    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4#t=180"
                     poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
                     loop
                     playsInline
@@ -508,8 +508,8 @@
                       if (!volumeLocked) setRefSuccess(true);
                     }}
                     className={`w-full mt-4 py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${volumeLocked
-                        ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-800'
-                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-800'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
                       }`}
                   >
                     {volumeLocked ? <><Lock /> 已鎖定監聽音量</> : <><Unlock /> 確認音量並鎖定</>}
