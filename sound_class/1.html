@@ -59,6 +59,7 @@
 
     const AudioCalibrationLab = () => {
       const [mode, setMode] = useState('calibration'); // 'calibration' or 'reference'
+      const [targetStandard, setTargetStandard] = useState('film'); // 'film' or 'tv'
 
       // --- Calibration State ---
       const [pinkNoiseOn, setPinkNoiseOn] = useState(false);
@@ -114,13 +115,23 @@
       }, [pinkNoiseOn, speakerVolume]);
 
       // Check for success in Calibration
+
       useEffect(() => {
-        if (Math.abs(splReading - 85) < 1.5 && pinkNoiseOn) {
+        let isSuccess = false;
+        if (targetStandard === 'film') {
+          // Film: Target 85dB
+          if (Math.abs(splReading - 85) < 1.5) isSuccess = true;
+        } else {
+          // TV: Target 77-78dB (allowing slight fluctuation)
+          if (splReading >= 76.5 && splReading <= 78.5) isSuccess = true;
+        }
+
+        if (isSuccess && pinkNoiseOn) {
           setIsCalibrated(true);
         } else {
           setIsCalibrated(false);
         }
-      }, [splReading, pinkNoiseOn]);
+      }, [splReading, pinkNoiseOn, targetStandard]);
 
       // --- Web Audio API (Pink Noise) ---
       const startPinkNoise = () => {
@@ -363,6 +374,22 @@
                       <h2 className="font-bold text-lg">音壓計 (SPL Meter)</h2>
                     </div>
 
+                    {/* Standard Selector */}
+                    <div className="flex bg-slate-800 p-1 rounded-lg mb-4 w-full">
+                      <button
+                        onClick={() => setTargetStandard('film')}
+                        className={`flex-1 py-1 text-xs rounded-md transition ${targetStandard === 'film' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        電影 (85dB)
+                      </button>
+                      <button
+                        onClick={() => setTargetStandard('tv')}
+                        className={`flex-1 py-1 text-xs rounded-md transition ${targetStandard === 'tv' ? 'bg-sky-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      >
+                        電視 (77~78dB)
+                      </button>
+                    </div>
+
                     {/* SPL Display */}
                     <div className="bg-black border-8 border-slate-700 rounded-2xl p-6 w-full max-w-[200px] mb-6 shadow-inner relative flex flex-col items-center">
                       <div className="text-slate-500 text-[10px] w-full text-right mb-1">C-Weighting / Slow</div>
@@ -373,11 +400,13 @@
                     </div>
 
                     <div className="bg-slate-800 p-4 rounded-lg text-center w-full">
-                      <h4 className="text-slate-300 font-bold mb-2">任務指示</h4>
+                      <h4 className="text-slate-300 font-bold mb-2">任務指示 ({targetStandard === 'film' ? '電影標準' : '電視標準'})</h4>
                       <ul className="text-sm text-slate-400 space-y-2 text-left list-disc list-inside">
                         <li className={pinkNoiseOn ? 'text-green-400' : ''}>開啟左側訊號 (-20dBFS)</li>
                         <li className={speakerVolume > 0 ? 'text-green-400' : ''}>慢慢轉動中間的音量旋鈕</li>
-                        <li className={isCalibrated ? 'text-green-400 font-bold' : ''}>使音壓計讀數達到 85dB</li>
+                        <li className={isCalibrated ? 'text-green-400 font-bold' : ''}>
+                          使音壓計讀數達到 {targetStandard === 'film' ? '85dB' : '77dB ~ 78dB'}
+                        </li>
                       </ul>
                     </div>
 
@@ -401,6 +430,9 @@
                         標準作法是由系統輸出 <strong>-20 dBFS 的粉紅噪音</strong>，每次只播放一個聲道（例如 Left、Center、Right…），
                         並在混音位置量測，使該喇叭單獨回放時達到 <strong>約 85 dB SPL（C-weighting、Slow）</strong>。
                         如此可確保每一個 channel 在相同能量基準下工作，避免因喇叭效率或空間差異造成錯誤判斷。
+                      </p>
+                      <p>
+                        關於電視的思考，混音 TV 作品的近場監聽，應該開至 <strong>77dB ~ 78dB</strong> 即可。
                       </p>
                       <p>
                         若無音壓計，實務上可使用同類型、已完成的電影或戲劇作品作為相對參考，調整監聽音量至最自然且不吃力的位置，
