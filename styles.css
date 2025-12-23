@@ -352,6 +352,34 @@ body {
     opacity: 1;
 }
 
+/* Category Themes */
+.project-card.type-course {
+    border-left: 4px solid var(--accent-color);
+}
+.project-card.type-course h3 { color: var(--accent-color); }
+.project-card.type-course:hover { 
+    border-color: var(--accent-color); 
+    box-shadow: 0 20px 40px rgba(0, 217, 245, 0.2); 
+}
+
+.project-card.type-creative {
+    border-left: 4px solid var(--primary-color);
+}
+.project-card.type-creative h3 { color: var(--primary-color); }
+.project-card.type-creative:hover { 
+    border-color: var(--primary-color); 
+    box-shadow: 0 20px 40px rgba(255, 51, 102, 0.2); 
+}
+
+.project-card.type-collab {
+    border-left: 4px solid var(--secondary-color);
+}
+.project-card.type-collab h3 { color: var(--secondary-color); }
+.project-card.type-collab:hover { 
+    border-color: var(--secondary-color); 
+    box-shadow: 0 20px 40px rgba(108, 99, 255, 0.2); 
+}
+
 /* Showcase Section */
 .showcase-grid {
     display: grid;
