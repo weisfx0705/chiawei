@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Attitude of Film On-Location Recording｜電影同步錄音基本態度</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            touch-action: manipulation;
+            /* Prevent zoom on double tap */
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-area {
+            cursor: crosshair;
+            background-image:
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 20px 20px, 40px 40px, 40px 40px;
+        }
+
+        /* Custom range slider styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // --- Icons ---
+        const IconBase = ({ size = 24, className, children, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>{children}</svg>
+        );
+        const Mic = (props) => <IconBase {...props}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></IconBase>;
+        const CheckCircle = (props) => <IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconBase>;
+        const AlertTriangle = (props) => <IconBase {...props}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></IconBase>;
+        const Target = (props) => <IconBase {...props}><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></IconBase>;
+        const Camera = (props) => <IconBase {...props}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></IconBase>;
+
+        // --- Game Constants ---
+        const FRAME_WIDTH = 300;
+        const FRAME_HEIGHT = 200;
+
+        const MicGame = () => {
+            const containerRef = useRef(null);
+            const [micPos, setMicPos] = useState({ x: 50, y: 350 }); // Start lower left
+            const [score, setScore] = useState(0); // 0-100 quality
+            const [message, setMessage] = useState("請移動麥克風");
+            const [status, setStatus] = useState("neutral"); // neutral, success, warning, error
+            const [snrValue, setSnrValue] = useState(0); // Signal to Noise Ratio simulation
+
+            // Responsive dimensions
+            const [dimensions, setDimensions] = useState({ width: 600, height: 400 });
+
+            useEffect(() => {
+                const updateSize = () => {
+                    if (containerRef.current) {
+                        setDimensions({
+                            width: containerRef.current.clientWidth,
+                            height: containerRef.current.clientHeight
+                        });
+                        setMicPos({ x: 50, y: 350 });
+                    }
+                };
+                window.addEventListener('resize', updateSize);
+                updateSize();
+                return () => window.removeEventListener('resize', updateSize);
+            }, []);
+
+            // Derived Actor Position (Centered better)
+            const actorPos = useMemo(() => ({
+                x: dimensions.width / 2 - 50, // Shift Left by 50px
+                y: dimensions.height / 2 + 50 // Shift Down by 50px
+            }), [dimensions]);
+
+            // Camera Frame Position (Centered on Actor's face area)
+            const frameRect = useMemo(() => ({
+                left: actorPos.x - FRAME_WIDTH / 2,
+                top: actorPos.y - FRAME_HEIGHT / 2 - 20,
+                right: actorPos.x + FRAME_WIDTH / 2,
+                bottom: actorPos.y + FRAME_HEIGHT / 2 - 20
+            }), [actorPos]);
+
+            // Calculate rotation angle (points towards actor)
+            const micRotation = useMemo(() => {
+                const dx = actorPos.x - micPos.x;
+                const dy = actorPos.y - micPos.y;
+                return Math.atan2(dy, dx) * (180 / Math.PI) + 90; // +90 to align "Head" of mic to actor
+            }, [micPos, actorPos]);
+
+
+            // Game Logic Loop (calculate state based on micPos)
+            useEffect(() => {
+                if (!dimensions.width) return;
+
+                const distance = Math.sqrt(
+                    Math.pow(micPos.x - actorPos.x, 2) +
+                    Math.pow(micPos.y - (actorPos.y - 20), 2) // Calculate from "Mouth" (slightly above center)
+                );
+
+                // Margin for "Touching the line"
+                const MIC_RADIUS_VISUAL = 40; // Strict margin
+
+                // Strict "Center point in frame" check
+                const centerInFrame = (
+                    micPos.x > frameRect.left &&
+                    micPos.x < frameRect.right &&
+                    micPos.y > frameRect.top &&
+                    micPos.y < frameRect.bottom
+                );
+
+                // "Touching Frame" check (Center is out, but edge is in)
+                const touchingFrame = (
+                    micPos.x > frameRect.left - MIC_RADIUS_VISUAL &&
+                    micPos.x < frameRect.right + MIC_RADIUS_VISUAL &&
+                    micPos.y > frameRect.top - MIC_RADIUS_VISUAL &&
+                    micPos.y < frameRect.bottom + MIC_RADIUS_VISUAL
+                );
+
+                // SNR Simulation default logic
+                let rawSnr = 0;
+                if (distance < 500) {
+                    rawSnr = Math.max(0, 100 - (distance / 4));
+                }
+
+                if (centerInFrame) {
+                    setStatus("error");
+                    setMessage("穿幫了！麥克風進入畫面 (Mike in Frame)");
+                    setScore(0);
+                    setSnrValue(100);
+                } else if (touchingFrame) {
+                    setStatus("error");
+                    setMessage("穿幫邊緣！(Touching Frame)");
+                    setScore(40);
+                    setSnrValue(95);
+                } else {
+                    // Safe zone
+
+                    if (distance < 110) {
+                        setStatus("warning");
+                        setMessage("太近了！(Too Close)");
+                        setScore(60);
+                        setSnrValue(100);
+                    } else if (distance < 190) { // Slight increase for easier bottom approach
+                        // SWEET SPOT
+                        setStatus("success");
+                        setMessage("完美位置！Sweet Spot");
+                        setScore(100);
+                        setSnrValue(98);
+                    } else if (distance < 260) {
+                        // OK Zone -> Good
+                        setStatus("success");
+                        setMessage("尚可 (Good)");
+                        setScore(80);
+                        setSnrValue(80);
+                    } else {
+                        // Far Zone
+                        setStatus("warning");
+                        setMessage("太遠了！噪音太多 (Too Far)");
+                        setScore(30);
+                        setSnrValue(30);
+                    }
+                }
+
+            }, [micPos, actorPos, frameRect, dimensions]);
+
+
+            // Mouse/Touch Handlers
+            const handleMove = (clientX, clientY) => {
+                if (!containerRef.current) return;
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = Math.min(Math.max(0, clientX - rect.left), dimensions.width);
+                const y = Math.min(Math.max(0, clientY - rect.top), dimensions.height);
+                setMicPos({ x, y });
+            };
+
+            const handleTouch = (e) => {
+                if (e.target.closest('.game-area')) {
+                    // e.preventDefault(); 
+                }
+                const touch = e.touches[0];
+                handleMove(touch.clientX, touch.clientY);
+            };
+
+            const handleMouse = (e) => {
+                if (e.buttons === 1 || e.type === 'mousemove') {
+                    handleMove(e.clientX, e.clientY);
+                }
+            };
+
+            return (
+                <div className="flex flex-col gap-4">
+                    {/* Feedback Status Bar */}
+                    <div className={`p-4 rounded-xl border flex items-center justify-between transition-colors duration-300 ${status === 'error' ? 'bg-red-900/50 border-red-500' :
+                        status === 'success' ? 'bg-emerald-900/50 border-emerald-500' :
+                            status === 'warning' ? 'bg-yellow-900/50 border-yellow-500' :
+                                'bg-slate-800 border-slate-600'
+                        }`}>
+                        <div className="flex items-center gap-3">
+                            {status === 'success' ? <CheckCircle className="text-emerald-400" /> :
+                                status === 'error' ? <AlertTriangle className="text-red-400" /> :
+                                    <Target className="text-slate-400" />}
+                            <div>
+                                <div className="font-bold text-lg">{message}</div>
+                                <div className="text-xs text-slate-400 font-mono">Distance Score: {Math.round(score)}</div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                            <div className="text-xs text-slate-400">SNR Level</div>
+                            <div className="flex gap-1 items-end h-8">
+                                {[1, 2, 3, 4, 5].map(i => (
+                                    <div key={i} className={`w-2 rounded-sm transition-all duration-200 ${snrValue / 20 >= i ? (status === 'error' ? 'bg-red-500' : 'bg-emerald-400') : 'bg-slate-700'
+                                        }`} style={{ height: `${i * 20}%` }}></div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Game Canvas DOM */}
+                    <div
+                        ref={containerRef}
+                        className="game-area relative rounded-xl h-[400px] w-full border border-slate-700 overflow-hidden select-none shadow-inner"
+                        onMouseMove={handleMouse}
+                        onTouchMove={handleTouch}
+                        onMouseDown={(e) => handleMove(e.clientX, e.clientY)}
+                    >
+                        {/* Overlay: Camera Frame */}
+                        <div
+                            className="absolute border-4 border-white/30 pointer-events-none"
+                            style={{
+                                left: frameRect.left,
+                                top: frameRect.top,
+                                width: FRAME_WIDTH,
+                                height: FRAME_HEIGHT,
+                                boxShadow: '0 0 0 9999px rgba(0,0,0,0.5)' // Dim outside area
+                            }}
+                        >
+                            <div className="absolute top-2 left-2 text-white/50 text-xs font-mono uppercase flex gap-1 items-center">
+                                <Camera size={12} /> Camera Frame (16:9)
+                            </div>
+                            {/* Crosshair Center */}
+                            <div className="absolute top-1/2 left-1/2 w-4 h-4 border-t border-l border-white/30 -translate-x-1/2 -translate-y-1/2"></div>
+                            <div className="absolute top-1/2 left-1/2 w-4 h-4 border-b border-r border-white/30 -translate-x-1/2 -translate-y-1/2"></div>
+                        </div>
+
+                        {/* Actor */}
+                        <div
+                            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none flex flex-col items-center"
+                            style={{ left: actorPos.x, top: actorPos.y }}
+                        >
+                            <div className="w-16 h-16 bg-slate-300 rounded-full shadow-lg relative mb-[-5px]">
+                                {/* Face details to orient direction */}
+                                <div className="absolute top-5 left-3 w-3 h-3 bg-slate-800 rounded-full"></div>
+                                <div className="absolute top-5 right-3 w-3 h-3 bg-slate-800 rounded-full"></div>
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-6 h-2 bg-red-400 rounded-full"></div>
+                            </div>
+                            <div className="w-32 h-24 bg-slate-700 rounded-t-3xl shadow-lg flex items-center justify-center text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                Actor
+                            </div>
+                        </div>
+
+                        {/* Microphone (Visual Cursor) */}
+                        <div
+                            className={`absolute pointer-events-none transition-transform duration-75 ${status === 'error' ? 'drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]' : ''}`}
+                            style={{
+                                left: micPos.x,
+                                top: micPos.y,
+                                transform: `translate(-50%, -50%) rotate(${micRotation}deg)`
+                            }}
+                        >
+                            {/* Boom Pole */}
+                            <div className="absolute left-1/2 w-1 h-[600px] bg-slate-500 origin-top shadow-xl" style={{ top: '80%', transform: 'translateX(-50%)' }}></div>
+
+                            {/* Mic Capsule */}
+                            <div className={`relative w-6 h-20 rounded-full border-2 flex items-center justify-center ${status === 'error' ? 'bg-red-500 border-white animate-pulse' :
+                                status === 'success' ? 'bg-emerald-500 border-white' :
+                                    'bg-slate-200 border-slate-400'
+                                }`}>
+                                {/* Windshield Texture */}
+                                <div className="w-full h-full opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')]"></div>
+                                {/* Front Indicator */}
+                                <div className="absolute top-2 w-full h-2 bg-black/20"></div>
+                            </div>
+                        </div>
+
+                        {/* Help Text */}
+                        <div className="absolute bottom-4 right-4 text-xs text-slate-500 pointer-events-none">
+                            點擊或拖曳移動 Boom 桿位置
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        const App = () => {
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 pb-12 font-sans select-none">
+
+                    {/* Navigation */}
+                    <div className="bg-slate-950/50 border-b border-slate-700/50 sticky top-0 z-50 backdrop-blur-md">
+                        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                            <a href="index.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                回總整理
+                            </a>
+                            <div className="text-xs font-mono text-slate-500">Film Sound Basics</div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-4xl mx-auto px-4 py-8">
+
+                        {/* Header */}
+                        <header className="mb-12 text-center">
+                            <h1 className="text-3xl md:text-5xl font-black mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                電影同步錄音基本態度
+                            </h1>
+                            <p className="text-slate-400 text-lg">
+                                Basic Attitude of Film On-Location Recording
+                            </p>
+                        </header>
+
+                        {/* Educational Content 1: SNR */}
+                        <section className="mb-16">
+                            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-l-4 border-blue-500 pl-4">
+                                核心觀念：訊噪比 (SNR)
+                            </h2>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <div className="glass-panel p-6 rounded-2xl">
+                                    <h3 className="text-xl font-bold text-blue-400 mb-4">Signal to Noise Ratio</h3>
+                                    <p className="text-slate-300 leading-relaxed mb-4">
+                                        電影錄音的第一個目標，就是追求<strong>最高的訊噪比</strong>。
+                                    </p>
+                                    <ul className="space-y-3 text-sm text-slate-400">
+                                        <li className="flex gap-2">
+                                            <span className="text-white font-bold bg-blue-600 px-2 rounded">Signal</span>
+                                            <span><strong>訊號 (對白)</strong>：我們想要的聲音。越大越好。</span>
+                                        </li>
+                                        <li className="flex gap-2">
+                                            <span className="text-white font-bold bg-slate-600 px-2 rounded">Noise</span>
+                                            <span><strong>噪音 (環境音)</strong>：我們不想要的聲音。越小越好。</span>
+                                        </li>
+                                    </ul>
+                                    <div className="mt-6 bg-slate-800 p-4 rounded-lg border border-slate-700">
+                                        <div className="text-center font-mono text-xl text-emerald-400 font-bold">Good Sound =</div>
+                                        <div className="flex justify-center items-center gap-4 mt-2">
+                                            <div className="text-center">
+                                                <div className="text-3xl font-bold text-white">⬆️ Signal</div>
+                                            </div>
+                                            <div className="text-slate-500">/</div>
+                                            <div className="text-center">
+                                                <div className="text-xl text-slate-400">⬇️ Noise</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col justify-center text-slate-300 space-y-4">
+                                    <p>
+                                        要達到這個目標，最有效的方法不是依靠昂貴的器材，而是：
+                                    </p>
+                                    <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-6 rounded-xl border border-blue-500/30 flex flex-col gap-2 items-center">
+                                        <p className="text-xl font-bold text-white text-center">
+                                            「離嘴巴越近越好」
+                                        </p>
+                                        <p className="text-xl font-bold text-emerald-300 text-center">
+                                            「同時把現場噪音關閉」
+                                        </p>
+                                    </div>
+                                    <p className="text-sm">
+                                        距離縮短一半，音量增加 6dB (反平方定律)。<br />
+                                        這意味著你可以把 Preamp 的 Gain 轉小，底噪自然就更小了。
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Interactive Game */}
+                        <section className="mb-16">
+                            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-l-4 border-purple-500 pl-4">
+                                實戰模擬：Boom Operator 的挑戰
+                            </h2>
+                            <div className="mb-4 text-slate-400 text-sm">
+                                身為 Boom Operator (麥克風操作員)，你的任務很矛盾：<br />
+                                <span className="text-emerald-400 font-bold">1. 麥克風要盡量靠近演員</span> (為了好聲音) <br />
+                                <span className="text-red-400 font-bold">2. 絕對不能穿幫</span> (不能出現在攝影機畫面裡)
+                            </div>
+
+                            {/* GAME COMPONENT */}
+                            <MicGame />
+
+                            <div className="mt-4 text-xs text-slate-500 text-center">
+                                * 試著將滑鼠/手指在畫面上移動，找到那個「甜蜜點」(Sweet Spot)。
+                            </div>
+                        </section>
+
+                        {/* Summary / Tip */}
+                        <section className="glass-panel p-8 rounded-2xl border-t-4 border-emerald-500">
+                            <h3 className="text-xl font-bold text-emerald-400 mb-4 flex gap-2 items-center">
+                                <CheckCircle size={24} />
+                                結論
+                            </h3>
+                            <p className="text-slate-300 leading-relaxed mb-4">
+                                一個優秀的 Boom Operator，總是站在<strong>「穿幫邊緣」</strong>。<br />
+                                他必須清楚知道攝影機的 Framing (取景範圍)，並在此限制下，爭取每一公分的距離優勢。
+                            </p>
+                            <p className="text-slate-400 text-sm">
+                                這就是為什麼錄音組在現場，必須跟攝影組保持良好溝通，隨時詢問：「Frame 上緣在哪裡？」(Frame line check)。
+                            </p>
+                        </section>
+
+                    </div>
+
+                    {/* Footer */}
+                    <footer className="mt-12 border-t border-slate-800 py-8 text-center text-slate-500 text-sm">
+                        <p>義守大學電影與電視學系陳嘉暐老師課程提供</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
