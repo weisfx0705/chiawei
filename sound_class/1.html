@@ -64,6 +64,17 @@
       const startY = useRef(0);
       const startValue = useRef(0);
 
+      // Common logic to update value based on Y position
+      const updateValue = (clientY) => {
+        const deltaY = startY.current - clientY; // Drag up to increase
+        const sensitivity = 0.5; // Values per pixel
+
+        let newValue = startValue.current + deltaY * sensitivity;
+        newValue = Math.min(Math.max(newValue, min), max);
+        onChange(newValue);
+      };
+
+      // --- MOUSE EVENTS ---
       const handleMouseDown = (e) => {
         if (disabled) return;
         isDragging.current = true;
@@ -76,14 +87,7 @@
 
       const handleMouseMove = (e) => {
         if (!isDragging.current) return;
-        const deltaY = startY.current - e.clientY; // Drag up to increase
-        const sensitivity = 0.5; // Values per pixel
-        const range = max - min;
-
-        let newValue = startValue.current + deltaY * sensitivity;
-        newValue = Math.min(Math.max(newValue, min), max);
-
-        onChange(newValue);
+        updateValue(e.clientY);
       };
 
       const handleMouseUp = () => {
@@ -92,14 +96,41 @@
         document.removeEventListener('mouseup', handleMouseUp);
       };
 
+      // --- TOUCH EVENTS ---
+      const handleTouchStart = (e) => {
+        if (disabled) return;
+        isDragging.current = true;
+        // Use the first touch point
+        startY.current = e.touches[0].clientY;
+        startValue.current = value;
+
+        // Add passive: false to allow preventing default (scrolling)
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
+      };
+
+      const handleTouchMove = (e) => {
+        if (!isDragging.current) return;
+        // Prevent scrolling while dragging the knob
+        if (e.cancelable) e.preventDefault();
+        updateValue(e.touches[0].clientY);
+      };
+
+      const handleTouchEnd = () => {
+        isDragging.current = false;
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('touchend', handleTouchEnd);
+      };
+
       // Calculate rotation: 0% = -135deg, 100% = +135deg. Total 270deg range.
       const rotation = ((value - min) / (max - min)) * 270 - 135;
 
       return (
         <div
-          className={`relative select-none flex flex-col items-center ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-ns-resize'}`}
+          className={`relative select-none flex flex-col items-center touch-none ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-ns-resize'}`}
           style={{ width: size, height: size + 40 }} // Extra space for label
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <div className="relative" style={{ width: size, height: size }}>
             {/* Bg Track */}
