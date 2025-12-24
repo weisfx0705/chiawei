@@ -247,10 +247,16 @@
 
         const ctx = audioContextRef.current;
 
-        const gainNode = ctx.createGain();
-        gainNode.gain.value = speakerVolume / 100;
-        gainNode.connect(ctx.destination);
-        gainNodeRef.current = gainNode;
+        let gainNode = gainNodeRef.current;
+        if (!gainNode) {
+          gainNode = ctx.createGain();
+          gainNode.gain.value = speakerVolume / 100;
+          gainNode.connect(ctx.destination);
+          gainNodeRef.current = gainNode;
+        } else {
+          // Ensure it's active
+          if (ctx.state === 'suspended') ctx.resume();
+        }
 
         const bufferSize = 4096;
         const pinkNoise = (function () {
@@ -297,17 +303,49 @@
       };
 
       // --- HTML5 Video Integration ---
-      // Sync Hardware Knob to Video Volume directly
-      useEffect(() => {
-        if (mode === 'reference' && videoRef.current) {
-          // HTML5 video volume is 0.0 to 1.0
-          videoRef.current.volume = speakerVolume / 100;
+      const videoSourceRef = useRef(null);
+
+      // Initialize/Connect Video Audio via Web Audio API (Bypassing iOS volume restrictions)
+      const connectVideoAudio = () => {
+        if (!videoRef.current) return;
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!audioContextRef.current) {
+          audioContextRef.current = new AudioContext();
         }
-      }, [speakerVolume, mode]);
+        const ctx = audioContextRef.current;
+
+        // Ensure GainNode exists and is set to current volume
+        if (!gainNodeRef.current) {
+          const gainNode = ctx.createGain();
+          gainNode.gain.value = speakerVolume / 100;
+          gainNode.connect(ctx.destination);
+          gainNodeRef.current = gainNode;
+        }
+
+        // Create MediaElementSource only once to avoid errors
+        if (!videoSourceRef.current) {
+          try {
+            // Create source from video element
+            const source = ctx.createMediaElementSource(videoRef.current);
+            source.connect(gainNodeRef.current);
+            videoSourceRef.current = source;
+          } catch (e) {
+            console.error("Audio Context Error (likely CORS):", e);
+          }
+        }
+
+        // Resume context if suspended (browser autoplay policy)
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+      };
 
       const toggleVideoPlay = () => {
         if (videoRef.current) {
           if (videoRef.current.paused) {
+            // Initialize AudioContext before playing
+            connectVideoAudio();
             videoRef.current.play();
             setIsVideoPlaying(true);
           } else {
@@ -543,91 +581,120 @@
 
             {/* === SCENARIO 2: REFERENCE METHOD === */}
             {mode === 'reference' && (
-              <div className="w-full flex flex-col md:flex-row h-[600px] md:h-[500px]">
+              <>
+                <div className="w-full flex flex-col md:flex-row h-[600px] md:h-[500px]">
 
-                {/* Left: Direct Video Player */}
-                <div className="flex-[1.5] bg-black border-r border-slate-700 flex flex-col relative group">
-                  <div className="absolute top-0 left-0 right-0 p-2 z-10 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center pointer-events-none">
-                    <div className="text-emerald-400 font-bold flex items-center gap-2 px-2">
-                      <Play size={16} /> Reference Project (Big Buck Bunny)
+                  {/* Left: Direct Video Player */}
+                  <div className="flex-[1.5] bg-black border-r border-slate-700 flex flex-col relative group">
+                    <div className="absolute top-0 left-0 right-0 p-2 z-10 bg-gradient-to-b from-black/80 to-transparent flex justify-between items-center pointer-events-none">
+                      <div className="text-emerald-400 font-bold flex items-center gap-2 px-2">
+                        <Play size={16} /> Reference Project (Big Buck Bunny)
+                      </div>
+                    </div>
+
+                    {/* HTML5 Video Element - No external API, no blocking */}
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full object-contain"
+                      src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4#t=180"
+                      poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
+                      loop
+                      playsInline
+                      crossOrigin="anonymous"
+                      // Hide default controls to force user to use the UI button and knob
+                      controls={false}
+                    ></video>
+
+                    {/* Custom Play/Pause Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      {!isVideoPlaying && (
+                        <div className="bg-black/50 backdrop-blur-sm p-4 rounded-full text-white animate-pulse">
+                          <Play size={48} fill="currentColor" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20">
+                      <button
+                        onClick={toggleVideoPlay}
+                        className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 active:scale-95"
+                      >
+                        {isVideoPlaying ? <><Pause fill="currentColor" /> 暫停播放</> : <><Play fill="currentColor" /> 播放影片</>}
+                      </button>
                     </div>
                   </div>
 
-                  {/* HTML5 Video Element - No external API, no blocking */}
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-contain"
-                    src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4#t=180"
-                    poster="https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217"
-                    loop
-                    playsInline
-                    // Hide default controls to force user to use the UI button and knob
-                    controls={false}
-                  ></video>
+                  {/* Right: User's Monitoring Environment */}
+                  <div className="flex-1 bg-slate-800 p-6 flex flex-col items-center justify-center relative">
+                    <h2 className="text-lg font-bold mb-4 text-slate-200">你的監聽控制 (Monitoring)</h2>
 
-                  {/* Custom Play/Pause Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    {!isVideoPlaying && (
-                      <div className="bg-black/50 backdrop-blur-sm p-4 rounded-full text-white animate-pulse">
-                        <Play size={48} fill="currentColor" />
+                    <div className="bg-slate-900/50 p-3 rounded text-sm text-slate-400 mb-6 text-center border border-slate-700">
+                      <Info size={14} className="inline mr-1 text-sky-400" />
+                      找任何一個參考影片、匯入你的工作平台，播放影片，並閉上眼聆聽。<br />轉動旋鈕，直到你覺得<strong>聽得最舒服</strong>，如果覺得還是不夠大聲，必然是還要再調大你目前正在聆聽的音響輸出系統的音量。
+                    </div>
+
+                    {/* Knob */}
+                    <div className="mb-6">
+                      <Knob
+                        value={speakerVolume}
+                        onChange={setSpeakerVolume}
+                        size={150}
+                        disabled={volumeLocked}
+                        locked={volumeLocked}
+                      />
+                    </div>
+
+                    {/* Lock Button */}
+                    <button
+                      onClick={() => {
+                        setVolumeLocked(!volumeLocked);
+                        if (!volumeLocked) setRefSuccess(true);
+                      }}
+                      className={`w-full py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${volumeLocked
+                        ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-800'
+                        : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                        }`}
+                    >
+                      {volumeLocked ? <><Lock /> 已鎖定監聽音量</> : <><Unlock /> 確認音量並鎖定</>}
+                    </button>
+
+                    {refSuccess && volumeLocked && (
+                      <div className="mt-4 text-center animate-fade-in">
+                        <p className="text-xs text-slate-400 mb-1">校準完成</p>
+                        <p className="text-emerald-400 text-sm font-bold">
+                          現在這個旋鈕位置就是你的「相對可信的標準」。
+                        </p>
                       </div>
                     )}
                   </div>
-
-                  <div className="absolute bottom-6 left-0 right-0 flex justify-center z-20">
-                    <button
-                      onClick={toggleVideoPlay}
-                      className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 transition-transform transform hover:scale-105 active:scale-95"
-                    >
-                      {isVideoPlaying ? <><Pause fill="currentColor" /> 暫停播放</> : <><Play fill="currentColor" /> 播放影片</>}
-                    </button>
-                  </div>
                 </div>
 
-                {/* Right: User's Monitoring Environment */}
-                <div className="flex-1 bg-slate-800 p-6 flex flex-col items-center justify-center relative">
-                  <h2 className="text-lg font-bold mb-4 text-slate-200">你的監聽控制 (Monitoring)</h2>
-
-                  <div className="bg-slate-900/50 p-3 rounded text-sm text-slate-400 mb-6 text-center border border-slate-700">
-                    <Info size={14} className="inline mr-1 text-sky-400" />
-                    請播放左側影片，並閉上眼聆聽。<br />轉動下方旋鈕，直到你覺得<strong>聽得最舒服</strong>，如果覺得還是不夠大聲，必然是還要再調大你目前正在聆聽的音響輸出系統的音量。
-                  </div>
-
-                  {/* Knob */}
-                  <div className="mb-6">
-                    <Knob
-                      value={speakerVolume}
-                      onChange={setSpeakerVolume}
-                      size={150}
-                      disabled={volumeLocked}
-                      locked={volumeLocked}
-                    />
-                  </div>
-
-                  {/* Lock Button */}
-                  <button
-                    onClick={() => {
-                      setVolumeLocked(!volumeLocked);
-                      if (!volumeLocked) setRefSuccess(true);
-                    }}
-                    className={`w-full py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all ${volumeLocked
-                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/30 ring-2 ring-red-400 ring-offset-2 ring-offset-slate-800'
-                      : 'bg-emerald-600 hover:bg-emerald-500 text-white'
-                      }`}
-                  >
-                    {volumeLocked ? <><Lock /> 已鎖定監聽音量</> : <><Unlock /> 確認音量並鎖定</>}
-                  </button>
-
-                  {refSuccess && volumeLocked && (
-                    <div className="mt-4 text-center animate-fade-in">
-                      <p className="text-xs text-slate-400 mb-1">校準完成</p>
-                      <p className="text-emerald-400 text-sm font-bold">
-                        現在這個旋鈕位置就是你的「相對可信的標準」。
+                {/* Big Buck Bunny Info */}
+                <div className="p-6 bg-slate-900/50 text-slate-400 text-sm border-t border-slate-800">
+                  <div className="flex gap-3">
+                    <div className="mt-1"><Info size={18} className="text-sky-500" /></div>
+                    <div className="space-y-2 leading-relaxed">
+                      <h4 className="font-bold text-slate-300">關於參考影片：Big Buck Bunny (2008)</h4>
+                      <p>
+                        本測試使用《Big Buck Bunny》作為參考素材。這是一部由 Blender 基金會製作的開放版權動畫短片（Open Movie）。
+                        由於其畫面細緻且頻寬動態豐富，常被業界用來作為視訊編碼與音訊播放設備的標準測試影片。
+                        在此處，我們利用其標準化的混音電平，協助你建立「相對聽感」的音量基準。
                       </p>
+                      <div className="pt-2 text-xs text-slate-500">
+                        來源網站：
+                        <a
+                          href="https://peach.blender.org/"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sky-500 hover:text-sky-400 ml-1 underline decoration-sky-500/30"
+                        >
+                          Project Peach - Big Buck Bunny Official Site
+                        </a>
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
           </div>
