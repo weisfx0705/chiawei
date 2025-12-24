@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影視錄音實務課程互動教學</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .hover-glow:hover {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-900 text-white min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Background Decor -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div
+            class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob">
+        </div>
+        <div
+            class="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-2000">
+        </div>
+        <div
+            class="absolute bottom-[-20%] left-[20%] w-[40%] h-[40%] bg-pink-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-20 animate-blob animation-delay-4000">
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="container mx-auto px-6 py-12 text-center relative z-10">
+        <div class="inline-block p-1 border border-blue-500/30 rounded-full mb-6 bg-blue-900/10 backdrop-blur-sm">
+            <span class="px-3 py-1 text-xs font-bold tracking-widest text-blue-400 uppercase">Interactive Course
+                Material</span>
+        </div>
+        <h1
+            class="text-4xl md:text-6xl font-black mb-4 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+            影視錄音實務課程互動教學
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 font-light mb-2">同步錄音、成音邏輯與無線麥克風應用</p>
+        <div class="flex items-center justify-center gap-4 text-sm text-gray-500 mt-4">
+            <span class="flex items-center"><i class="fas fa-university mr-2"></i> 義守大學 電影與電視學系</span>
+            <span class="w-1 h-1 bg-gray-600 rounded-full"></span>
+            <span class="flex items-center"><i class="fas fa-chalkboard-teacher mr-2"></i> 陳嘉暐 老師</span>
+        </div>
+    </header>
+
+    <!-- Main Grid -->
+    <main class="container mx-auto px-6 pb-20 max-w-6xl z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 8 -->
+            <a href="8.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-crosshairs text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-cyan-300 transition-colors">電影同步錄音基本態度
+                </h2>
+                <p class="text-gray-400 text-sm flex-grow">Boom Operator 的挑戰：在不穿幫的前提下，追求最高的訊噪比 (SNR)，以及掌握「離嘴巴越近越好」的核心觀念。
+                </p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-cyan-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 9 -->
+            <a href="9.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-teal-500/20 flex items-center justify-center mb-4 text-teal-400 group-hover:bg-teal-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-broadcast-tower text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-teal-300 transition-colors">現場成音與轉播思維
+                </h2>
+                <p class="text-gray-400 text-sm flex-grow">了解活動收音的正確訊號流程（Line Out vs Mic In），以及「聲音即時間」的導播概念。
+                </p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-teal-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 10 -->
+            <a href="10.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-orange-500/20 flex items-center justify-center mb-4 text-orange-400 group-hover:bg-orange-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-clipboard-list text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-orange-300 transition-colors">電影同步錄音流程
+                </h2>
+                <p class="text-gray-400 text-sm flex-grow">互動式體驗劇組開機流程 (Cadence) 與聲音報表術語 (Sound Report Glossary)。
+                </p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-orange-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <!-- Card 11 -->
+            <a href="11.html"
+                class="glass-card rounded-2xl p-6 transition-all duration-300 transform hover:-translate-y-2 hover-glow group flex flex-col h-full">
+                <div
+                    class="w-12 h-12 rounded-lg bg-indigo-500/20 flex items-center justify-center mb-4 text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition-colors">
+                    <i class="fas fa-sliders-h text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-2 text-white group-hover:text-indigo-300 transition-colors">聲道設定與
+                    PolyWAV
+                </h2>
+                <p class="text-gray-400 text-sm flex-grow">體驗 Mono 與 Stereo 的聽感差異，並操作多軌錄音檔案 (PolyWAV)。
+                </p>
+                <div
+                    class="mt-4 pt-4 border-t border-gray-700/50 flex justify-between items-center text-sm text-indigo-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span>開始學習</span>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black/50 py-8 text-center text-gray-500 text-sm border-t border-gray-800">
+        <p>&copy; 2025/12/22 Film & TV Sound Course. Department of Film and Television, I-Shou University.</p>
+    </footer>
+
+</body>
+
+</html>
