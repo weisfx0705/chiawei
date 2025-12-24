@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Event & Broadcast Audio｜現場成音與轉播思維</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            touch-action: manipulation;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Cable Animation */
+        .cable-line {
+            stroke-dasharray: 10;
+            animation: dash 1s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+
+        // --- Icons ---
+        const Icon = ({ path, className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {path}
+            </svg>
+        );
+
+        const Icons = {
+            Mic: <><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v4 M8 23h8" /></>,
+            Speaker: <><path d="M11 5L6 9H2v6h4l5 4V5z M19.07 4.93a10 10 0 0 1 0 14.14 M15.54 8.46a5 5 0 0 1 0 7.07" /></>,
+            Camera: <><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 13a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" /></>,
+            Cable: <><path d="M5 12h2a2 2 0 1 1 0 4H5a2 2 0 0 1 0-4zm12 0h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 0-4z M7 14h10" /></>,
+            Tv: <><rect x="2" y="7" width="20" height="15" rx="2" ry="2" /><polyline points="17 2 12 7 7 2" /></>,
+            Check: <><polyline points="20 6 9 17 4 12" /></>,
+            User: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+            Radio: <><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" /><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" /><circle cx="12" cy="12" r="2" /><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" /><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19.1" /></>
+        };
+
+        const BroadcastDemo = () => {
+            const [connection, setConnection] = useState('air'); // 'air', 'line', 'speaker'
+            const [activeCam, setActiveCam] = useState(0); // 0, 1, 2 for multi-cam
+            const containerRef = useRef(null);
+            const [containerWidth, setContainerWidth] = useState(600); // Default fallback
+
+            // Track container width for SVG coordinates
+            useEffect(() => {
+                if (!containerRef.current) return;
+                const updateWidth = () => setContainerWidth(containerRef.current.offsetWidth);
+                const observer = new ResizeObserver(updateWidth);
+                observer.observe(containerRef.current);
+                updateWidth(); // Initial
+                return () => observer.disconnect();
+            }, []);
+
+            // Auto switch cameras to simulate broadcast
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    setActiveCam(prev => (prev + 1) % 3);
+                }, 2000);
+                return () => clearInterval(interval);
+            }, []);
+
+            return (
+                <div className="space-y-12">
+
+                    {/* Section 1: The Principle */}
+                    <section className="grid md:grid-cols-2 gap-8 items-center">
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-2 border-l-4 border-yellow-500 pl-4">
+                                演講與活動現場：不要使用機頂麥克風
+                            </h2>
+                            <p className="text-slate-300 leading-relaxed">
+                                在拍攝演講、直播或活動紀錄時，攝影機往往位於場地後方。
+                                如果只依賴攝影機上的麥克風收音，你會錄到：
+                            </p>
+                            <ul className="space-y-2 text-slate-400 bg-slate-900/50 p-4 rounded-lg">
+                                <li className="flex items-center gap-2 text-red-400">
+                                    <Icon path={<path d="M18 6L6 18M6 6l12 12" />} size={16} /> 觀眾的咳嗽聲、交談聲
+                                </li>
+                                <li className="flex items-center gap-2 text-red-400">
+                                    <Icon path={<path d="M18 6L6 18M6 6l12 12" />} size={16} /> 嚴重的空間殘響 (Reverb)
+                                </li>
+                                <li className="flex items-center gap-2 text-red-400">
+                                    <Icon path={<path d="M18 6L6 18M6 6l12 12" />} size={16} /> 很遠、很空洞的主講人聲音
+                                </li>
+                            </ul>
+                            <div className="space-y-4">
+                                <div className="p-4 rounded-lg bg-emerald-900/30 border border-emerald-500/30">
+                                    <h3 className="font-bold text-emerald-400 mb-2">正確做法：Line Signal</h3>
+                                    <p className="text-sm text-slate-300">
+                                        應該直接從現場音控台 (PA Mixer) 索取訊號 (AUX Out / Line Out)，
+                                        這才是講者手上麥克風最乾淨的聲音。
+                                    </p>
+                                </div>
+                                <div className="p-4 rounded-lg bg-yellow-900/30 border border-yellow-500/30">
+                                    <h3 className="font-bold text-yellow-400 mb-2">權宜之計：無線麥克風貼喇叭</h3>
+                                    <p className="text-sm text-slate-300">
+                                        如果無法取得 Mixer 訊號，至少將無線麥克風（Receiver端接攝影機）
+                                        放置在現場喇叭旁邊 (越近越好)，減少空間殘響與觀眾噪音。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Interactive Diagram */}
+                        <div ref={containerRef} className="glass-panel p-1 rounded-xl relative overflow-hidden h-[400px] select-none">
+                            <div className="absolute inset-0 bg-slate-900/50"></div>
+
+                            {/* Stage Area */}
+                            {/* Stage Area */}
+                            <div className="absolute top-0 left-0 right-0 h-1/3 bg-slate-800/50 border-b border-white/5 flex items-center justify-center px-12 relative">
+                                <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs text-slate-500 font-mono tracking-widest">舞台</div>
+
+                                {/* Speaker Person */}
+                                <div className="flex flex-col items-center z-10">
+                                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-600 mb-1">
+                                        <Icon path={Icons.User} className="text-slate-300" />
+                                    </div>
+                                    <span className="text-xs text-slate-300 font-bold">演講者</span>
+                                </div>
+
+                                {/* PA Speaker (Loudspeaker) */}
+                                <div className="absolute right-12 top-1/2 -translate-y-1/2 flex flex-col items-center z-10">
+                                    <div className="w-10 h-14 bg-slate-900 rounded border border-slate-600 flex items-center justify-center relative">
+                                        <Icon path={Icons.Speaker} className="text-slate-500" />
+                                        {/* Sound Waves from Speaker */}
+                                        <div className="absolute -right-4 top-1/2 -translate-y-1/2 flex gap-1">
+                                            <div className="w-1 h-4 bg-white/20 rounded-full animate-pulse"></div>
+                                            <div className="w-1 h-6 bg-white/10 rounded-full animate-pulse delay-75"></div>
+                                        </div>
+                                    </div>
+                                    <span className="text-[10px] text-slate-500 mt-1">現場喇叭</span>
+
+                                    {/* Wireless Mic placed near speaker */}
+                                    {connection === 'speaker' && (
+                                        <div className="absolute -right-8 bottom-0 flex flex-col items-center animate-bounce duration-1000">
+                                            <div className="w-2 h-6 bg-black border border-yellow-500 rounded-full"></div>
+                                            <div className="text-[8px] text-yellow-500 whitespace-nowrap">無線Mic</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Audience Area (Middle) */}
+                            <div className="absolute top-[33%] bottom-[25%] left-0 right-0 flex flex-wrap content-center justify-center gap-4 px-12 opacity-30 pointer-events-none overflow-hidden">
+                                {Array.from({ length: 12 }).map((_, i) => (
+                                    <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center transform translate-y-2">
+                                        <div className="w-4 h-4 rounded-full bg-slate-700"></div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* PA Mixer */}
+                            <div className="absolute left-8 top-[40%] bg-slate-700 p-3 rounded-lg border border-slate-600 shadow-xl z-20">
+                                <div className="text-[10px] text-slate-400 mb-1">PA Mixer</div>
+                                <div className="flex gap-1 mb-2">
+                                    {[1, 2, 3, 4].map(i => <div key={i} className="w-1 h-3 bg-slate-500 rounded-full"></div>)}
+                                </div>
+                                <div className={`w-3 h-3 rounded-full border-2 ${connection === 'line' ? 'bg-green-500 border-green-300 shadow-[0_0_10px_rgba(34,197,94,0.8)]' : 'bg-slate-900 border-slate-500 animate-pulse'}`}></div>
+                                <div className="text-[9px] text-slate-400 mt-1 text-center">Output</div>
+                            </div>
+
+                            {/* Camera Area */}
+                            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center z-10 transition-all duration-500" style={{ opacity: (connection === 'line' || connection === 'speaker') ? 1 : 0.5 }}>
+                                <Icon path={Icons.Camera} size={48} className={`transition-colors duration-500 ${connection === 'air' ? 'text-red-500' : connection === 'speaker' ? 'text-yellow-400' : 'text-emerald-400'}`} />
+                                <span className="text-xs mt-2 text-slate-400">Camera / Recorder</span>
+                                {connection === 'speaker' && (
+                                    <div className="absolute -top-6 right-0 text-yellow-500 animate-pulse">
+                                        <Icon path={Icons.Radio} size={16} />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Connections Visual */}
+                            <svg className="absolute inset-0 pointer-events-none z-0 overflow-visible">
+                                {/* Air Path (Bad): Center Stage to Center Camera */}
+                                {connection === 'air' && (
+                                    <>
+                                        <path d={`M ${containerWidth / 2} 120 L ${containerWidth / 2} 300`} fill="none" stroke="rgba(239,68,68,0.3)" strokeWidth="2" strokeDasharray="5,5" />
+                                        {/* Scattering Noise Waves */}
+                                        <path d={`M ${containerWidth / 2} 120 Q ${containerWidth / 2 - 100} 200 ${containerWidth / 2 - 50} 300`} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                                        <path d={`M ${containerWidth / 2} 120 Q ${containerWidth / 2 + 100} 200 ${containerWidth / 2 + 50} 300`} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+
+                                        <circle cx="0" cy="0" r="3" fill="rgba(239,68,68,0.5)">
+                                            <animateMotion dur="1.5s" repeatCount="indefinite" path={`M ${containerWidth / 2} 120 L ${containerWidth / 2} 300`} />
+                                        </circle>
+                                    </>
+                                )}
+
+                                {/* Line Path (Good): Mixer (Left) to Camera (Center) */}
+                                {/* Line Path (Good): Mixer (Left) to Camera (Center) - Straight Line */}
+                                {connection === 'line' && (
+                                    <>
+                                        <path d={`M 70 200 L ${containerWidth / 2} 310`} fill="none" stroke="#064e3b" strokeWidth="5" className="opacity-50" />
+                                        <path d={`M 70 200 L ${containerWidth / 2} 310`} fill="none" stroke="#10b981" strokeWidth="3" className="cable-line drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]" />
+                                        <circle cx="0" cy="0" r="3" fill="#10b981">
+                                            <animateMotion dur="1s" repeatCount="indefinite" path={`M 70 200 L ${containerWidth / 2} 310`} />
+                                        </circle>
+                                    </>
+                                )}
+
+                                {/* Wireless Path (Compromise): Speaker (Right) to Camera (Center) - No visual path, just wireless icons */}
+                                {connection === 'speaker' && (
+                                    <>
+                                        {/* No line for wireless */}
+                                    </>
+                                )}
+                            </svg>
+
+                            {/* Control Switch */}
+                            <div className="absolute bottom-4 left-4 right-4 z-30 bg-slate-800 p-4 rounded-xl border border-slate-600 flex gap-2 overflow-x-auto">
+                                <button
+                                    onClick={() => setConnection('air')}
+                                    className={`flex-1 min-w-[100px] p-2 rounded text-xs font-bold transition-all text-left ${connection === 'air' ? 'bg-red-500/20 text-red-400 border border-red-500' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    <div>機身麥克風 (Bad)</div>
+                                    <div className="text-[9px] opacity-70 font-normal mt-1">空間殘響大、不清</div>
+                                </button>
+
+                                <button
+                                    onClick={() => setConnection('speaker')}
+                                    className={`flex-1 min-w-[100px] p-2 rounded text-xs font-bold transition-all text-left ${connection === 'speaker' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.3)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    <div>無線Mic貼喇叭 (OK)</div>
+                                    <div className="text-[9px] opacity-70 font-normal mt-1">權宜之計，近距離收音</div>
+                                </button>
+
+                                <button
+                                    onClick={() => setConnection('line')}
+                                    className={`flex-1 min-w-[100px] p-2 rounded text-xs font-bold transition-all text-left ${connection === 'line' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-slate-700 text-slate-400 hover:bg-slate-600'}`}
+                                >
+                                    <div>Mixer Line Out (Best)</div>
+                                    <div className="text-[9px] opacity-70 font-normal mt-1">最乾淨、專業做法</div>
+                                </button>
+                            </div>
+
+                            {/* SNR Meter - Moved slightly left to separate from edge, or maybe adjust vertical position */}
+                            <div className="absolute top-[50%] -translate-y-[50%] right-6 w-16 bg-slate-900 rounded border border-slate-700 p-2 z-30 shadow-xl">
+                                <div className="text-[9px] text-slate-500 mb-1 text-center">QUALITY</div>
+                                <div className="h-24 bg-slate-800 rounded relative overflow-hidden flex items-end gap-0.5 justify-center px-1">
+                                    <div className={`w-1 transition-all duration-300 ${connection === 'line' ? 'h-[90%] bg-emerald-400' : connection === 'speaker' ? 'h-[70%] bg-yellow-400' : 'h-[30%] bg-red-400'}`}></div>
+                                    <div className={`w-1 transition-all duration-300 delay-75 ${connection === 'line' ? 'h-[85%] bg-emerald-400' : connection === 'speaker' ? 'h-[65%] bg-yellow-400' : 'h-[25%] bg-red-400'}`}></div>
+                                    <div className={`w-1 transition-all duration-300 delay-150 ${connection === 'line' ? 'h-[88%] bg-emerald-400' : connection === 'speaker' ? 'h-[68%] bg-yellow-400' : 'h-[35%] bg-red-400'}`}></div>
+                                </div>
+                                <div className={`text-[10px] text-center mt-1 font-bold ${connection === 'line' ? 'text-emerald-400' : connection === 'speaker' ? 'text-yellow-400' : 'text-red-400'}`}>
+                                    {connection === 'line' ? 'Excellent' : connection === 'speaker' ? 'Acceptable' : 'Poor'}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Section 2: Sound is Time (Multi-cam) */}
+                    <section className="mt-16">
+                        <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 border-l-4 border-purple-500 pl-4">
+                            導播概念：聲音是時間的連續體
+                        </h2>
+
+                        <div className="glass-panel p-8 rounded-2xl border-t border-purple-500/30">
+                            <div className="grid md:grid-cols-3 gap-8">
+                                <div className="md:col-span-1 space-y-4">
+                                    <p className="text-slate-300">
+                                        在導播室 (Control Room) 裡，我們可能有 3 台與 4 台攝影機在拍攝。
+                                        畫面會不斷切換 (Cut)，每幾秒鐘就換一個視角。
+                                    </p>
+                                    <p className="text-purple-300 font-bold text-lg">
+                                        但是，聲音只有這一條。
+                                    </p>
+                                    <p className="text-slate-400 text-sm">
+                                        如果每一台攝影機都用自己的麥克風，當畫面切換時，聲音的空間感、音質就會一直跳動，
+                                        觀眾會感到困惑，因為「時間感」被打斷了。
+                                    </p>
+                                    <div className="bg-slate-800 p-4 rounded-lg mt-4">
+                                        <div className="text-xs text-slate-500 uppercase tracking-widest mb-2 font-bold">Conclusion</div>
+                                        <p className="text-white italic">
+                                            老師說： "Sound represents the concept of time in the visual narrative."
+                                        </p>
+                                        <p className="text-slate-400 text-xs mt-2">
+                                            聲音代表了影像敘事中的時間流動。
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Multi-cam Simulator */}
+                                <div className="md:col-span-2 bg-black rounded-lg border border-slate-700 p-4 flex flex-col gap-4">
+                                    {/* Monitor Wall */}
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {[0, 1, 2].map(id => (
+                                            <div key={id} className={`aspect-video bg-slate-800 relative rounded border-2 transition-colors duration-200 ${activeCam === id ? 'border-red-500' : 'border-slate-700'}`}>
+                                                <div className="absolute top-1 left-1 text-[10px] bg-black/50 px-1 text-slate-400">CAM {id + 1}</div>
+                                                <div className="flex items-center justify-center h-full text-slate-600">
+                                                    {id === 0 ? 'Wide Shot' : id === 1 ? 'Close Up' : 'Audience'}
+                                                </div>
+                                                {/* Tally Light */}
+                                                <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${activeCam === id ? 'bg-red-500 shadow-[0_0_8px_red]' : 'bg-slate-900'}`}></div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Program Out */}
+                                    <div className="h-32 bg-slate-900 rounded border border-slate-700 flex items-center justify-between px-6 relative overflow-hidden">
+                                        <div className="absolute top-2 left-2 text-xs text-red-500 font-bold flex gap-2">
+                                            <span className="animate-pulse">● REC</span>
+                                            <span className="text-white">PGM OUT</span>
+                                        </div>
+
+                                        {/* Audio Waveform Visualization */}
+                                        <div className="flex-1 flex flex-col justify-end h-full py-4 ml-24">
+                                            <div className="text-xs text-slate-500 mb-1">Master Audio Bus (Continuous Mix)</div>
+                                            <div className="h-12 flex items-end gap-[2px] opacity-80">
+                                                {Array.from({ length: 60 }).map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className="w-1 bg-gradient-to-t from-purple-600 to-blue-400 rounded-sm"
+                                                        style={{
+                                                            height: `${30 + Math.random() * 50}%`,
+                                                            opacity: (i > 40) ? (60 - i) / 20 : 1 // fade out tail
+                                                        }}
+                                                    ></div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <div className="min-h-screen bg-slate-950 pb-12 font-sans selection:bg-purple-500 selection:text-white">
+                    {/* Navigation */}
+                    <div className="bg-slate-950/80 border-b border-slate-800/50 sticky top-0 z-50 backdrop-blur-md">
+                        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                            <a href="index.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                                <Icon path={<path d="M19 12H5M12 19l-7-7 7-7" />} className="mr-2" size={16} />
+                                回總整理
+                            </a>
+                            <div className="text-xs font-mono text-slate-500">Live Event Audio</div>
+                        </div>
+                    </div>
+
+                    <div className="max-w-5xl mx-auto px-4 py-12">
+                        {/* Header */}
+                        <header className="mb-16 text-center">
+                            <h1 className="text-3xl md:text-5xl font-black mb-4 text-white">
+                                現場成音與轉播思維
+                            </h1>
+                            <p className="text-slate-400 text-lg">
+                                Thinking in Live Event & Broadcast Audio
+                            </p>
+                        </header>
+
+                        <BroadcastDemo />
+
+                        {/* Footer */}
+                        <footer className="mt-24 border-t border-slate-900 py-8 text-center text-slate-600 text-sm">
+                            <p>義守大學電影與電視學系陳嘉暐老師課程提供</p>
+                        </footer>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
