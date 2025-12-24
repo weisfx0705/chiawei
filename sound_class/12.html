@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麥克風原理與 48V 幻象電源教學</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8;
+        }
+
+        .cable-path {
+            stroke-dasharray: 10;
+            animation: dash 1s linear infinite;
+        }
+
+        .cable-static {
+            stroke-dasharray: 10;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
+        @keyframes dash-reverse {
+            to {
+                stroke-dashoffset: 20;
+            }
+        }
+
+        .flow-reverse {
+            animation: dash-reverse 1s linear infinite;
+        }
+
+        .sound-wave {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Implemented manually to prevent external library errors) ---
+        const Mic = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+        );
+
+        const Mic2 = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="9" y="3" width="6" height="14" rx="3"></rect>
+                <path d="M12 3v14"></path>
+                <path d="M8 3h8"></path>
+                <path d="M7 3v14h10V3"></path>
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            </svg>
+        );
+
+        const Speaker = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+                <circle cx="12" cy="14" r="4"></circle>
+                <line x1="12" y1="6" x2="12.01" y2="6"></line>
+            </svg>
+        );
+
+        const Power = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+        );
+
+        const Volume2 = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+        );
+
+        const ArrowRight = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        );
+
+        const CheckCircle2 = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m9 12 2 2 4-4"></path>
+            </svg>
+        );
+
+        const XCircle = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        );
+
+        const Info = ({ size = 24, className = "" }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        );
+        // ----------------------------------------------------------------
+
+        const App = () => {
+            const [micType, setMicType] = useState('dynamic'); // dynamic or condenser
+            const [phantomPower, setPhantomPower] = useState(false);
+            const [isSpeaking, setIsSpeaking] = useState(false);
+            const [quizSelected, setQuizSelected] = useState([]);
+            const [quizSubmitted, setQuizSubmitted] = useState(false);
+            const [showExplanation, setShowExplanation] = useState(false);
+
+            // Reset interaction when switching mics
+            useEffect(() => {
+                setIsSpeaking(false);
+                setShowExplanation(false);
+            }, [micType]);
+
+            // Quiz Logic
+            const handleQuizSelect = (option) => {
+                if (quizSelected.includes(option)) {
+                    setQuizSelected(quizSelected.filter(item => item !== option));
+                } else {
+                    setQuizSelected([...quizSelected, option]);
+                }
+                setQuizSubmitted(false);
+            };
+
+            const checkQuiz = () => {
+                setQuizSubmitted(true);
+            };
+
+            const isCorrect = (option) => {
+                const correctAnswers = [2, 3];
+                // Check if the option is correct and was selected
+                return correctAnswers.includes(option);
+            };
+
+            const getQuizResult = () => {
+                const correctAnswers = [2, 3];
+                const sortedSelected = [...quizSelected].sort();
+                const sortedCorrect = [...correctAnswers].sort();
+                return JSON.stringify(sortedSelected) === JSON.stringify(sortedCorrect);
+            };
+
+            // Simulation Logic
+            const micWorking = micType === 'dynamic' || (micType === 'condenser' && phantomPower);
+
+            return (
+                <div className="min-h-screen pb-12">
+                    <div className="bg-slate-800 border-b border-slate-700 px-6 py-2">
+                        <div className="max-w-5xl mx-auto">
+                            <a href="index2.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                                回總整理
+                            </a>
+                        </div>
+                    </div>
+                    {/* Header */}
+                    <header className="bg-slate-800 text-white p-6 shadow-md">
+                        <div className="max-w-5xl mx-auto flex items-center justify-between">
+                            <div>
+                                <h1 className="text-2xl font-bold flex items-center gap-2">
+                                    <Mic /> 音響工程教學：麥克風原理
+                                </h1>
+                                <p className="text-slate-300 mt-1">互動式訊號流程模擬</p>
+                            </div>
+                            <div className="text-sm bg-slate-700 px-4 py-2 rounded-lg border border-slate-600">
+                                課程：麥克風供電原理
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-5xl mx-auto mt-8 px-4">
+
+                        {/* Simulation Section */}
+                        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-slate-200 mb-8">
+                            <div className="p-4 bg-slate-100 border-b border-slate-200 flex flex-wrap gap-4 justify-between items-center">
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setMicType('dynamic')}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${micType === 'dynamic' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                                    >
+                                        <Mic size={18} /> 動圈式麥克風 (Dynamic)
+                                    </button>
+                                    <button
+                                        onClick={() => setMicType('condenser')}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${micType === 'condenser' ? 'bg-purple-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50'}`}
+                                    >
+                                        <Mic2 size={18} /> 電容式麥克風 (Condenser)
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    <div className="text-slate-600 font-medium text-sm">操作步驟：</div>
+                                    <button
+                                        onClick={() => setPhantomPower(!phantomPower)}
+                                        className={`px-4 py-2 rounded-lg font-bold border-2 transition-all flex items-center gap-2 ${phantomPower ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]' : 'bg-gray-100 border-gray-300 text-gray-400 hover:border-gray-400'}`}
+                                        title="點擊切換電源"
+                                    >
+                                        <Power size={18} />
+                                        {phantomPower ? "48V ON" : "48V OFF"}
+                                    </button>
+
+                                    <button
+                                        onMouseDown={() => setIsSpeaking(true)}
+                                        onMouseUp={() => setIsSpeaking(false)}
+                                        onTouchStart={() => setIsSpeaking(true)}
+                                        onTouchEnd={() => setIsSpeaking(false)}
+                                        className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold shadow-md active:transform active:scale-95 transition-all select-none"
+                                    >
+                                        按住說話 (測試)
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Visualization Area */}
+                            <div className="relative p-8 h-[400px] bg-slate-50 flex items-center justify-between select-none">
+
+                                {/* 1. Source (Human) */}
+                                <div className="flex flex-col items-center w-1/5 relative z-10">
+                                    <div className="text-6xl mb-2">🧑‍🏫</div>
+                                    <div className="font-bold text-slate-700">音源 (人聲)</div>
+                                    {isSpeaking && (
+                                        <div className="absolute top-0 right-[-30px]">
+                                            <Volume2 className="text-slate-400 sound-wave" size={40} />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Connection: Air to Mic */}
+                                <div className="flex-1 h-1 bg-transparent relative flex items-center justify-center">
+                                    {isSpeaking && (
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <ArrowRight className="text-slate-400 animate-pulse" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 2. Microphone */}
+                                <div className={`flex flex-col items-center w-1/5 relative z-10 p-4 rounded-xl border-2 transition-all ${micType === 'condenser' ? 'border-purple-200 bg-purple-50' : 'border-blue-200 bg-blue-50'}`}>
+                                    {micType === 'dynamic' ? <Mic size={48} className="text-blue-600" /> : <Mic2 size={48} className="text-purple-600" />}
+                                    <div className="font-bold text-slate-700 mt-2 text-center">
+                                        {micType === 'dynamic' ? '動圈式' : '電容式'}
+                                    </div>
+                                    <div className="text-xs text-slate-500 text-center mt-1">
+                                        {micType === 'dynamic' ? '線圈震動生電' : '需要電容極板充電'}
+                                    </div>
+
+                                    {/* Status Indicator */}
+                                    {micType === 'condenser' && !phantomPower && (
+                                        <div className="absolute -top-3 -right-3 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full border border-red-200 font-bold animate-bounce">
+                                            沒電！無法運作
+                                        </div>
+                                    )}
+                                    {micType === 'condenser' && phantomPower && (
+                                        <div className="absolute -top-3 -right-3 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full border border-green-200 font-bold">
+                                            已供電 Ready
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 3. Cable & Preamp (The Core Concept) */}
+                                <div className="w-[30%] h-32 relative flex flex-col justify-center items-center mx-4">
+                                    {/* Cable Visual */}
+                                    <div className="w-full h-8 bg-gray-700 rounded-lg relative flex items-center overflow-hidden border-2 border-gray-600">
+                                        <div className="absolute left-2 text-xs text-gray-400 font-mono">XLR Cable</div>
+
+                                        {/* Power Flow (Red) - Only for Condenser + 48V */}
+                                        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                                            {micType === 'condenser' && phantomPower && (
+                                                <line x1="100%" y1="70%" x2="0%" y2="70%" stroke="#ef4444" strokeWidth="2" className="flow-reverse cable-path" />
+                                            )}
+                                        </svg>
+
+                                        {/* Audio Signal Flow (Blue/Yellow) */}
+                                        <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                                            {isSpeaking && micWorking && (
+                                                <line x1="0%" y1="30%" x2="100%" y2="30%" stroke="#facc15" strokeWidth="2" className="cable-path" />
+                                            )}
+                                        </svg>
+                                    </div>
+
+                                    {/* Labels for flows */}
+                                    <div className="w-full flex justify-between text-xs mt-1">
+                                        <span className={`transition-opacity ${isSpeaking && micWorking ? 'opacity-100 text-yellow-600 font-bold' : 'opacity-0'}`}>
+                                            音訊訊號 (微弱) ⮕
+                                        </span>
+                                        <span className={`transition-opacity ${micType === 'condenser' && phantomPower ? 'opacity-100 text-red-500 font-bold' : 'opacity-0'}`}>
+                                            ⬅ 48V / Phantom Power (回送)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* 4. Audio Interface / Preamp */}
+                                <div className="flex flex-col items-center w-1/5 relative z-10 bg-slate-800 p-4 rounded-lg text-white shadow-xl">
+                                    <div className="text-xs text-slate-400 mb-1">錄音介面 / 前級</div>
+                                    <div className="flex gap-2 mb-2">
+                                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+                                        <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse delay-75"></div>
+                                        <div className={`w-3 h-3 rounded-full ${isSpeaking && micWorking ? 'bg-yellow-400' : 'bg-slate-600'} transition-colors`}></div>
+                                    </div>
+                                    <div className="w-full h-1 bg-slate-600 rounded-full mb-2 overflow-hidden">
+                                        <div className={`h-full bg-green-400 transition-all duration-100 ${isSpeaking && micWorking ? 'w-[80%]' : 'w-0'}`}></div>
+                                    </div>
+                                    <div className={`text-xs px-2 py-0.5 rounded border ${phantomPower ? 'border-red-500 text-red-400 bg-red-900/30' : 'border-slate-600 text-slate-500'}`}>
+                                        +48V / Phantom
+                                    </div>
+                                </div>
+
+                                {/* Output Connection */}
+                                <div className="flex-1 h-1 bg-slate-300 mx-2 relative">
+                                    {isSpeaking && micWorking && (
+                                        <div className="absolute inset-0 w-full h-full bg-blue-400 cable-path opacity-50"></div>
+                                    )}
+                                </div>
+
+                                {/* 5. Output (Speaker) */}
+                                <div className="flex flex-col items-center w-1/5 relative z-10">
+                                    <Speaker size={48} className={`${isSpeaking && micWorking ? 'text-blue-600 animate-bounce' : 'text-slate-400'}`} />
+                                    <div className="font-bold text-slate-700 mt-2">喇叭/耳機</div>
+                                    <div className="text-xs text-slate-500">訊號放大輸出</div>
+                                </div>
+                            </div>
+
+                            {/* Conceptual Explanation Box */}
+                            <div className="bg-blue-50 p-6 border-t border-blue-100">
+                                <h3 className="font-bold text-lg text-blue-800 mb-2 flex items-center gap-2">
+                                    <Info size={20} />
+                                    老師的小筆記：發生了什麼事？
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-6 text-slate-700">
+                                    <div>
+                                        <h4 className="font-bold text-blue-700 mb-1">動圈式 (Dynamic)</h4>
+                                        <p className="text-sm leading-relaxed">
+                                            你的嘴巴就像是在幫小型的發電機，做功發電。當聲音推動振膜與線圈，在磁鐵中移動就會<strong>自己產生電流</strong>。所以它不需要額外的電源就可以把聲音送進錄音介面。
+                                            <br />
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-purple-700 mb-1">電容式 (Condenser)</h4>
+                                        <p className="text-sm leading-relaxed">
+                                            它的構造像一個蓄電池，必須先有電才能運作。我們必須從錄音介面/混音器開啟開關，透過 XLR 線<strong>「回送」</strong>電源給麥克風的內部電路與極板。
+                                            <br />
+                                            <strong className="text-red-600">如果沒開 48V，麥克風就完全不會有反應！</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* New Selection Guide Section */}
+                            <div className="bg-slate-800 text-slate-300 p-6 border-t border-slate-700">
+                                <h3 className="font-bold text-lg text-white mb-4 flex items-center gap-2">
+                                    <Mic size={20} className="text-emerald-400" />
+                                    進階應用：如何挑選？
+                                </h3>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="bg-slate-700/50 p-4 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded font-bold">錄音室首選</span>
+                                            <h4 className="font-bold text-purple-300">靈敏度與細節：電容式</h4>
+                                        </div>
+                                        <p className="text-sm leading-relaxed text-slate-400">
+                                            電容式麥克風靈敏度極高，能捕捉非常細微的聲音細節（高頻延伸佳）。
+                                            <br />
+                                            但這從來不是「絕對好」的選擇。因為<strong>太過靈敏</strong>，它會把房間的冷氣聲、電腦風扇聲、甚至房間的回音（殘響）都收進去。
+                                            一定要在<strong>吸音良好、安靜的錄音室</strong>使用才能發揮最大優勢。
+                                        </p>
+                                    </div>
+                                    <div className="bg-slate-700/50 p-4 rounded-lg">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded font-bold">Podcast / 現場首選</span>
+                                            <h4 className="font-bold text-blue-300">隔絕噪音專家：動圈式</h4>
+                                        </div>
+                                        <p className="text-sm leading-relaxed text-slate-400">
+                                            動圈式麥克風反應較「遲鈍」（靈敏度低），這反而是它的優點！
+                                            <br />
+                                            因為收音範圍小，只要嘴巴貼近錄音，它就能<strong>有效忽略背景噪音與房間的回音</strong>。
+                                            這也是為什麼在吵雜的演唱會、或是<strong>家中環境未做隔音的 Podcast 錄製</strong>，動圈式麥克風往往比昂貴的電容式聽起來更乾淨、專業。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Quiz Section */}
+                        <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8 mb-12">
+                            <h2 className="text-xl font-bold text-slate-800 mb-6 border-l-4 border-indigo-500 pl-4">
+                                隨堂測驗
+                            </h2>
+                            <p className="text-lg mb-6 font-medium text-slate-700">
+                                若使用無電池的電容式麥克風，應該於錄音機、錄音界面或者攝影機上，尋找下列何者供電開關？（複選）
+                            </p>
+
+                            <div className="grid md:grid-cols-2 gap-4 mb-6">
+                                {[
+                                    { id: 1, text: "(1) Polar Pattern (指向性)" },
+                                    { id: 2, text: "(2) 48V" },
+                                    { id: 3, text: "(3) Phantom Power (幻象電源)" },
+                                    { id: 4, text: "(4) 48Khz (取樣率)" }
+                                ].map((option) => (
+                                    <div
+                                        key={option.id}
+                                        onClick={() => !quizSubmitted && handleQuizSelect(option.id)}
+                                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all flex items-center justify-between ${quizSelected.includes(option.id)
+                                            ? 'border-indigo-500 bg-indigo-50 text-indigo-900'
+                                            : 'border-slate-200 hover:border-slate-300'
+                                            } ${quizSubmitted ? 'cursor-default' : ''}`}
+                                    >
+                                        <span>{option.text}</span>
+                                        {quizSubmitted && isCorrect(option.id) && <CheckCircle2 className="text-green-500" />}
+                                        {quizSubmitted && !isCorrect(option.id) && quizSelected.includes(option.id) && <XCircle className="text-red-500" />}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {!quizSubmitted ? (
+                                <button
+                                    onClick={checkQuiz}
+                                    disabled={quizSelected.length === 0}
+                                    className="px-8 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    提交答案
+                                </button>
+                            ) : (
+                                <div className={`p-6 rounded-lg ${getQuizResult() ? 'bg-green-100 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+                                    <h3 className={`text-lg font-bold mb-2 ${getQuizResult() ? 'text-green-800' : 'text-red-800'}`}>
+                                        {getQuizResult() ? '答對了！非常好！' : '再試一次看看？'}
+                                    </h3>
+                                    <p className="text-slate-700">
+                                        <strong>解析：</strong> 電容式麥克風需要電力驅動內部放大器及極板充電。這個電力通常標示為 <strong>48V</strong> 或 <strong>Phantom Power (幻象電源)</strong>。
+                                        <br />
+                                        (Polar Pattern 是指向性切換，48Khz 是數位取樣率，皆與供電無關。)
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            setQuizSubmitted(false);
+                                            setQuizSelected([]);
+                                        }}
+                                        className="mt-4 text-sm font-bold underline text-slate-600 hover:text-slate-800"
+                                    >
+                                        重做題目
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+
+                    <footer className="text-center text-slate-400 text-sm py-6">
+                        義守大學電影與電視學系陳嘉暐老師課程提供
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
