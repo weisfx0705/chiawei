@@ -173,7 +173,7 @@
                         setSnrValue(98);
                     } else if (distance < 260) {
                         // OK Zone -> Good
-                        setStatus("success");
+                        setStatus("good");
                         setMessage("尚可 (Good)");
                         setScore(80);
                         setSnrValue(80);
@@ -217,13 +217,15 @@
                     {/* Feedback Status Bar */}
                     <div className={`p-4 rounded-xl border flex items-center justify-between transition-colors duration-300 ${status === 'error' ? 'bg-red-900/50 border-red-500' :
                         status === 'success' ? 'bg-emerald-900/50 border-emerald-500' :
-                            status === 'warning' ? 'bg-yellow-900/50 border-yellow-500' :
-                                'bg-slate-800 border-slate-600'
+                            status === 'good' ? 'bg-yellow-900/50 border-yellow-500' :
+                                status === 'warning' ? 'bg-yellow-900/50 border-yellow-500' :
+                                    'bg-slate-800 border-slate-600'
                         }`}>
                         <div className="flex items-center gap-3">
                             {status === 'success' ? <CheckCircle className="text-emerald-400" /> :
-                                status === 'error' ? <AlertTriangle className="text-red-400" /> :
-                                    <Target className="text-slate-400" />}
+                                status === 'good' ? <CheckCircle className="text-yellow-400" /> :
+                                    status === 'error' ? <AlertTriangle className="text-red-400" /> :
+                                        <Target className="text-slate-400" />}
                             <div>
                                 <div className="font-bold text-lg">{message}</div>
                                 <div className="text-xs text-slate-400 font-mono">Distance Score: {Math.round(score)}</div>
@@ -233,7 +235,7 @@
                             <div className="text-xs text-slate-400">SNR Level</div>
                             <div className="flex gap-1 items-end h-8">
                                 {[1, 2, 3, 4, 5].map(i => (
-                                    <div key={i} className={`w-2 rounded-sm transition-all duration-200 ${snrValue / 20 >= i ? (status === 'error' ? 'bg-red-500' : 'bg-emerald-400') : 'bg-slate-700'
+                                    <div key={i} className={`w-2 rounded-sm transition-all duration-200 ${snrValue / 20 >= i ? (status === 'error' ? 'bg-red-500' : status === 'good' ? 'bg-yellow-400' : 'bg-emerald-400') : 'bg-slate-700'
                                         }`} style={{ height: `${i * 20}%` }}></div>
                                 ))}
                             </div>
@@ -298,7 +300,8 @@
                             {/* Mic Capsule */}
                             <div className={`relative w-6 h-20 rounded-full border-2 flex items-center justify-center ${status === 'error' ? 'bg-red-500 border-white animate-pulse' :
                                 status === 'success' ? 'bg-emerald-500 border-white' :
-                                    'bg-slate-200 border-slate-400'
+                                    status === 'good' ? 'bg-yellow-500 border-white' :
+                                        'bg-slate-200 border-slate-400'
                                 }`}>
                                 {/* Windshield Texture */}
                                 <div className="w-full h-full opacity-30 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIiBmaWxsLW9wYWNpdHk9IjAuMSIvPgo8L3N2Zz4=')]"></div>
