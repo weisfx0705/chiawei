@@ -83,18 +83,29 @@
                             width: containerRef.current.clientWidth,
                             height: containerRef.current.clientHeight
                         });
-                        setMicPos({ x: 50, y: 350 });
                     }
                 };
+
+                updateSize(); // Initial check
+
+                // Use ResizeObserver to detect container size changes robustly
+                const observer = new ResizeObserver(updateSize);
+                if (containerRef.current) {
+                    observer.observe(containerRef.current);
+                }
+
                 window.addEventListener('resize', updateSize);
-                updateSize();
-                return () => window.removeEventListener('resize', updateSize);
+
+                return () => {
+                    window.removeEventListener('resize', updateSize);
+                    observer.disconnect();
+                };
             }, []);
 
-            // Derived Actor Position (Centered better)
+            // Derived Actor Position
             const actorPos = useMemo(() => ({
-                x: dimensions.width / 2 - 50, // Shift Left by 50px
-                y: dimensions.height / 2 + 50 // Shift Down by 50px
+                x: dimensions.width / 2, // Horizontally centered
+                y: dimensions.height / 2 - 30 // Shift Up vertically to give more space at the bottom for the boom
             }), [dimensions]);
 
             // Camera Frame Position (Centered on Actor's face area)
