@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>錄音工作流程與術語｜On-Set Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            touch-action: manipulation;
+        }
+
+        .digital-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-200">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Icons ---
+        const Icon = ({ children, className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+
+        const Mic = () => (
+            <Icon><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="23" /><line x1="8" y1="23" x2="16" y2="23" /></Icon>
+        );
+        const Clapperboard = ({ isOpen }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 22H2V12a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10Z" />
+                <g style={{ transformOrigin: '3px 10px', transform: isOpen ? 'rotate(-20deg)' : 'rotate(0deg)', transition: 'transform 0.1s' }}>
+                    <path d="M20.2 6 3 11l-.9-2.4c-.5-1.1.2-2.4 1.3-2.9L16.2 2c1.1-.5 2.4.2 2.9 1.3l1.1 2.7Z" />
+                </g>
+            </svg>
+        );
+        const Camera = () => (
+            <Icon><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></Icon>
+        );
+        const Film = () => (
+            <Icon><rect width="20" height="20" x="2" y="2" rx="2.18" ry="2.18" /><line x1="7" x2="7" y1="2" y2="22" /><line x1="17" x2="17" y1="2" y2="22" /><line x1="2" x2="22" y1="12" y2="12" /><line x1="2" x2="7" y1="7" y2="7" /><line x1="2" x2="7" y1="17" y2="17" /><line x1="17" x2="22" y1="17" y2="17" /><line x1="17" x2="22" y1="7" y2="7" /></Icon>
+        );
+        const Megaphone = () => (
+            <Icon><path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" /></Icon>
+        );
+        const AlertCircle = () => (
+            <Icon><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></Icon>
+        );
+        const ArrowLeft = () => (
+            <Icon><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></Icon>
+        );
+
+        // --- Protocol Simulator Component ---
+        const ProtocolSimulator = () => {
+            const [step, setStep] = useState(-1);
+            // -1: Init (Show Prepare Button)
+            // 0: AD: Quiet on Set
+            // 1: AD: Roll Sound
+            // 2: Mixer: Wait for Rec (User Action)
+            // 3: Mixer: Wait for Speed (User Action)
+            // 4: Mixer: Speed! -> AD: Roll Cam
+            // 5: Cam: Rolling
+            // 6: Slate: Info
+            // 7: Slate: Clap
+            // 8: Boom: Set
+            // 9: Director: Action! (Wait for STOP)
+            // 10: Director: Cut! -> (Wait for Mixer Stop)
+            // 11: Mixer: SNG/Success -> Finish
+
+            const [isRecording, setIsRecording] = useState(false);
+            const [isSpeeding, setIsSpeeding] = useState(false);
+            const [message, setMessage] = useState("");
+            const [actorSpeaking, setActorSpeaking] = useState(null); // 'AD', 'Director', 'Mixer', 'AC', 'Slate', 'Boom'
+            const [errorMsg, setErrorMsg] = useState("");
+            const [timecode, setTimecode] = useState("00:00:00:00");
+            const [clapOpen, setClapOpen] = useState(true);
+
+            // Timecode simulation
+            useEffect(() => {
+                let interval;
+                if (isRecording) {
+                    let frames = 0;
+                    let seconds = 0;
+                    let minutes = 0;
+                    let hours = 10;
+                    interval = setInterval(() => {
+                        frames++;
+                        if (frames >= 24) { frames = 0; seconds++; }
+                        if (seconds >= 60) { seconds = 0; minutes++; }
+                        const f = frames.toString().padStart(2, '0');
+                        const s = seconds.toString().padStart(2, '0');
+                        const m = minutes.toString().padStart(2, '0');
+                        const h = hours.toString().padStart(2, '0');
+                        setTimecode(`${h}:${m}:${s}:${f}`);
+                    }, 41);
+                }
+                return () => clearInterval(interval);
+            }, [isRecording]);
+
+            // Step Logic
+            useEffect(() => {
+                if (step === 0) { // Quiet
+                    setActorSpeaking('AD');
+                    setMessage("AD: \"Quiet on Set!\"");
+                    setTimeout(() => setStep(1), 2000);
+                }
+                else if (step === 1) { // Roll Sound
+                    setActorSpeaking('AD');
+                    setMessage("AD: \"Roll Sound!\"");
+                    setTimeout(() => setStep(2), 1500);
+                }
+                else if (step === 2) { // Wait for Rec
+                    setActorSpeaking('Mixer');
+                    setMessage("你的回合！(按下錄音鍵)");
+                }
+                else if (step === 4) { // Speed -> Roll Cam
+                    setActorSpeaking('Mixer');
+                    setMessage("Mixer: \"Sound Speeds!\"");
+                    setTimeout(() => {
+                        setActorSpeaking('AD');
+                        setMessage("AD: \"Roll Camera!\"");
+                        setTimeout(() => setStep(5), 1500);
+                    }, 1500);
+                }
+                else if (step === 5) { // Cam Roll
+                    setActorSpeaking('AC');
+                    setMessage("Camera: \"Rolling!\"");
+                    setTimeout(() => setStep(6), 1500);
+                }
+                else if (step === 6) { // Slate Info
+                    setActorSpeaking('Slate');
+                    setClapOpen(true);
+                    setMessage("Slate: \"Scene 1, Take 1...\"");
+                    setTimeout(() => setStep(7), 1500);
+                }
+                else if (step === 7) { // Slate Clap
+                    setActorSpeaking('Slate');
+                    setMessage("*CLAP*");
+                    setClapOpen(false); // Close clap
+                    setTimeout(() => setStep(8), 1000);
+                }
+                else if (step === 8) { // Boom Set
+                    setActorSpeaking('Boom');
+                    setMessage("Boom Op: \"Boom Set!\"");
+                    setTimeout(() => setStep(9), 1500);
+                }
+                else if (step === 9) { // Action
+                    setActorSpeaking('Director');
+                    setMessage("Director: \"Action!\"");
+                    // Here we wait for "Scenario End" (Simulating actor finishing lines)
+                    // We'll add a "Simulate Scene End" button for the user to trigger Director's Cut
+                }
+                else if (step === 10) { // Cut called by Director
+                    setActorSpeaking('Director');
+                    setMessage("Director: \"Cut!\"");
+                    // Wait for Mixer Stop
+                }
+            }, [step]);
+
+            const startSequence = () => {
+                setStep(0);
+                setIsRecording(false);
+                setIsSpeeding(false);
+                setClapOpen(true);
+                setTimecode("00:00:00:00");
+                setErrorMsg("");
+            };
+
+            const handleRec = () => {
+                if (step === 2) {
+                    setIsRecording(true);
+                    setStep(3); // Wait for Speed
+                    setErrorMsg("");
+                    setMessage("確認錄音後，大聲喊Speed");
+                }
+            };
+
+            const handleSpeed = () => {
+                if (!isRecording) {
+                    setErrorMsg("錯誤：請先按錄音 (REC)！");
+                    return;
+                }
+                if (step === 3) {
+                    setIsSpeeding(true);
+                    setStep(4);
+                    setErrorMsg("");
+                }
+            };
+
+            // New: Trigger Director Cut
+            const handleDirectorCut = () => {
+                // User clicked "Simulate End of Scene"
+                if (step === 9) {
+                    setStep(10);
+                }
+            };
+
+            const handleStop = () => {
+                if (step === 10) { // Can only stop AFTER Director says cut
+                    setIsRecording(false); // Stop timecode
+                    setStep(11); // Finished
+                    setMessage("Great Take! (旅程結束)");
+                    setActorSpeaking('Mixer');
+                } else if (step === 9) {
+                    // If user presses stop BEFORE Director calls cut
+                    // Ideally shouldn't happen, but let's allow "Early Cut" warning?
+                    // Or force user to wait for Director.
+                    setErrorMsg("等導演喊 Cut 再停！");
+                }
+            };
+
+            const reset = () => {
+                setStep(-1);
+                setIsRecording(false);
+                setIsSpeeding(false);
+                setActorSpeaking(null);
+                setMessage("");
+                setTimecode("00:00:00:00");
+                setErrorMsg("");
+                setClapOpen(true);
+            };
+
+            return (
+                <div className="bg-slate-900 rounded-2xl border border-slate-700 shadow-2xl overflow-hidden relative min-h-[600px] flex flex-col">
+
+                    {/* Top Section: Leadership (AD & Director) */}
+                    <div className="bg-slate-800/50 p-6 flex justify-center items-end gap-12 border-b border-slate-700 min-h-[160px]">
+                        {/* AD */}
+                        <div className={`transition-all duration-300 flex flex-col items-center ${actorSpeaking === 'AD' ? 'scale-110 opacity-100 z-10' : 'opacity-40 scale-90'}`}>
+                            <div className="p-4 bg-purple-600 rounded-full text-white mb-2 shadow-[0_0_20px_rgba(147,51,234,0.5)]">
+                                <Megaphone />
+                            </div>
+                            <span className="text-sm font-bold text-purple-400">AD (助導)</span>
+                        </div>
+
+                        {/* Director */}
+                        <div className={`transition-all duration-300 flex flex-col items-center ${actorSpeaking === 'Director' ? 'scale-125 opacity-100 z-10' : 'opacity-40 scale-90'}`}>
+                            <div className="p-4 bg-amber-600 rounded-full text-white mb-2 shadow-[0_0_20px_rgba(217,119,6,0.5)]">
+                                <Film />
+                            </div>
+                            <span className="text-sm font-bold text-amber-500">Director</span>
+                        </div>
+                    </div>
+
+                    {/* Middle Section: Command Center (Big Text) */}
+                    <div className="flex-1 flex flex-col justify-center items-center py-8 px-4 bg-slate-900 relative">
+                        {step === -1 ? (
+                            <button
+                                onClick={startSequence}
+                                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white text-xl font-bold rounded-full shadow-lg transition-transform hover:scale-105 animate-pulse"
+                            >
+                                準備開拍 (Prepare to Roll)
+                            </button>
+                        ) : (
+                            <>
+                                {/* AD Commands - Big & Loud */}
+                                <div className={`text-4xl md:text-5xl font-black text-center transition-all duration-300 transform
+                                    ${actorSpeaking === 'AD' ? 'text-purple-400 scale-100'
+                                        : actorSpeaking === 'Director' ? 'text-amber-500 scale-110'
+                                            : 'text-slate-500 scale-90 opacity-50'}`}>
+                                    {message.includes('"') ? message.split('"')[1] : message}
+                                </div>
+
+                                {errorMsg && (
+                                    <div className="absolute top-4 bg-red-900/80 text-white px-4 py-2 rounded-full text-sm animate-shake flex items-center gap-2 z-50">
+                                        <AlertCircle /> {errorMsg}
+                                    </div>
+                                )}
+
+                                {/* Scene End Trigger (Simulate Actor Finishing) */}
+                                {step === 9 && (
+                                    <div className="mt-12 animate-bounce">
+                                        <button
+                                            onClick={handleDirectorCut}
+                                            className="px-6 py-2 bg-slate-800 border border-slate-600 hover:bg-slate-700 text-slate-300 rounded-full text-sm transition-colors"
+                                        >
+                                            模擬表演結束 (Finish Scene)
+                                        </button>
+                                    </div>
+                                )}
+
+                                {step === 11 && (
+                                    <div className="mt-8">
+                                        <button onClick={reset} className="px-6 py-2 border border-slate-600 text-slate-400 hover:text-white rounded-full transition-colors">
+                                            重置 (Reset)
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Bottom Section: Crew Grid */}
+                    <div className="bg-slate-950 p-6 border-t border-slate-800">
+
+                        {/* Crew Icons */}
+                        <div className="flex justify-center gap-8 mb-8 opacity-80">
+                            {/* Camera */}
+                            <div className={`transition-all duration-300 flex flex-col items-center ${actorSpeaking === 'AC' ? 'opacity-100 scale-110 text-blue-400' : 'opacity-30 text-slate-500'}`}>
+                                <Camera />
+                                <span className="text-[10px] uppercase mt-1 font-bold">Camera</span>
+                            </div>
+
+                            {/* Slate */}
+                            <div className={`transition-all duration-300 flex flex-col items-center ${actorSpeaking === 'Slate' ? 'opacity-100 scale-110 text-white' : 'opacity-30 text-slate-500'}`}>
+                                <Clapperboard isOpen={clapOpen} />
+                                <span className="text-[10px] uppercase mt-1 font-bold">Slate</span>
+                            </div>
+
+                            {/* Boom */}
+                            <div className={`transition-all duration-300 flex flex-col items-center ${actorSpeaking === 'Boom' ? 'opacity-100 scale-110 text-green-400' : 'opacity-30 text-slate-500'}`}>
+                                <Icon><path d="M12 2v20M12 2a3 3 0 0 1 3 3" /></Icon>
+                                <span className="text-[10px] uppercase mt-1 font-bold">Boom</span>
+                            </div>
+                        </div>
+
+                        {/* Mixer Console (User Interface) */}
+                        <div className={`bg-slate-800 rounded-xl p-4 border-2 transition-all duration-300 relative ${actorSpeaking === 'Mixer' || step === 2 || step === 3 || step === 10 ? 'border-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)]' : 'border-slate-700 opacity-60'}`}>
+
+                            {/* Hint Label - Fixed Positioning */}
+                            {(step === 2 || step === 3) && (
+                                <div className="absolute -top-3 left-0 right-0 flex justify-center z-50 pointer-events-none">
+                                    <div className="bg-blue-600 text-white text-xs px-3 py-1 rounded-full animate-bounce shadow-lg">
+                                        輪到你了！ 但不急著喊，請先確定所有事情都順利。
+                                    </div>
+                                </div>
+                            )}
+                            {/* Hint Label for Stop */}
+                            {step === 10 && (
+                                <div className="absolute -top-3 left-0 right-0 flex justify-center z-50 pointer-events-none">
+                                    <div className="bg-red-600 text-white text-xs px-3 py-1 rounded-full animate-bounce shadow-lg">
+                                        導演喊卡了！ (Press STOP)
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative">
+                                {/* LCD Screen */}
+                                <div className="bg-black/50 p-4 rounded w-full md:w-auto text-center font-mono border border-slate-600/50">
+                                    <div className="text-3xl text-red-500 digital-font tracking-widest">{timecode}</div>
+                                </div>
+
+                                {/* Controls */}
+                                <div className="flex items-center gap-4">
+                                    {/* STOP Button - Active ONLY after Director Cuts (Step 10) */}
+                                    <button
+                                        onClick={handleStop}
+                                        disabled={step !== 10}
+                                        className={`w-12 h-12 rounded bg-slate-700 flex items-center justify-center transition-all ${step === 10 ? 'hover:bg-slate-600 cursor-pointer border-2 border-red-500 shadow-lg animate-pulse' : 'opacity-30 cursor-not-allowed'}`}
+                                        title="Stop Recording"
+                                    >
+                                        <div className="w-4 h-4 bg-slate-300 rounded-sm"></div>
+                                    </button>
+
+                                    {/* REC Button */}
+                                    <button
+                                        onClick={handleRec}
+                                        disabled={isRecording || step !== 2}
+                                        className={`w-16 h-16 rounded-full border-4 flex items-center justify-center transition-all shadow-lg active:scale-95 
+                                            ${isRecording ? 'border-red-600 bg-red-600 opacity-100' :
+                                                step === 2 ? 'border-red-500 bg-slate-800 animate-pulse cursor-pointer hover:bg-red-900/20' :
+                                                    'border-slate-600 bg-slate-800 opacity-50 cursor-not-allowed'}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded-full ${isRecording ? 'bg-white' : 'bg-red-500'}`}></div>
+                                    </button>
+
+                                    {/* SPEED Button */}
+                                    <button
+                                        onClick={handleSpeed}
+                                        disabled={isSpeeding || (!isRecording && step > 0 && step !== 3) || step !== 3}
+                                        className={`px-6 py-3 rounded font-bold transition-all shadow-lg active:scale-95
+                                            ${isSpeeding ? 'bg-green-600 text-white' :
+                                                step === 3 ? 'bg-slate-700 text-slate-200 border border-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)] hover:bg-slate-600' :
+                                                    'bg-slate-800 text-slate-500 border border-slate-700 opacity-50 cursor-not-allowed'}`}
+                                    >
+                                        SPEED
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Glossary Component ---
+        const Glossary = () => {
+            const terms = [
+                { id: 'ns', en: 'NS', full: 'No Slate', zh: '沒有打板', desc: '開機後直接拍攝，未進行打板動作。' },
+                { id: 'ts', en: 'TS', full: 'Tail Slate', zh: '打尾板', desc: '鏡頭結束前才補打板，通常會將板子倒置示意。' },
+                { id: 'mos', en: 'MOS', full: 'Mute On Sound / Mit Out Sound', zh: '不收音鏡頭', desc: '該鏡頭僅拍攝畫面，不錄製聲音。' },
+                { id: 'sng', en: 'SNG', full: 'Sound No Good', zh: '聲音不好', desc: '該 Take 聲音有問題（如飛機聲、底噪過大），需備註給後期。' },
+                { id: 'ss', en: 'SS', full: 'Second Slates', zh: '打兩次板', desc: '第一次打板失誤（沒打響或出框），立即再打一次。' },
+                { id: 'print', en: 'PRINT', full: 'A Printed Take', zh: '導演選用的 Take', desc: '導演滿意並決定使用的鏡頭，需在報表中特別標註。' },
+                { id: 'bif', en: 'BIF', full: 'Boom In Frame', zh: 'Boom 穿幫', desc: '麥克風或桿子進入畫面範圍。' }
+            ];
+
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {terms.map(item => (
+                        <div key={item.id} className="bg-slate-800 p-6 rounded-xl border border-slate-700 hover:border-blue-500/50 transition-colors group">
+                            <div className="flex justify-between items-start mb-4">
+                                <h4 className="text-3xl font-black text-white tracking-tighter">{item.en}</h4>
+                                <span className="text-xs font-bold bg-slate-700 text-slate-300 px-2 py-1 rounded uppercase tracking-wider">{item.full}</span>
+                            </div>
+                            <h5 className="text-lg font-bold text-blue-400 mb-2">{item.zh}</h5>
+                            <p className="text-slate-400 text-sm leading-relaxed mb-4">{item.desc}</p>
+
+                            {/* Visual Hint (Simple text or icon) */}
+                            <div className="h-1 w-full bg-slate-700 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-500/30 w-0 group-hover:w-full transition-all duration-500"></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        const App = () => {
+            return (
+                <div className="min-h-screen bg-slate-950 pb-12 font-sans selection:bg-purple-500 selection:text-white">
+                    {/* Navigation */}
+                    <div className="bg-slate-950/80 border-b border-slate-800/50 sticky top-0 z-50 backdrop-blur-md">
+                        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+                            <a href="index.html" className="inline-flex items-center text-slate-400 hover:text-white font-bold transition-colors text-sm">
+                                <ArrowLeft className="mr-2 w-4 h-4" />
+                                回總整理
+                            </a>
+                            <div className="text-xs font-mono text-slate-500">On-Set Protocol</div>
+                        </div>
+                    </div>
+
+                    <main className="max-w-5xl mx-auto px-4 pt-12">
+                        {/* Title Section */}
+                        <div className="text-center mb-16">
+                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                                現場錄音流程與術語
+                                <span className="block text-xl md:text-2xl text-slate-500 font-normal mt-2">On-Set Protocol & Terminology</span>
+                            </h1>
+                            <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+                                在劇組現場，標準化的溝通流程 (Cadence) 與精準的報表術語，是確保聲音部門與其他部門高效協作的關鍵。
+                            </p>
+                        </div>
+
+                        {/* Interactive Simulator */}
+                        <section className="mb-20">
+                            <ProtocolSimulator />
+                            <div className="mt-6 flex gap-4 text-sm text-slate-500 justify-center">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                                    <span>錄音 (Record)</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                    <span>確認走順 (Speed)</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Glossary Section */}
+                        <section>
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
+                                <h2 className="text-2xl font-bold text-white">聲音報表術語 (Sound Report Abbreviations)</h2>
+                            </div>
+                            <Glossary />
+                        </section>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-24 border-t border-slate-800 py-12 text-center">
+                        <p className="text-slate-600 text-sm">
+                            義守大學電影與電視學系陳嘉暐老師課程提供
+                        </p>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
