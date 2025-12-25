@@ -242,62 +242,52 @@
                 { id: 3, name: 'Lavalier (Boy)', file: 'sound/ch3_boy.mp3', color: 'text-blue-400', bg: 'bg-blue-500' },
             ];
 
-            const audioRefs = useRef(tracks.map(() => new Audio()));
+            const audioRef = useRef(new Audio());
 
-            // Initialize Audio Sources
+            // Initialize Audio Listeners
             useEffect(() => {
-                tracks.forEach((track, index) => {
-                    audioRefs.current[index].src = track.file;
-                    audioRefs.current[index].loop = true;
-                    // Default volume to 0 (muted)
-                    audioRefs.current[index].volume = 0;
-                });
+                const audio = audioRef.current;
 
-                // Cleanup
+                const handleEnded = () => {
+                    setIsPlaying(false);
+                    setSoloTrack(null);
+                };
+
+                audio.addEventListener('ended', handleEnded);
+
                 return () => {
-                    audioRefs.current.forEach(audio => {
-                        audio.pause();
-                        audio.src = "";
-                    });
+                    audio.pause();
+                    audio.removeEventListener('ended', handleEnded);
                 };
             }, []);
 
             // Handle Track Toggle (Play/Pause/Switch)
             const handleTrackToggle = (trackId) => {
+                const audio = audioRef.current;
+                const track = tracks.find(t => t.id === trackId);
+
                 if (isPlaying && soloTrack === trackId) {
                     // STOP
-                    audioRefs.current.forEach(audio => audio.pause());
+                    audio.pause();
+                    audio.currentTime = 0; // Reset to start
                     setIsPlaying(false);
                     setSoloTrack(null);
                 } else {
                     // PLAY or SWITCH
-                    // Set volumes immediately
-                    audioRefs.current.forEach((audio, index) => {
-                        const id = tracks[index].id;
-                        audio.volume = (id === trackId) ? 1 : 0;
-                    });
+                    audio.inputSource = track.file; // Just for reference if needed, but src is what matters
+
+                    // If switching tracks, or starting new, always play from start
+                    if (audio.src !== new URL(track.file, window.location.href).href) {
+                        audio.src = track.file;
+                    }
+
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.error("Play failed", e));
 
                     setSoloTrack(trackId);
-
-                    if (!isPlaying) {
-                        // Start playback if established
-                        audioRefs.current.forEach(audio => {
-                            audio.play().catch(e => console.error("Play failed", e));
-                        });
-                        setIsPlaying(true);
-                    }
+                    setIsPlaying(true);
                 }
             };
-
-            // Sync volume state (Effect)
-            useEffect(() => {
-                if (soloTrack !== null) {
-                    audioRefs.current.forEach((audio, index) => {
-                        const trackId = tracks[index].id;
-                        audio.volume = (soloTrack === trackId) ? 1 : 0;
-                    });
-                }
-            }, [soloTrack]);
 
             return (
                 <div className="bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden">
