@@ -87,8 +87,8 @@
             ];
 
             const outputs = [
-                { id: 'stereo', label: '混成 Stereo (錯誤)', file: 'sound/stereo.mp3', desc: '聲音偏左或偏右(聽感不適)', color: 'text-purple-400', border: 'border-purple-500', icon: <span className="text-xl">❌</span> },
-                { id: 'mono', label: '混成 Mono (正確)', file: 'sound/mono.mp3', desc: '聲音置中 (清晰有力)', color: 'text-green-400', border: 'border-green-500', icon: <span className="text-xl">✅</span> }
+                { id: 'stereo', label: '直接當作最終的Stereo應用 (錯誤)', file: 'sound/stereo.mp3', desc: '聲音偏左或偏右(聽感不適)', color: 'text-purple-400', border: 'border-purple-500', icon: <span className="text-xl">❌</span> },
+                { id: 'mono', label: '僅將來源當作Mono思考，之後再混成各種聲道表現 (正確)', file: 'sound/mono.mp3', desc: '聲音置中 (清晰有力)', color: 'text-green-400', border: 'border-green-500', icon: <span className="text-xl">✅</span> }
             ];
 
             const playAudio = (file, type, id) => {
