@@ -71,15 +71,106 @@
             <div class="whats-new-section">
                 <h3 class="whats-new-title">🎬 What's New?</h3>
                 <p class="whats-new-subtitle">VIBE-CODING for Pain Points</p>
-                <div class="youtube-embed-wrapper">
-                    <iframe
-                        src="https://www.youtube.com/embed/videoseries?si=-SLmRYBNFPSd6NxV&list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-"
-                        title="What's New? - YouTube Playlist" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                    </iframe>
+                <div class="whats-new-content">
+                    <div class="youtube-embed-wrapper">
+                        <iframe id="youtube-player"
+                            src="https://www.youtube.com/embed/zl7pZ2Fw0UU?list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-&enablejsapi=1"
+                            title="What's New? - YouTube Playlist" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="playlist-panel">
+                        <div class="playlist-header">
+                            <span class="playlist-icon">📋</span>
+                            <span class="playlist-label">Playlist</span>
+                        </div>
+                        <div class="playlist-items" id="playlist-items">
+                            <div class="playlist-item active" data-video-id="zl7pZ2Fw0UU">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/zl7pZ2Fw0UU/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">Student Name/ID Encryption Tool</span>
+                                    <span class="playlist-item-desc">Privacy-protecting encryption solution</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="vn6mpNIT4Fc">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/vn6mpNIT4Fc/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">View Insta360 Titan on Quest</span>
+                                    <span class="playlist-item-desc">Stream Titan 360 footage to Quest headset</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="OCsAMwSIbFI">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/OCsAMwSIbFI/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">360 Image Editor Tool</span>
+                                    <span class="playlist-item-desc">360 panoramic image editing solution</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="ac9nkTEusZg">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/ac9nkTEusZg/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">Film Crew Pose Game</span>
+                                    <span class="playlist-item-desc">Interactive crew pose game</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="P-dh9PuBV5s">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/P-dh9PuBV5s/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">Cinematography Prompt Generator</span>
+                                    <span class="playlist-item-desc">Translate cinematography language via
+                                        prompts</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="OaZMTy1ZfEM">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/OaZMTy1ZfEM/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">Film Crew Grouping Wizard</span>
+                                    <span class="playlist-item-desc">Smart crew matching solution</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <script>
+                // YouTube Playlist Player Script
+                document.querySelectorAll('.playlist-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const videoId = this.getAttribute('data-video-id');
+                        const iframe = document.getElementById('youtube-player');
+                        iframe.src = `https://www.youtube.com/embed/${videoId}?list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-&autoplay=1&enablejsapi=1`;
+
+                        // Update active state
+                        document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            </script>
 
             <!-- Category: Teaching -->
             <br>

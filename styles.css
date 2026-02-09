@@ -1197,7 +1197,7 @@ footer {
 .playlist-items {
     flex: 1;
     overflow-y: auto;
-    max-height: 280px;
+    max-height: 400px;
     scrollbar-width: thin;
     scrollbar-color: var(--primary-color) rgba(255, 255, 255, 0.1);
 }
