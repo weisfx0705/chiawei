@@ -70,15 +70,72 @@
             <div class="whats-new-section">
                 <h3 class="whats-new-title">🎬 What's New?</h3>
                 <p class="whats-new-subtitle">為自己的痛點VIBE-CODING</p>
-                <div class="youtube-embed-wrapper">
-                    <iframe
-                        src="https://www.youtube.com/embed/videoseries?si=-SLmRYBNFPSd6NxV&list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-"
-                        title="What's New? - YouTube Playlist" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                    </iframe>
+                <div class="whats-new-content">
+                    <div class="youtube-embed-wrapper">
+                        <iframe id="youtube-player"
+                            src="https://www.youtube.com/embed/vn6mpNIT4Fc?list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-&enablejsapi=1"
+                            title="What's New? - YouTube Playlist" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="playlist-panel">
+                        <div class="playlist-header">
+                            <span class="playlist-icon">📋</span>
+                            <span class="playlist-label">播放清單</span>
+                        </div>
+                        <div class="playlist-items" id="playlist-items">
+                            <div class="playlist-item active" data-video-id="vn6mpNIT4Fc">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/vn6mpNIT4Fc/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">在Quest看insta360 Titan的畫面</span>
+                                    <span class="playlist-item-desc">將 Titan 360 畫面即時串流到 Quest 頭顯</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="vDfPAXGfNOg">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/vDfPAXGfNOg/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">動態捕捉虛擬攝影系統</span>
+                                    <span class="playlist-item-desc">校園實景融合 AI 虛擬場景製作</span>
+                                </div>
+                            </div>
+                            <div class="playlist-item" data-video-id="n_FYgvhKRpc">
+                                <div class="playlist-thumbnail">
+                                    <img src="https://img.youtube.com/vi/n_FYgvhKRpc/mqdefault.jpg"
+                                        alt="Video thumbnail">
+                                    <span class="play-indicator">▶</span>
+                                </div>
+                                <div class="playlist-info">
+                                    <span class="playlist-item-title">虛擬攝影棚360監看系統</span>
+                                    <span class="playlist-item-desc">Vibe Coding 親自實踐場域需求</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <script>
+                // YouTube Playlist Player Script
+                document.querySelectorAll('.playlist-item').forEach(item => {
+                    item.addEventListener('click', function () {
+                        const videoId = this.getAttribute('data-video-id');
+                        const iframe = document.getElementById('youtube-player');
+                        iframe.src = `https://www.youtube.com/embed/${videoId}?list=PLGlCb3dEvVsXWcGWO6dqFaZXnaX7rPz5-&autoplay=1&enablejsapi=1`;
+
+                        // Update active state
+                        document.querySelectorAll('.playlist-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            </script>
 
             <!-- Category: Courses -->
             <br>
