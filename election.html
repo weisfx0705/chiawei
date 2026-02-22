@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班級幹部提名與投票產生器</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        /* Stepper UI */
+        .stepper-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .step-nav {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            min-width: 120px;
+            white-space: nowrap;
+            color: var(--text-muted);
+        }
+
+        .step-nav.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .step-nav:hover:not(.active) {
+            background: var(--bg);
+        }
+
+        .step-content {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .step-badge {
+            background: var(--primary);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: #fff;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        button.danger {
+            background: var(--danger);
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        button.outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        button.outline:hover {
+            background: var(--bg);
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex-gap {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .mt-4 {
+            margin-top: 1rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .text-muted {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tag {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .tag button {
+            background: transparent;
+            color: var(--text-muted);
+            padding: 0;
+            font-size: 1.25rem;
+            line-height: 1;
+            min-width: unset;
+        }
+
+        .tag button:hover {
+            color: var(--danger);
+        }
+
+        /* Nomination Section */
+        .nomination-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .nomination-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            background: #fafafa;
+        }
+
+        .nomination-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--primary);
+        }
+
+        .nomination-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .search-box {
+            margin-bottom: 0.75rem;
+        }
+
+        .student-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: white;
+        }
+
+        .student-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            gap: 0.5rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .student-item:last-child {
+            border-bottom: none;
+        }
+
+        .student-item:hover {
+            background: var(--bg);
+        }
+
+        .student-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .student-item.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .student-item.disabled input {
+            cursor: not-allowed;
+        }
+
+        /* Tutorial Box */
+        .tutorial-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 1.25rem;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 1.5rem;
+            color: #0c4a6e;
+        }
+
+        .tutorial-box h4 {
+            margin-bottom: 0.5rem;
+            color: #0369a1;
+            font-size: 1.1rem;
+        }
+
+        .tutorial-box ol {
+            padding-left: 1.5rem;
+        }
+
+        .tutorial-box li {
+            margin-bottom: 0.5rem;
+        }
+
+        .tutorial-box a {
+            color: #0284c7;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .tutorial-box a:hover {
+            color: #0369a1;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Code Block */
+        .code-container {
+            position: relative;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        pre {
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 1rem;
+            padding-top: 2.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: 1px solid #334155;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            background: white;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .winner-row {
+            background: #ecfdf5;
+            font-weight: 500;
+            color: #065f46;
+        }
+
+        .tie-indicator {
+            color: #b45309;
+            font-weight: bold;
+            margin-left: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        /* Loader & Toast */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(2px);
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: var(--text-main);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease forwards;
+            min-width: 250px;
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 600px) {
+            .flex-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🎓 班級幹部提名與投票產生器</h1>
+
+        <!-- Stepper Navigation -->
+        <div class="stepper-container">
+            <div class="step-nav active" onclick="switchStep(0)" id="nav-0">0. API設定</div>
+            <div class="step-nav" onclick="switchStep(1)" id="nav-1">1. 匯入名單</div>
+            <div class="step-nav" onclick="switchStep(2)" id="nav-2">2. 幹部職稱</div>
+            <div class="step-nav" onclick="switchStep(3)" id="nav-3">3. 進行提名</div>
+            <div class="step-nav" onclick="switchStep(4)" id="nav-4">4. 產生程式碼</div>
+            <div class="step-nav" onclick="switchStep(5)" id="nav-5">5. 計票分析</div>
+            <div class="step-nav" onclick="switchStep(6)" id="nav-6">6. 最終名單</div>
+        </div>
+
+        <!-- Step 0: API Key -->
+        <div class="step-content active" id="step-0">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">0</div>
+                    <div class="card-title">API Key 設定</div>
+                </div>
+                <div class="form-group">
+                    <label for="api-key">Gemini API Key</label>
+                    <div class="flex-gap">
+                        <input type="password" id="api-key" placeholder="輸入您的 Google Gemini API Key">
+                        <button id="save-key-btn" onclick="saveApiKey()">儲存</button>
+                    </div>
+                    <div class="mt-4 flex-gap">
+                        <span class="text-muted">狀態：</span>
+                        <span id="key-status" class="status-badge status-warning">尚未設定</span>
+                    </div>
+                </div>
+
+                <div class="action-buttons" style="justify-content: flex-end;">
+                    <button onclick="switchStep(1)">下一步：匯入名單 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: 匯入全班名單 -->
+        <div class="step-content" id="step-1">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">1</div>
+                    <div class="card-title">匯入全班名單</div>
+                </div>
+                <div class="form-group">
+                    <label for="students-input">請輸入學生姓名（每行一個）</label>
+                    <textarea id="students-input" placeholder="小明&#10;小華&#10;小美..."></textarea>
+                </div>
+                <div class="flex-between">
+                    <button onclick="processStudents()">匯入 / 更新名單</button>
+                    <span class="text-muted">總人數：<strong id="students-count">0</strong> 人</span>
+                </div>
+                <div id="students-tags" class="tag-list"></div>
+
+                <div class="action-buttons">
+                    <button class="outline" onclick="switchStep(0)">← 上一步：API設定</button>
+                    <button onclick="switchStep(2)">下一步：幹部職稱 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: 建立幹部職稱 -->
+        <div class="step-content" id="step-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">2</div>
+                    <div class="card-title">建立幹部職稱</div>
+                </div>
+                <div class="form-group">
+                    <label for="roles-input">請輸入幹部職稱（每行一個）</label>
+                    <textarea id="roles-input" placeholder="班長&#10;副班長&#10;風紀股長..."></textarea>
+                </div>
+                <div class="flex-between">
+                    <button onclick="processRoles()">匯入 / 更新職稱</button>
+                    <span class="text-muted">總數：<strong id="roles-count">0</strong> 個職位</span>
+                </div>
+                <div id="roles-tags" class="tag-list"></div>
+
+                <div class="action-buttons">
+                    <button class="outline" onclick="switchStep(1)">← 上一步：匯入名單</button>
+                    <button onclick="switchStep(3)">下一步：進行提名 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: 提名系統 -->
+        <div class="step-content" id="step-3">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">3</div>
+                    <div class="card-title">進行提名</div>
+                </div>
+                <p class="text-muted mb-2">請為每個職位勾選提名人選（每個職位最多 3 人）。資料自動儲存。</p>
+                <div id="nomination-container" class="nomination-grid">
+                    <div class="text-muted" style="grid-column: 1/-1;">請先完成 Step 1 與 Step 2 以載入提名清單。</div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="outline" onclick="switchStep(2)">← 上一步：幹部職稱</button>
+                    <button onclick="switchStep(4)">下一步：產生程式碼 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: 產生 Google Apps Script -->
+        <div class="step-content" id="step-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">4</div>
+                    <div class="card-title">產生 Google Apps Script 程式碼</div>
+                </div>
+
+                <!-- Tutorial Instruction Box -->
+                <div class="tutorial-box">
+                    <h4>📝 使用教學：</h4>
+                    <ol>
+                        <li>確認前幾個步驟的名單與提名皆無誤。</li>
+                        <li>點擊下方「✨ 呼叫 Gemini 產生程式碼」按鈕。</li>
+                        <li>程式碼生成完成後，點擊「一鍵複製」。</li>
+                        <li>開啟 <a href="https://script.google.com/" target="_blank">Google Apps Script</a>，建立「新專案」。</li>
+                        <li>將複製的程式碼貼上並覆蓋編輯器原有的 <code>myFunction</code> 內容。</li>
+                        <li>點擊上方的「▷ 執行」按鈕，並同意授權應用程式權限。</li>
+                        <li><strong>執行完畢後，查看下方的「執行記錄」視窗，將會顯示新建立的「表單編輯網址」(Edit URL) 與「表單發布/填寫網址」(Published URL)。</strong>
+                        </li>
+                    </ol>
+                </div>
+
+                <button onclick="generateGASCode()" id="generate-btn">✨ 呼叫 Gemini 產生程式碼</button>
+
+                <div class="code-container" id="code-container">
+                    <button class="copy-btn" onclick="copyCode()">一鍵複製</button>
+                    <pre id="output-code">等待生成...</pre>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="outline" onclick="switchStep(3)">← 上一步：進行提名</button>
+                    <button onclick="switchStep(5)">下一步：計票分析 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 5: CSV 上傳自動計票 -->
+        <div class="step-content" id="step-5">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">5</div>
+                    <div class="card-title">CSV 上傳自動計票分析</div>
+                </div>
+                <p class="text-muted mb-4">收集表單回覆後，將 Google 表單的結果匯出為 CSV，並於下方上傳即可看見統計與當選人。</p>
+
+                <div class="form-group">
+                    <label for="csv-file">請上傳從 Google 表單匯出的 CSV 檔案</label>
+                    <input type="file" id="csv-file" accept=".csv" onchange="handleCSVUpload(event)">
+                </div>
+                <div id="csv-analysis-result" style="display: none;">
+                    <div class="flex-gap mt-4 mb-2">
+                        <div class="status-badge status-success" id="vote-total-badge">投票總人數: 0</div>
+                        <div class="status-badge status-warning" id="vote-rate-badge">參與率: 0%</div>
+                    </div>
+                    <div id="results-tables-container"></div>
+                </div>
+
+                <div class="action-buttons" style="justify-content: space-between;">
+                    <button class="outline" onclick="switchStep(4)">← 上一步：產生程式碼</button>
+                    <button onclick="switchStep(6)">下一步：最終名單 ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 6: 最終名單 -->
+        <div class="step-content" id="step-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge" style="background: var(--success);">6</div>
+                    <div class="card-title">🎉 最終幹部名單</div>
+                </div>
+                <p class="text-muted mb-4">以下為本次投票選出的各職位當選人名單。</p>
+                <div id="final-winners-container" class="nomination-grid">
+                    <div class="text-muted" style="grid-column: 1/-1;">請先完成 Step 5 的 CSV 上傳與分析。</div>
+                </div>
+
+                <div class="action-buttons" style="justify-content: flex-start;">
+                    <button class="outline" onclick="switchStep(5)">← 上一步：計票分析</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner"></div>
+        <h3 style="color:var(--primary);">正在呼叫 Gemini API 生成程式碼...</h3>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+        // ======= State Management =======
+        let apiKey = localStorage.getItem('gemini_api_key') || '';
+        let students = [];
+        let roles = [];
+        let nominations = {}; // { '班長': ['小明', '小華'] }
+        let generatedCode = '';
+
+        // ======= UI Helpers =======
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'flex' : 'none';
+        }
+
+        // ======= Step Navigation =======
+        function switchStep(stepIndex) {
+            // Hide all contents and remove active class from navs
+            document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.step-nav').forEach(el => el.classList.remove('active'));
+
+            // Show target content and add active class to nav
+            document.getElementById(`step-${stepIndex}`).classList.add('active');
+            document.getElementById(`nav-${stepIndex}`).classList.add('active');
+
+            // Optional cross-validation / dynamic UI hooks when entering specific step
+            if (stepIndex === 3) {
+                renderNominationSystem();
+            }
+
+            // Scroll to top cleanly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ======= Step 0: API Key =======
+        function initApiKey() {
+            const elKeyStatus = document.getElementById('key-status');
+            const elApiKey = document.getElementById('api-key');
+            if (apiKey) {
+                elApiKey.value = apiKey;
+                elKeyStatus.className = 'status-badge status-success';
+                elKeyStatus.textContent = '已設定';
+            } else {
+                elKeyStatus.className = 'status-badge status-danger';
+                elKeyStatus.textContent = '尚未設定';
+            }
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('api-key').value.trim();
+            if (!input) {
+                showToast('API Key 不能為空', 'error');
+                return;
+            }
+            apiKey = input;
+            localStorage.setItem('gemini_api_key', apiKey);
+            initApiKey();
+            showToast('API Key 已儲存');
+        }
+
+        // ======= Step 1: Students =======
+        function processStudents() {
+            const input = document.getElementById('students-input').value;
+            const lines = input.split('\n').map(s => s.trim()).filter(s => s !== '');
+            students = [...new Set(lines)]; // Remove duplicates
+
+            // Clean up nominations if students are removed
+            for (let role in nominations) {
+                nominations[role] = nominations[role].filter(s => students.includes(s));
+            }
+
+            renderStudents();
+            showToast(`匯入成功，共 ${students.length} 名學生`);
+        }
+
+        function renderStudents() {
+            document.getElementById('students-count').textContent = students.length;
+            const container = document.getElementById('students-tags');
+            container.innerHTML = '';
+            students.forEach((student, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    ${student}
+                    <button onclick="removeStudent(${index})">&times;</button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        function removeStudent(index) {
+            const std = students[index];
+            students.splice(index, 1);
+            // Remove from nominations
+            for (let role in nominations) {
+                nominations[role] = nominations[role].filter(s => s !== std);
+            }
+            renderStudents();
+            renderNominationSystem();
+        }
+
+        // ======= Step 2: Roles =======
+        function processRoles() {
+            const input = document.getElementById('roles-input').value;
+            const lines = input.split('\n').map(s => s.trim()).filter(s => s !== '');
+            const newRoles = [...new Set(lines)];
+
+            // Re-init nominations for new roles, keep old if exists
+            let newNominations = {};
+            newRoles.forEach(role => {
+                newNominations[role] = nominations[role] || [];
+            });
+            roles = newRoles;
+            nominations = newNominations;
+
+            renderRoles();
+            showToast(`匯入成功，共 ${roles.length} 個幹部職稱`);
+        }
+
+        function renderRoles() {
+            document.getElementById('roles-count').textContent = roles.length;
+            const container = document.getElementById('roles-tags');
+            container.innerHTML = '';
+            roles.forEach((role, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    ${role}
+                    <button onclick="removeRole(${index})">&times;</button>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        function removeRole(index) {
+            const role = roles[index];
+            roles.splice(index, 1);
+            delete nominations[role];
+            renderRoles();
+            renderNominationSystem();
+        }
+
+        // ======= Step 3: Nomination System =======
+        function renderNominationSystem() {
+            const container = document.getElementById('nomination-container');
+            container.innerHTML = '';
+
+            if (roles.length === 0 || students.length === 0) {
+                container.innerHTML = `<div class="text-muted" style="grid-column: 1/-1;">請先完成 Step 1 與 Step 2 以載入提名清單。</div>`;
+                return;
+            }
+
+            roles.forEach(role => {
+                const card = document.createElement('div');
+                card.className = 'nomination-card';
+
+                const selectedCount = nominations[role].length;
+                const isMax = selectedCount >= 3;
+                const selectedBadges = nominations[role].map(name => `<span class="tag" style="display:inline-flex;font-size:12px;padding:2px 8px;margin:0;">${name}</span>`).join('');
+
+                card.innerHTML = `
+                    <div class="nomination-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <span>${role}</span>
+                        ${selectedBadges}
+                    </div>
+                    <div class="nomination-count" id="count-${role}">目前提名：${selectedCount}/3 人</div>
+                    <input type="text" class="search-box" placeholder="搜尋學生..." onkeyup="filterStudents(this, '${role}')">
+                    <div class="student-list" id="list-${role}">
+                        ${students.map(student => {
+                    const isChecked = nominations[role].includes(student);
+                    const isDisabled = !isChecked && isMax;
+                    return `
+                                <label class="student-item ${isDisabled ? 'disabled' : ''}">
+                                    <input type="checkbox" onchange="toggleNomination('${role}', '${student}', this.checked)" ${isChecked ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
+                                    <span class="student-name">${student}</span>
+                                </label>
+                            `;
+                }).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterStudents(input, role) {
+            const keyword = input.value.toLowerCase();
+            const items = document.getElementById(`list-${role}`).querySelectorAll('.student-item');
+            items.forEach(item => {
+                const name = item.querySelector('.student-name').textContent.toLowerCase();
+                if (name.includes(keyword)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleNomination(role, student, isChecked) {
+            if (isChecked) {
+                if (nominations[role].length < 3) {
+                    nominations[role].push(student);
+                }
+            } else {
+                nominations[role] = nominations[role].filter(s => s !== student);
+            }
+            renderNominationSystem(); // Re-render to update counts and disable states
+        }
+
+        // ======= Step 4: Generate Code with Gemini =======
+        async function generateGASCode() {
+            if (!apiKey) {
+                showToast('請先於 Step 0 設定 API Key', 'error');
+                return;
+            }
+            if (students.length === 0) {
+                showToast('請先匯入學生名單', 'error');
+                return;
+            }
+            if (roles.length === 0) {
+                showToast('請至少建立一個職稱', 'error');
+                return;
+            }
+
+            // Construct Prompt
+            const prompt = `
+你是一位 Google Apps Script 專家。請幫我撰寫一段完整的 Google Apps Script 程式碼，功能為自動建立一個「班級幹部投票表單」(Google Form)。
+請回傳單一且完整的 \`createForm()\` 函數，且需滿足以下規格：
+
+1. 表單標題：班級幹部投票表單
+2. 第一題：姓名（下拉選單(ListItem)，必須填寫），選項為全班名單：${students.join(', ')}。請確保所有學生在同一個下拉選單中。
+3. 接下來的題目為幹部投票，每個職稱為一題。皆為單選題(MultipleChoiceItem)，必須填寫。
+4. 每個職稱的題目與選項如下：
+${roles.map(r => `   - 題目：${r}\n     選項：${nominations[r].length > 0 ? nominations[r].join(', ') : '無人被提名'}`).join('\n')}
+5. 表單設定：每人限填一次。
+6. 最重要的步驟：程式碼最後請使用 Logger.log() 列印出新建立表單的「表單編輯網址 (Edit URL)」以及「填寫網址 (Published URL)」，讓我在執行完畢後看見。
+
+請只回傳 JavaScript 程式碼，不要包含 Markdown 語法 (不要用 \`\`\`javascript 包裝)，只要純程式碼文字即可，或確保你的回覆只有程式碼，沒有其他文字說明。
+`;
+
+            const requestBody = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            showLoading(true);
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API Error: ${response.status} ${errText}`);
+                }
+
+                const data = await response.json();
+                let resultText = data.candidates[0].content.parts[0].text;
+
+                // Clean up markdown blocks if the model still returns them
+                resultText = resultText.replace(/^```javascript\n/im, '').replace(/^```\n?/im, '').replace(/```$/im, '').trim();
+
+                generatedCode = resultText;
+                document.getElementById('output-code').textContent = generatedCode;
+                document.getElementById('code-container').style.display = 'block';
+                showToast('產生成功！');
+
+            } catch (error) {
+                console.error(error);
+                showToast('發生錯誤：' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function copyCode() {
+            if (!generatedCode) return;
+            navigator.clipboard.writeText(generatedCode).then(() => {
+                showToast('程式碼已複製！');
+            }).catch(err => {
+                showToast('複製失敗', 'error');
+            });
+        }
+
+        // ======= Step 5: CSV Parsing & Analysis =======
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                processCSV(text);
+            };
+            reader.onerror = function () {
+                showToast('檔案讀取失敗', 'error');
+            }
+            reader.readAsText(file);
+        }
+
+        function parseCSVLine(text) {
+            // Regex to handle CSV lines with quotes
+            const re = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+            return text.split(re).map(item => item.replace(/^"|"$/g, '').trim());
+        }
+
+        function processCSV(csvText) {
+            const rawLines = csvText.trim().split('\n');
+            if (rawLines.length < 2) {
+                showToast('CSV 無資料或格式錯誤', 'error');
+                return;
+            }
+
+            const headers = parseCSVLine(rawLines[0]);
+            const dataRows = rawLines.slice(1).map(parseCSVLine);
+
+            const votersCount = dataRows.length;
+            const totalStudents = students.length || 1; // prevent division by zero for display
+            const voteRate = ((votersCount / totalStudents) * 100).toFixed(1);
+
+            document.getElementById('vote-total-badge').textContent = `投票總人數: ${votersCount}`;
+            document.getElementById('vote-rate-badge').textContent = `參與率: ${voteRate}% (基於系統名單人數)`;
+
+            // Assume the first two columns are Timestamp, Name (or similar). The rest are role voting.
+            // But realistically, user might just have Timestamp, Name, and then custom titles matching roles.
+            // We find intersection of CSV headers and 'roles' state, or just process from column index 2.
+            let votingColStartIndex = 2;
+            // Better to let dynamically map from headers where headers match `roles`
+            let foundRoles = headers.slice(1).filter(h => roles.includes(h) || h !== '姓名');
+
+            // Simple generic approach: col 0 is Time, col 1 is Name, rest are votes.
+            const stats = {};
+            const roleHeaders = headers.slice(2);
+
+            roleHeaders.forEach(r => { stats[r] = {}; });
+
+            dataRows.forEach(row => {
+                roleHeaders.forEach((role, idx) => {
+                    const vote = row[2 + idx]; // Column content
+                    if (vote) {
+                        stats[role][vote] = (stats[role][vote] || 0) + 1;
+                    }
+                });
+            });
+
+            renderCSVAnalysis(stats, roleHeaders);
+            renderFinalWinners(stats, roleHeaders);
+            document.getElementById('csv-analysis-result').style.display = 'block';
+            showToast('CSV 分析完成');
+        }
+
+        function renderCSVAnalysis(stats, roleHeaders) {
+            const container = document.getElementById('results-tables-container');
+            container.innerHTML = '';
+
+            roleHeaders.forEach(role => {
+                const roleStats = stats[role];
+                const candidates = Object.keys(roleStats);
+
+                if (candidates.length === 0) return; // Skip if no votes
+
+                // Sort by vote count descending
+                candidates.sort((a, b) => roleStats[b] - roleStats[a]);
+
+                let maxVotes = roleStats[candidates[0]];
+
+                // Check ties among max votes
+                let winners = candidates.filter(c => roleStats[c] === maxVotes);
+                let isTie = winners.length > 1;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-responsive';
+
+                const table = document.createElement('table');
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th colspan="2">${role}</th>
+                        </tr>
+                        <tr>
+                            <th style="width:70%;">候選人</th>
+                            <th>得票數</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${candidates.map(candidate => {
+                    const votes = roleStats[candidate];
+                    const isWinner = votes === maxVotes;
+                    return `
+                                <tr class="${isWinner ? 'winner-row' : ''}">
+                                    <td>
+                                        ${candidate}
+                                        ${isWinner ? ` <span class="tag" style="display:inline-flex;margin-left:8px;font-size:12px;padding:2px 6px;">${isTie ? '平手當選' : '👑 當選'}</span>` : ''}
+                                    </td>
+                                    <td><strong>${votes}</strong></td>
+                                </tr>
+                            `;
+                }).join('')}
+                    </tbody>
+                `;
+
+                wrapper.appendChild(table);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function renderFinalWinners(stats, roleHeaders) {
+            const container = document.getElementById('final-winners-container');
+            container.innerHTML = '';
+
+            roleHeaders.forEach(role => {
+                const roleStats = stats[role];
+                if (!roleStats) return;
+
+                const candidates = Object.keys(roleStats);
+                if (candidates.length === 0) return;
+
+                // Sort descending to find max votes
+                candidates.sort((a, b) => roleStats[b] - roleStats[a]);
+                let maxVotes = roleStats[candidates[0]];
+                let winners = candidates.filter(c => roleStats[c] === maxVotes);
+
+                const card = document.createElement('div');
+                card.className = 'nomination-card';
+                card.style.textAlign = 'center';
+                card.style.borderColor = 'var(--success)';
+                card.style.background = '#f0fdf4'; // Light green background
+
+                card.innerHTML = `
+                    <div class="nomination-title" style="justify-content: center; font-size: 1.25rem; color: #166534; margin-bottom: 1rem; border-bottom: 2px solid #bbf7d0; padding-bottom: 0.5rem;">
+                        ${role}
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #14532d; line-height: 1.8;">
+                        ${winners.map(w => `<div>👑 ${w} <span style="font-size: 0.875rem; color: #16a34a; font-weight: normal;">(${maxVotes} 票)</span></div>`).join('')}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Initialize
+        initApiKey();
+
+    </script>
+</body>
+
+</html>
