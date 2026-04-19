@@ -183,8 +183,8 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 700;
 }
-.speaker-config:nth-child(1) .speaker-badge { background: #4285f4; color: white; }
-.speaker-config:nth-child(2) .speaker-badge { background: #ea4335; color: white; }
+.speaker-config .speaker-badge.s1 { background: #ea4335 !important; color: white; }
+.speaker-config .speaker-badge.s2 { background: #4285f4 !important; color: white; }
 .speaker-config input {
   width: 80px; padding: 4px 8px;
   background: transparent; border: 1px solid var(--border);
@@ -215,8 +215,8 @@ body {
   transition: transform 0.15s;
 }
 .dialogue-line .line-badge:hover { transform: scale(1.1); }
-.dialogue-line .line-badge.s1 { background: #4285f4; color: white; }
-.dialogue-line .line-badge.s2 { background: #ea4335; color: white; }
+.dialogue-line .line-badge.s1 { background: #ea4335 !important; color: white; }
+.dialogue-line .line-badge.s2 { background: #4285f4 !important; color: white; }
 
 .dialogue-line .line-content {
   flex: 1; display: flex; flex-direction: column; gap: 4px;
@@ -405,9 +405,43 @@ body {
 }
 .chat-msg .apply-btn:hover { background: var(--primary); }
 
-.chat-input-area {
-  padding: 12px 16px;
+.chat-compose {
   border-top: 1px solid var(--border);
+  padding: 10px 16px 12px;
+  background: var(--surface);
+}
+.chat-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.chat-mode-toggle button {
+  min-height: 32px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-secondary);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: 'Google Sans', 'Noto Sans TC', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all 0.15s;
+}
+.chat-mode-toggle button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.chat-mode-toggle button.active {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  color: white;
+}
+.chat-mode-toggle .material-icons-round { font-size: 15px; }
+.chat-input-area {
   display: flex; gap: 8px;
 }
 .chat-input-area textarea {
@@ -803,7 +837,7 @@ body {
     <div class="content-area hidden" id="multiContent">
       <div class="multi-config">
         <div class="speaker-config">
-          <div class="speaker-badge">S1</div>
+          <div class="speaker-badge s1" style="background:#ea4335;color:white;">S1</div>
           <input type="text" id="speaker1Name" value="Speaker 1" placeholder="名稱">
           <div class="voice-select-row">
             <select id="voice1Select"></select>
@@ -813,7 +847,7 @@ body {
           </div>
         </div>
         <div class="speaker-config">
-          <div class="speaker-badge">S2</div>
+          <div class="speaker-badge s2" style="background:#4285f4;color:white;">S2</div>
           <input type="text" id="speaker2Name" value="Speaker 2" placeholder="名稱">
           <div class="voice-select-row">
             <select id="voice2Select"></select>
@@ -963,12 +997,24 @@ body {
         輸入你的想法，AI 會生成符合格式的對話稿
       </div>
     </div>
-    <div class="chat-input-area">
-      <textarea id="chatInput" placeholder="描述你想要的對話場景..." rows="2"
-        onkeydown="handleChatKeydown(event)"></textarea>
-      <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()">
-        <span class="material-icons-round" style="font-size:20px;">send</span>
-      </button>
+    <div class="chat-compose">
+      <div class="chat-mode-toggle" role="tablist" aria-label="對話稿助手模式">
+        <button id="chatModeGenerate" class="active" onclick="setChatMode('generate')" role="tab" aria-selected="true">
+          <span class="material-icons-round">edit_note</span>
+          生成新稿
+        </button>
+        <button id="chatModeFormat" onclick="setChatMode('format')" role="tab" aria-selected="false">
+          <span class="material-icons-round">format_quote</span>
+          整理稿件
+        </button>
+      </div>
+      <div class="chat-input-area">
+        <textarea id="chatInput" placeholder="描述你想要的對話場景..." rows="2"
+          onkeydown="handleChatKeydown(event)"></textarea>
+        <button class="chat-send-btn" id="chatSendBtn" onclick="sendChat()">
+          <span class="material-icons-round" style="font-size:20px;">send</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -1113,7 +1159,7 @@ function syncEditorToScript() {
   const s2 = document.getElementById('speaker2Name').value || 'Speaker 2';
   const tone = document.getElementById('multiToneInput').value.trim();
   let text = '';
-  if (tone) text += tone + '\n\n';
+  if (tone) text += `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${tone}\n\n`;
   dialogueLines.forEach(l => {
     if (!l.text.trim() && !l.emotion) return;
     const name = l.speaker === 1 ? s1 : s2;
@@ -1191,8 +1237,9 @@ function renderDialogue() {
     const div = document.createElement('div');
     div.className = 'dialogue-line';
     div.dataset.lineId = line.id;
+    const badgeColor = line.speaker === 1 ? '#ea4335' : '#4285f4';
     div.innerHTML = `
-      <div class="line-badge s${line.speaker}" onclick="toggleSpeaker(${line.id})" title="點擊切換講者">
+      <div class="line-badge s${line.speaker}" style="background:${badgeColor};color:white;" onclick="toggleSpeaker(${line.id})" title="點擊切換講者">
         S${line.speaker}
       </div>
       <div class="line-content">
@@ -1259,7 +1306,7 @@ function exportDialogue() {
   const s2 = document.getElementById('speaker2Name').value || 'Speaker 2';
   const tone = document.getElementById('multiToneInput').value.trim();
   let text = '';
-  if (tone) text += tone + '\n\n';
+  if (tone) text += `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${tone}\n\n`;
   dialogueLines.forEach(l => {
     const name = l.speaker === 1 ? s1 : s2;
     const emotionTag = l.emotion ? ` [${l.emotion}]` : '';
@@ -1271,6 +1318,22 @@ function exportDialogue() {
   });
 }
 
+function parseTonePrefixLine(line) {
+  const cleaned = line
+    .trim()
+    .replace(/^[-*#>\s]+/, '')
+    .replace(/^tune\s+/i, '')
+    .trim();
+  const match = cleaned.match(/^(?:語氣\s*\/\s*風格指令|語氣風格指令|Multi-Speaker\s+Prompt\s+Prefix|Prompt\s+Prefix)(?:\s*[（(][^）)]*[）)])?\s*[:：-]?\s*(.*)$/i);
+  if (!match) return null;
+  return (match[1] || '').trim();
+}
+
+function isLikelyDialogueLine(line) {
+  return /^(?:Speaker\s*[12]|S[12])\s*[:：]/i.test(line)
+    || /^.+?[:：]\s*\[.+?\]\s*.+/.test(line);
+}
+
 function parseDialogueText(text) {
   dialogueLines = [];
   lineIdCounter = 0;
@@ -1279,15 +1342,27 @@ function parseDialogueText(text) {
   let toneLines = [];
   let dialogueStarted = false;
   let dialogText = [];
+  let collectingTonePrefix = false;
 
   // Phase 1: Separate tone/style lines from dialogue lines
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) { if (dialogueStarted) dialogText.push(''); continue; }
+    const tonePrefixValue = parseTonePrefixLine(trimmed);
+    if (tonePrefixValue !== null && !dialogueStarted) {
+      collectingTonePrefix = true;
+      if (tonePrefixValue) toneLines.push(tonePrefixValue);
+      continue;
+    }
+    if (collectingTonePrefix && !dialogueStarted && !isLikelyDialogueLine(trimmed)) {
+      toneLines.push(trimmed);
+      continue;
+    }
     // Match "SpeakerName: [emotion] text" or "SpeakerName: text"
-    const speakerMatch = trimmed.match(/^(.+?):\s*(?:\[(.+?)\])?\s*(.+)$/);
+    const speakerMatch = trimmed.match(/^(.+?)[:：]\s*(?:\[(.+?)\])?\s*(.+)$/);
     if (speakerMatch) {
       dialogueStarted = true;
+      collectingTonePrefix = false;
       dialogText.push(trimmed);
     } else if (!dialogueStarted) {
       toneLines.push(trimmed);
@@ -1303,7 +1378,7 @@ function parseDialogueText(text) {
   let speakerNames = [];
   for (const line of dialogText) {
     if (!line.trim()) continue;
-    const m = line.trim().match(/^(.+?):\s*(?:\[.+?\])?\s*.+$/);
+    const m = line.trim().match(/^(.+?)[:：]\s*(?:\[.+?\])?\s*.+$/);
     if (m) {
       const name = m[1].trim();
       if (!speakerNames.includes(name)) speakerNames.push(name);
@@ -1318,7 +1393,7 @@ function parseDialogueText(text) {
   // Phase 3: Parse each dialogue line
   for (const line of dialogText) {
     if (!line.trim()) continue;
-    const m = line.trim().match(/^(.+?):\s*(?:\[(.+?)\])?\s*(.+)$/);
+    const m = line.trim().match(/^(.+?)[:：]\s*(?:\[(.+?)\])?\s*(.+)$/);
     if (m) {
       const speakerName = m[1].trim();
       const emotion = m[2] || '';
@@ -1617,9 +1692,18 @@ function downloadAudio() {
 }
 
 // ─── Chat (LLM Script Assistant) ───
-let chatHistory = [];
+let currentChatMode = 'generate';
+let chatHistories = {
+  generate: [],
+  format: []
+};
 
-const SYSTEM_PROMPT = `你是一個專業的 TTS 對話稿助手。你的工作是幫用戶創建適合 Text-to-Speech 系統的雙人對話稿。
+const CHAT_MODES = {
+  generate: {
+    intro: 'AI 對話稿助手 — 幫你產生適合 TTS 的雙人對話稿<br>輸入你的想法，AI 會生成符合格式的對話稿',
+    placeholder: '描述你想要的對話場景...',
+    temperature: 0.9,
+    prompt: `你是一個專業的 TTS 對話稿助手。你的工作是幫用戶創建適合 Text-to-Speech 系統的雙人對話稿。
 
 你產生的對話稿必須嚴格遵循以下格式：
 
@@ -1644,7 +1728,46 @@ Speaker 2: [excited] 我知道了！吃火鍋！
 - 用繁體中文（台灣用語）
 - 如果用戶提供場景或主題，據此創作
 - 直接輸出對話稿，不要加額外的解釋或 markdown 格式
-- 當用戶說「先不做回應」或「等待指令」時，簡短確認即可`;
+- 當用戶說「先不做回應」或「等待指令」時，簡短確認即可`
+  },
+  format: {
+    intro: '整理稿件模式 — 貼上既有對話稿，AI 只補 TTS 格式與情緒標籤<br>台詞文字會保留，不進行改寫',
+    placeholder: '貼上既有對話稿，將整理成 Speaker 1: [emotion] 台詞 的格式...',
+    temperature: 0.2,
+    prompt: `你是一個專業的 TTS 對話稿格式整理助手。你的工作是把用戶提供的既有對話稿整理成適合 Text-to-Speech 系統的雙人對話稿格式。
+
+你必須嚴格遵守「不修改台詞」原則：
+- 不改寫、不潤飾、不翻譯、不增刪台詞中的任何文字
+- 不改變台詞順序
+- 不合併或拆分台詞，除非原稿明顯把同一句台詞斷成多行
+- 可以新增 Speaker 標示與 [情緒] 標籤
+- 可以把括號中的舞台提示、語氣提示轉換成英文情緒標籤，但台詞正文要保持原樣
+- 這個工具主要支援雙人 TTS；如果原稿已有兩位說話者，盡量保留原名稱
+- 如果原稿沒有說話者名稱，使用 Speaker 1 / Speaker 2 交替標示
+- 若原稿已有 [emotion] 標籤，可保留或補足，但不要改動後面的台詞
+
+輸出格式：
+1. 開頭必須標注語氣/風格指令區塊，格式固定為：
+   語氣/風格指令 (Multi-Speaker Prompt Prefix):
+   接著放 1-2 行適合 TTS 的整體語氣/風格描述
+2. 如果原稿已有語氣、場景、舞台提示或風格描述，放進上述區塊；如果沒有，請依原稿氣氛補一個簡短、保守的整體朗讀風格
+3. 對話每行格式為：Speaker 1: [emotion] 台詞文字
+4. 情緒標籤用英文，放在方括號 [] 中，例如 [calm], [angry], [nervous], [excited]
+5. 直接輸出整理後的對話稿，不要加額外解釋、註解或 markdown 格式
+
+範例：
+輸入：
+A：你怎麼現在才來？
+B：路上塞車啊。
+
+輸出：
+語氣/風格指令 (Multi-Speaker Prompt Prefix):
+台灣口語對話，節奏自然，情緒反應明確
+
+Speaker 1: [angry] 你怎麼現在才來？
+Speaker 2: [apologetic] 路上塞車啊。`
+  }
+};
 
 async function sendChat() {
   const input = document.getElementById('chatInput');
@@ -1656,6 +1779,10 @@ async function sendChat() {
 
   input.value = '';
   input.style.height = 'auto';
+
+  const requestMode = currentChatMode;
+  const mode = CHAT_MODES[requestMode];
+  const chatHistory = chatHistories[requestMode];
 
   // Add user message
   chatHistory.push({ role: 'user', parts: [{ text: msg }] });
@@ -1670,10 +1797,10 @@ async function sendChat() {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${chatModel}:generateContent`;
 
     const requestBody = {
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      systemInstruction: { parts: [{ text: mode.prompt }] },
       contents: chatHistory,
       generationConfig: {
-        temperature: 0.9,
+        temperature: mode.temperature,
         maxOutputTokens: 4096
       }
     };
@@ -1696,18 +1823,52 @@ async function sendChat() {
     const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || '(無回應)';
 
     chatHistory.push({ role: 'model', parts: [{ text: reply }] });
-    appendChatMsg('assistant', reply, hasDialogueFormat(reply));
+    if (currentChatMode === requestMode) {
+      appendChatMsg('assistant', reply, hasDialogueFormat(reply));
+    }
 
   } catch (err) {
-    appendChatMsg('system', `錯誤: ${err.message}`);
+    if (currentChatMode === requestMode) {
+      appendChatMsg('system', `錯誤: ${err.message}`);
+    }
   } finally {
     sendBtn.disabled = false;
   }
 }
 
+function setChatMode(mode) {
+  if (!CHAT_MODES[mode] || currentChatMode === mode) return;
+  currentChatMode = mode;
+
+  document.getElementById('chatModeGenerate').classList.toggle('active', mode === 'generate');
+  document.getElementById('chatModeFormat').classList.toggle('active', mode === 'format');
+  document.getElementById('chatModeGenerate').setAttribute('aria-selected', mode === 'generate' ? 'true' : 'false');
+  document.getElementById('chatModeFormat').setAttribute('aria-selected', mode === 'format' ? 'true' : 'false');
+
+  const input = document.getElementById('chatInput');
+  input.placeholder = CHAT_MODES[mode].placeholder;
+  input.value = '';
+  input.style.height = 'auto';
+  renderChatHistory();
+}
+
+function renderChatHistory() {
+  const container = document.getElementById('chatMessages');
+  container.innerHTML = `<div class="chat-msg system">${CHAT_MODES[currentChatMode].intro}</div>`;
+
+  chatHistories[currentChatMode].forEach(item => {
+    const text = item.parts?.[0]?.text || '';
+    if (item.role === 'user') {
+      appendChatMsg('user', text);
+    } else if (item.role === 'model') {
+      appendChatMsg('assistant', text, hasDialogueFormat(text));
+    }
+  });
+}
+
 function hasDialogueFormat(text) {
   // Check if text contains speaker dialogue format
-  return /Speaker\s*[12]:/i.test(text) || /^.+?:\s*\[.+?\]/m.test(text);
+  return /Speaker\s*[12][:：]/i.test(text) || /^.+?[:：]\s*\[.+?\]/m.test(text);
 }
 
 function appendChatMsg(role, text, showApply = false) {
@@ -1747,13 +1908,8 @@ function applyDialogue(text) {
 }
 
 function clearChat() {
-  chatHistory = [];
-  document.getElementById('chatMessages').innerHTML = `
-    <div class="chat-msg system">
-      AI 對話稿助手 — 幫你產生適合 TTS 的雙人對話稿<br>
-      輸入你的想法，AI 會生成符合格式的對話稿
-    </div>
-  `;
+  chatHistories[currentChatMode] = [];
+  renderChatHistory();
 }
 
 // ─── Toast ───
