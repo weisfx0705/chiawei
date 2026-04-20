@@ -1033,11 +1033,35 @@ const VOICE_MALE = [
   'Algenib','Rasalgethi','Alnilam','Schedar','Achird','Zubenelgenubi',
   'Sadachbia','Sadaltager'
 ];
+const DEFAULT_VOICE_PROMPT = 'Normal Pitched and Natural';
 
 function voiceGender(name) {
   if (VOICE_FEMALE.includes(name)) return 'female';
   if (VOICE_MALE.includes(name)) return 'male';
   return 'unknown';
+}
+
+function promptIncludesDefaultVoicePrompt(promptText) {
+  return promptText.toLowerCase().includes(DEFAULT_VOICE_PROMPT.toLowerCase());
+}
+
+function withDefaultVoicePrompt(promptText = '') {
+  const trimmed = promptText.trim();
+  if (!trimmed) return DEFAULT_VOICE_PROMPT;
+  if (promptIncludesDefaultVoicePrompt(trimmed)) return trimmed;
+  return `${DEFAULT_VOICE_PROMPT}\n${trimmed}`;
+}
+
+function buildTtsText(text, promptText = '') {
+  const defaultedPrompt = withDefaultVoicePrompt(promptText);
+  return `${defaultedPrompt}\n\n${text.trim()}`;
+}
+
+function setDefaultVoicePromptFields() {
+  ['toneInput', 'multiToneInput', 'srtToneInput'].forEach(id => {
+    const input = document.getElementById(id);
+    if (input && !input.value.trim()) input.value = DEFAULT_VOICE_PROMPT;
+  });
 }
 
 // Populate voice selects with gender grouping
@@ -1091,6 +1115,7 @@ function updateGenderBadge(sel) {
 }
 
 populateVoices();
+setDefaultVoicePromptFields();
 
 // ─── API Key ───
 const apiKeyInput = document.getElementById('apiKeyInput');
@@ -1158,8 +1183,7 @@ function syncEditorToScript() {
   const s1 = document.getElementById('speaker1Name').value || 'Speaker 1';
   const s2 = document.getElementById('speaker2Name').value || 'Speaker 2';
   const tone = document.getElementById('multiToneInput').value.trim();
-  let text = '';
-  if (tone) text += `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${tone}\n\n`;
+  let text = `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${withDefaultVoicePrompt(tone)}\n\n`;
   dialogueLines.forEach(l => {
     if (!l.text.trim() && !l.emotion) return;
     const name = l.speaker === 1 ? s1 : s2;
@@ -1305,8 +1329,7 @@ function exportDialogue() {
   const s1 = document.getElementById('speaker1Name').value || 'Speaker 1';
   const s2 = document.getElementById('speaker2Name').value || 'Speaker 2';
   const tone = document.getElementById('multiToneInput').value.trim();
-  let text = '';
-  if (tone) text += `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${tone}\n\n`;
+  let text = `語氣/風格指令 (Multi-Speaker Prompt Prefix):\n${withDefaultVoicePrompt(tone)}\n\n`;
   dialogueLines.forEach(l => {
     const name = l.speaker === 1 ? s1 : s2;
     const emotionTag = l.emotion ? ` [${l.emotion}]` : '';
@@ -1371,7 +1394,7 @@ function parseDialogueText(text) {
   }
 
   if (toneLines.length > 0) {
-    document.getElementById('multiToneInput').value = toneLines.join('\n');
+    document.getElementById('multiToneInput').value = withDefaultVoicePrompt(toneLines.join('\n'));
   }
 
   // Phase 2: Detect unique speaker names automatically
@@ -1433,13 +1456,14 @@ async function previewVoice(selectId, btn) {
   const voice = document.getElementById(selectId).value;
   const model = document.getElementById('modelSelect').value;
   const sampleText = `你好，我是 ${voice}。很高興為你服務，希望你喜歡我的聲音。`;
+  const previewText = buildTtsText(sampleText);
 
   btn.classList.add('loading');
   btn.querySelector('.material-icons-round').textContent = 'hourglass_top';
 
   try {
     const requestBody = {
-      contents: [{ parts: [{ text: sampleText }] }],
+      contents: [{ parts: [{ text: previewText }] }],
       generationConfig: {
         responseModalities: ['AUDIO'],
         speechConfig: {
@@ -1521,7 +1545,7 @@ async function generateSpeech() {
       const text = document.getElementById('singleText').value.trim();
       if (!text) { showToast('請輸入文字', 'error'); return; }
 
-      const fullText = tone ? `${tone}\n\n${text}` : text;
+      const fullText = buildTtsText(text, tone);
       requestBody = {
         contents: [{ parts: [{ text: fullText }] }],
         generationConfig: {
@@ -1550,8 +1574,7 @@ async function generateSpeech() {
       }
 
       // Build dialogue text
-      let dialogueText = '';
-      if (tone) dialogueText += tone + '\n\n';
+      let dialogueText = `${withDefaultVoicePrompt(tone)}\n\n`;
       dialogueLines.forEach(l => {
         if (!l.text.trim()) return;
         const name = l.speaker === 1 ? s1Name : s2Name;
@@ -1707,7 +1730,7 @@ const CHAT_MODES = {
 
 你產生的對話稿必須嚴格遵循以下格式：
 
-1. 開頭可以有語氣/風格描述（1-2行）
+1. 開頭必須有語氣/風格描述（1-2行），其中必須包含：Normal Pitched and Natural
 2. 對話格式為：Speaker 1: [情緒] 對話文字
 3. 情緒標籤用方括號 [] 包裹，例如 [eager], [confused], [shouting]
 4. 每行一句對話
@@ -1715,6 +1738,7 @@ const CHAT_MODES = {
 
 範例格式：
 台灣的舞台劇表演，節奏快，情緒多變
+Normal Pitched and Natural
 Read aloud in a humorous Taiwanese Mandarin tone
 
 Speaker 1: [eager] 你今天想吃什麼？
@@ -1749,7 +1773,7 @@ Speaker 2: [excited] 我知道了！吃火鍋！
 輸出格式：
 1. 開頭必須標注語氣/風格指令區塊，格式固定為：
    語氣/風格指令 (Multi-Speaker Prompt Prefix):
-   接著放 1-2 行適合 TTS 的整體語氣/風格描述
+   接著放 1-2 行適合 TTS 的整體語氣/風格描述，且必須包含：Normal Pitched and Natural
 2. 如果原稿已有語氣、場景、舞台提示或風格描述，放進上述區塊；如果沒有，請依原稿氣氛補一個簡短、保守的整體朗讀風格
 3. 對話每行格式為：Speaker 1: [emotion] 台詞文字
 4. 情緒標籤用英文，放在方括號 [] 中，例如 [calm], [angry], [nervous], [excited]
@@ -1762,6 +1786,7 @@ B：路上塞車啊。
 
 輸出：
 語氣/風格指令 (Multi-Speaker Prompt Prefix):
+Normal Pitched and Natural
 台灣口語對話，節奏自然，情緒反應明確
 
 Speaker 1: [angry] 你怎麼現在才來？
@@ -2325,7 +2350,7 @@ async function srtTtsRequest(text, voice, model, apiKey) {
 }
 
 async function generateOneEntry(entry, voice, model, apiKey, tone) {
-  const fullText = tone ? `${tone}\n\n${entry.text}` : entry.text;
+  const fullText = buildTtsText(entry.text, tone);
 
   for (let attempt = 1; attempt <= SRT_MAX_RETRIES; attempt++) {
     try {
