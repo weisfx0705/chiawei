@@ -247,15 +247,16 @@
                     const groupText = textarea.value;
                     if (!groupText.trim()) continue;
 
-                    // 核心比對邏輯
+                    // 去除所有空白（含全形空格 U+3000），讓全形/半形、空格不一致也能比對
+                    const normalizedGroupText = groupText.replace(/\s/g, '');
+
+                    // 核心比對邏輯：以學號為主鍵，姓名（去空白後）為備援，不做單字模糊比對
                     finalGroups.forEach(student => {
                         // 如果學生已被分組，則跳過
                         if (student.group !== 0) return;
 
-                        // 檢查姓名或學號是否存在於該組的文字中
-                        // 這裡使用 .includes() 進行模糊比對，容錯率較高
-                        const studentName = student.name.split(' ')[0]; // 處理英文名，只取第一部分比對
-                        if (groupText.includes(student.id) || groupText.includes(student.name) || groupText.includes(studentName)) {
+                        const normalizedName = student.name.replace(/\s/g, '');
+                        if (normalizedGroupText.includes(student.id) || normalizedGroupText.includes(normalizedName)) {
                             student.group = i;
                         }
                     });
