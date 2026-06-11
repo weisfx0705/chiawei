@@ -987,6 +987,70 @@
       box-shadow: 0 16px 45px rgba(0,0,0,.22);
     }
 
+    .final-report {
+      padding-top: 4rem;
+    }
+    .report-panel {
+      overflow: hidden;
+      background: #141312;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      box-shadow: var(--shadow);
+    }
+    .report-video {
+      background: #000;
+      border-bottom: 1px solid var(--line);
+    }
+    .report-video iframe {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 22rem;
+      border: 0;
+    }
+    .report-meta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, .56fr);
+      gap: 1rem;
+      padding: 1.25rem;
+    }
+    .report-title {
+      padding: 1.2rem;
+      color: var(--ink);
+      background: var(--paper);
+      border-radius: 6px;
+    }
+    .report-title h3 {
+      font-size: 1.45rem;
+    }
+    .report-title p {
+      margin: .65rem 0 0;
+      color: rgba(17,17,15,.74);
+    }
+    .report-credits {
+      display: grid;
+      gap: .65rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .report-credits li {
+      display: grid;
+      gap: .15rem;
+      padding: .8rem .9rem;
+      background: rgba(244, 239, 228, .07);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+    }
+    .report-credits b {
+      color: var(--amber);
+      font-size: .82rem;
+    }
+    .report-credits span {
+      color: var(--paper-2);
+      line-height: 1.55;
+    }
+
     footer {
       padding: 3rem 1rem;
       color: var(--muted);
@@ -1028,7 +1092,7 @@
       .nav { align-items: flex-start; flex-direction: column; }
       .nav-links { justify-content: flex-start; }
       section { scroll-margin-top: 13rem; }
-      .module, .module-media, .notes-grid, .tools-grid, .lab, .survey-wrap, .reflection, .credit-intro, .credit-rules { grid-template-columns: 1fr; }
+      .module, .module-media, .notes-grid, .tools-grid, .lab, .survey-wrap, .reflection, .credit-intro, .credit-rules, .report-meta { grid-template-columns: 1fr; }
       .survey-left { height: auto; }
       .quote-panel { flex: none; grid-template-rows: auto; }
       .quote-card { align-items: start; }
@@ -1050,6 +1114,7 @@
       .module { padding: .7rem; }
       .module-copy { padding: .85rem; }
       .module-photo img, .module-work video, .module-work iframe { min-height: 13rem; }
+      .report-video iframe { min-height: 13rem; }
       .gallery { grid-auto-rows: 14rem; }
       .survey-bar { grid-template-columns: 1fr; gap: .3rem; }
       .survey-bar b { text-align: left; }
@@ -1563,6 +1628,33 @@
         </div>
       </div>
 
+    </section>
+
+    <section class="final-report" aria-labelledby="final-report-title">
+      <div class="section-head">
+        <div>
+          <p class="kicker">FINAL REPORT VIDEO</p>
+          <h2 id="final-report-title">課程成果報告影片。</h2>
+        </div>
+        <p class="lead">本課程成果報告影片以嘉暐老師分身配音呈現，整理本學期電影混音創新教學的課程設計、AI 工具導入與學生實作成果。</p>
+      </div>
+
+      <div class="report-panel">
+        <div class="report-video">
+          <iframe src="https://www.youtube.com/embed/Swx6zQponPg" title="本課程成果報告影片（嘉暐老師分身配音）" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <div class="report-meta">
+          <div class="report-title">
+            <h3>本課程成果報告影片（嘉暐老師分身配音）</h3>
+            <p>影片作為本成果網頁的收束，集中呈現課程流程、AI 聲音工具應用與期末成果整理。</p>
+          </div>
+          <ul class="report-credits" aria-label="成果報告影片製作資訊">
+            <li><b>音樂生成</b><span>Suno AI V4.5（License: isufilmtv1@gmail.com, 2026/04）</span></li>
+            <li><b>TTS</b><span>OpenAI</span></li>
+            <li><b>影片剪輯</b><span>OpenAI Gpt5.5 + Hyperframes Skill</span></li>
+          </ul>
+        </div>
+      </div>
     </section>
 
   </main>
