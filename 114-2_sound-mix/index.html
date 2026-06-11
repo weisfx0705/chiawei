@@ -4,7 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>114-2 義守大學電影混音創新教學成果</title>
-  <meta name="description" content="義守大學影視系 114 學年度第二學期電影混音課程創新教學成果網頁，展示 AI 聲音設計、ADR、Foley、5.1 環繞錄音室與學生作品。">
+  <meta name="description" content="義守大學影視系 114 學年度第二學期電影混音課程創新教學成果網頁，展示 AI 聲音設計、ADR、Suno 配樂標注、Foley、5.1 環繞錄音室與學生作品。">
+  <link rel="preload" as="image" href="assets/site/hero-studio.webp" fetchpriority="high">
+  <link rel="icon" href="data:,">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
@@ -67,21 +69,9 @@
     }
 
     .brand {
-      display: flex;
-      align-items: center;
-      gap: .65rem;
-      min-width: 12rem;
+      min-width: 16rem;
       font-weight: 900;
-    }
-    .brand-mark {
-      width: 2.4rem;
-      height: 2.4rem;
-      display: grid;
-      place-items: center;
-      color: var(--ink);
-      background: var(--amber);
-      border-radius: 4px;
-      font-weight: 900;
+      letter-spacing: .01em;
     }
     .nav-links {
       display: flex;
@@ -117,7 +107,7 @@
       background:
         linear-gradient(90deg, rgba(12,12,11,.94) 0%, rgba(12,12,11,.62) 42%, rgba(12,12,11,.15) 100%),
         linear-gradient(180deg, rgba(12,12,11,.08) 0%, rgba(12,12,11,.84) 100%),
-        url("assets/site/hero-studio.jpg") center / cover no-repeat;
+        url("assets/site/hero-studio.webp") center / cover no-repeat;
       transform: scale(1.015);
       animation: settle 1.8s ease-out forwards;
     }
@@ -245,6 +235,51 @@
       font-size: .86rem;
       line-height: 1.55;
     }
+    .suno-mini-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .45rem;
+      margin-top: 1rem;
+    }
+    .suno-mini {
+      padding: .55rem .65rem;
+      color: var(--paper-2);
+      background: rgba(244, 239, 228, .06);
+      border: 1px solid rgba(244, 239, 228, .12);
+      border-radius: 5px;
+      font-size: .84rem;
+      line-height: 1.45;
+    }
+    .suno-mini b {
+      color: var(--green);
+    }
+    .krotos-discussion {
+      margin-top: 1rem;
+      overflow: hidden;
+      background: rgba(112, 199, 255, .08);
+      border: 1px solid rgba(112, 199, 255, .22);
+      border-radius: 6px;
+    }
+    .krotos-discussion img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #050505;
+    }
+    .krotos-discussion div {
+      padding: .85rem;
+    }
+    .krotos-discussion h4 {
+      margin: 0;
+      color: var(--cyan);
+      font-size: 1rem;
+      line-height: 1.35;
+    }
+    .module-copy .krotos-discussion p {
+      margin-top: .55rem;
+      font-size: .88rem;
+      line-height: 1.6;
+    }
     .source-note b {
       color: var(--amber);
     }
@@ -270,20 +305,44 @@
       border: 1px solid var(--line);
       border-radius: 6px;
     }
+    .module-photo button {
+      width: 100%;
+      height: 100%;
+      display: block;
+      padding: 0;
+      border: 0;
+      cursor: zoom-in;
+      background: #100f0e;
+    }
     .module-photo img,
-    .module-work video {
+    .module-work video,
+    .module-work iframe {
       width: 100%;
       height: 100%;
       min-height: 18rem;
       object-fit: cover;
     }
+    .module-photo img {
+      transition: transform .45s ease, filter .45s ease;
+    }
+    .module-photo button:hover img,
+    .module-photo button:focus-visible img {
+      transform: scale(1.045);
+      filter: saturate(1.12);
+    }
+    .module-photo button:focus-visible {
+      outline: 3px solid var(--green);
+      outline-offset: -3px;
+    }
     .module-work {
       display: grid;
       grid-template-rows: minmax(16rem, 1fr) auto;
     }
-    .module-work video {
+    .module-work video,
+    .module-work iframe {
       min-height: 16rem;
       background: #000;
+      border: 0;
     }
     .module-work.copy-only {
       display: grid;
@@ -463,6 +522,128 @@
     .tool h3 { font-size: 1.45rem; }
     .tool p { margin: .8rem 0 0; }
 
+    .ai-credit {
+      display: grid;
+      gap: 1rem;
+    }
+    .credit-intro {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 1rem;
+      align-items: stretch;
+    }
+    .credit-panel,
+    .usage-panel,
+    .credit-rule,
+    .credit-shot {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      box-shadow: var(--shadow);
+    }
+    .credit-panel,
+    .usage-panel {
+      padding: 1.5rem;
+    }
+    .credit-panel h3,
+    .usage-panel h3,
+    .credit-rule h3 {
+      font-size: 1.45rem;
+    }
+    .credit-panel p,
+    .usage-panel p,
+    .credit-rule p {
+      margin: .75rem 0 0;
+      color: var(--paper-2);
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .7rem;
+      margin-top: 1.2rem;
+    }
+    .metric {
+      min-height: 7.5rem;
+      padding: .9rem;
+      color: var(--ink);
+      background: var(--paper);
+      border-radius: 6px;
+    }
+    .metric:nth-child(2) { background: #d7f7e6; }
+    .metric:nth-child(3) { background: #d9ecff; }
+    .metric b {
+      display: block;
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .metric span {
+      display: block;
+      margin-top: .45rem;
+      font-size: .86rem;
+      line-height: 1.45;
+    }
+    .credit-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    .credit-rule {
+      padding: 1.25rem;
+    }
+    .credit-rule .num {
+      display: inline-grid;
+      width: 2.5rem;
+      height: 2.5rem;
+      place-items: center;
+      margin-bottom: 1rem;
+      color: var(--ink);
+      background: var(--green);
+      border-radius: 50%;
+      font-weight: 900;
+    }
+    .credit-gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .8rem;
+    }
+    .credit-shot {
+      overflow: hidden;
+    }
+    .credit-shot button {
+      display: block;
+      width: 100%;
+      padding: 0;
+      border: 0;
+      cursor: zoom-in;
+      background: #050505;
+    }
+    .credit-shot img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #050505;
+      transition: transform .45s ease, filter .45s ease;
+    }
+    .credit-shot button:hover img,
+    .credit-shot button:focus-visible img {
+      transform: scale(1.045);
+      filter: saturate(1.12);
+    }
+    .credit-shot button:focus-visible {
+      outline: 3px solid var(--green);
+      outline-offset: -3px;
+    }
+    .credit-shot figcaption {
+      padding: .85rem;
+      color: var(--paper-2);
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+    .credit-shot b {
+      display: block;
+      margin-bottom: .2rem;
+      color: var(--amber);
+    }
     .lab {
       display: grid;
       grid-template-columns: 1.1fr .9fr;
@@ -575,61 +756,6 @@
       font-size: .82rem;
       font-weight: 900;
     }
-
-    .evidence {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    .e-card {
-      padding: 1.4rem;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 7px;
-    }
-    .e-card h3 { margin-bottom: 1rem; }
-    .bar {
-      display: grid;
-      grid-template-columns: 7.5rem 1fr 2.2rem;
-      gap: .8rem;
-      align-items: center;
-      margin: .8rem 0;
-      color: var(--paper-2);
-    }
-    .track {
-      height: .8rem;
-      overflow: hidden;
-      background: rgba(244,239,228,.13);
-      border-radius: 999px;
-    }
-    .fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--green), var(--amber));
-      border-radius: inherit;
-    }
-    .rubric {
-      display: grid;
-      grid-template-columns: 2fr 2fr 1fr;
-      min-height: 16rem;
-      overflow: hidden;
-      border-radius: 6px;
-      border: 1px solid var(--line);
-    }
-    .rubric div {
-      display: grid;
-      align-content: end;
-      padding: 1rem;
-      color: var(--ink);
-      font-weight: 900;
-    }
-    .rubric small {
-      display: block;
-      font-size: .88rem;
-      font-weight: 500;
-    }
-    .r1 { background: var(--green); }
-    .r2 { background: var(--amber); }
-    .r3 { background: var(--paper); }
 
     .survey-wrap {
       display: grid;
@@ -810,17 +936,36 @@
       gap: .8rem;
       flex: 1;
     }
-    .quote-panel div {
+    .quote-card {
       display: grid;
-      align-content: center;
+      grid-template-columns: 8rem 1fr;
+      gap: 1rem;
+      align-items: center;
       padding: 1rem;
       color: var(--ink);
       background: var(--paper);
       border-radius: 6px;
     }
-    .quote-panel b {
+    .quote-logo {
+      display: grid;
+      min-height: 5.4rem;
+      place-items: center;
+      padding: .8rem;
+      background: rgba(17,17,15,.06);
+      border-radius: 5px;
+    }
+    .quote-logo img {
+      width: 100%;
+      max-height: 2.4rem;
+      object-fit: contain;
+    }
+    .quote-copy b {
       display: block;
       margin-bottom: .45rem;
+    }
+    .quote-copy p {
+      margin: 0;
+      line-height: 1.6;
     }
 
     .reflection {
@@ -883,12 +1028,13 @@
       .nav { align-items: flex-start; flex-direction: column; }
       .nav-links { justify-content: flex-start; }
       section { scroll-margin-top: 13rem; }
-      .module, .module-media, .notes-grid, .tools-grid, .lab, .evidence, .survey-wrap, .reflection { grid-template-columns: 1fr; }
+      .module, .module-media, .notes-grid, .tools-grid, .lab, .survey-wrap, .reflection, .credit-intro, .credit-rules { grid-template-columns: 1fr; }
       .survey-left { height: auto; }
       .quote-panel { flex: none; grid-template-rows: auto; }
-      .quote-panel div { align-content: start; }
+      .quote-card { align-items: start; }
       .section-head { grid-template-columns: 1fr; }
       .gallery { grid-template-columns: 1fr 1fr; }
+      .credit-gallery { grid-template-columns: 1fr 1fr; }
       .gallery button:nth-child(1), .gallery button:nth-child(4) { grid-column: auto; grid-row: auto; }
       h1 { font-size: 4.6rem; }
       h2 { font-size: 2.9rem; }
@@ -898,15 +1044,15 @@
       .hero { min-height: 86vh; }
       .hero-inner { padding-bottom: 3rem; }
       section { scroll-margin-top: 17rem; }
-      .module, .module-media, .notes-grid, .tools-grid, .gallery, .survey-stats, .quote-panel { grid-template-columns: 1fr; }
+      .module, .module-media, .notes-grid, .tools-grid, .gallery, .survey-stats, .quote-panel, .metric-grid, .credit-gallery { grid-template-columns: 1fr; }
+      .quote-card { grid-template-columns: 1fr; }
+      .quote-logo { min-height: 4.2rem; }
       .module { padding: .7rem; }
       .module-copy { padding: .85rem; }
-      .module-photo img, .module-work video { min-height: 13rem; }
+      .module-photo img, .module-work video, .module-work iframe { min-height: 13rem; }
       .gallery { grid-auto-rows: 14rem; }
       .survey-bar { grid-template-columns: 1fr; gap: .3rem; }
       .survey-bar b { text-align: left; }
-      .bar { grid-template-columns: 1fr; gap: .3rem; }
-      .rubric { grid-template-columns: 1fr; }
       h1 { font-size: 3.25rem; }
       h2 { font-size: 2.25rem; }
     }
@@ -917,17 +1063,16 @@
 
   <nav class="nav" aria-label="主選單">
     <div class="brand">
-      <div class="brand-mark">5.1</div>
-      <span>ISU Sound Design</span>
+      <span>ISU Film Sound Mixing</span>
     </div>
     <div class="nav-links">
       <a href="#purpose">教學目的</a>
+      <a href="#ai-credit">AI 標注</a>
       <a href="#path">學習路徑</a>
       <a href="#notes">學生筆記</a>
       <a href="#lab">錄音室</a>
       <a href="#path">學生作品</a>
       <a href="#survey">問卷分析</a>
-      <a href="#evidence">成果佐證</a>
     </div>
   </nav>
 
@@ -952,7 +1097,7 @@
       <div class="tools-grid">
         <article class="tool">
           <div class="tool-logo">
-            <img src="assets/logos/elevenlabs.svg" alt="ElevenLabs logo" loading="lazy">
+            <img src="assets/logos/elevenlabs.svg" alt="ElevenLabs logo" loading="lazy" decoding="async">
           </div>
           <span class="tag">VOICE / ADR</span>
           <h3>ElevenLabs</h3>
@@ -960,7 +1105,7 @@
         </article>
         <article class="tool">
           <div class="tool-logo">
-            <img src="assets/logos/suno.svg" alt="Suno logo" loading="lazy">
+            <img src="assets/logos/suno.svg" alt="Suno logo" loading="lazy" decoding="async">
           </div>
           <span class="tag">MUSIC / EMOTION</span>
           <h3>Suno AI</h3>
@@ -968,7 +1113,7 @@
         </article>
         <article class="tool">
           <div class="tool-logo dark">
-            <img src="assets/logos/krotos-studio.png" alt="Krotos Studio logo" loading="lazy">
+            <img src="assets/logos/krotos-studio.png" alt="Krotos Studio logo" loading="lazy" decoding="async">
           </div>
           <span class="tag">SFX / AMBIENCE</span>
           <h3>Krotos Studio Pro</h3>
@@ -983,7 +1128,7 @@
           <p class="kicker">LEARNING PATH</p>
           <h2>從聽見空間，到完成可被檢驗的混音作品。</h2>
         </div>
-        <p class="lead">課程以五個階段推進：先讓身體感知不同聲道與空間，再進入 AI 工具、聲音劇本拆解、錄音室實作，最後以《鋼琴課》片段進行聲音重製與反思。</p>
+        <p class="lead">課程以五個階段推進：先讓身體感知不同聲道與空間，再進入 AI 工具、聲音劇本拆解、錄音室實作，最後以《鋼琴課》片段進行聲音重製、AI 標注與反思。</p>
       </div>
 
       <div class="module-list">
@@ -995,12 +1140,12 @@
           </div>
           <div class="module-media">
             <div class="module-photo">
-              <img src="assets/site/theater-screening.jpg" alt="學生在劇場觀看影片，建立聲音與影像的初步感知" loading="lazy">
+              <button type="button" data-full="assets/site/theater-screening.webp" aria-label="放大聲音感知與空間聆聽照片">
+                <img src="assets/site/theater-screening.webp" alt="學生在劇場觀看影片，建立聲音與影像的初步感知" loading="lazy" decoding="async">
+              </button>
             </div>
             <div class="module-work">
-              <video controls preload="metadata" poster="assets/videos/offscreen-music.jpg">
-                <source src="assets/videos/offscreen-music.mp4" type="video/mp4">
-              </video>
+              <iframe src="https://www.youtube.com/embed/z5YvkWfzkG0" title="offscreen music" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <div class="work-info">
                 <span class="work-type">OFFSCREEN SOUND</span>
                 <h4>樓上傳來的音樂</h4>
@@ -1018,12 +1163,12 @@
           </div>
           <div class="module-media">
             <div class="module-photo">
-              <img src="assets/site/metaverse-classroom.jpg" alt="元宇宙教室中進行多聲道影片觀看" loading="lazy">
+              <button type="button" data-full="assets/site/metaverse-classroom.webp" aria-label="放大元宇宙教室課程照片">
+                <img src="assets/site/metaverse-classroom.webp" alt="元宇宙教室中進行多聲道影片觀看" loading="lazy" decoding="async">
+              </button>
             </div>
             <div class="module-work">
-              <video controls preload="metadata" poster="assets/videos/ai-voice-short.jpg">
-                <source src="assets/videos/ai-voice-short.mp4" type="video/mp4">
-              </video>
+              <iframe src="https://www.youtube.com/embed/P1YsrbrQqgA" title="ai voice short" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <div class="work-info">
                 <span class="work-type">AI VOICE</span>
                 <h4>語音置換短影音</h4>
@@ -1038,15 +1183,23 @@
             <span class="module-label">STAGE 03 / AI 配樂與音訊工具導入</span>
             <h3>從 Prompt、情緒標籤到影像同步。</h3>
             <p>導入 Suno、ElevenLabs 與 Krotos Studio Pro，讓學生理解 AI 產出必須回到剪輯、同步、情緒曲線與混音判斷中檢驗。</p>
+            <div class="suno-mini-list" aria-label="Suno 作品類型摘要">
+              <div class="suno-mini"><b>Cinematic</b> 弦樂、鋼琴、懸疑與環境襯底，回應影像情緒曲線。</div>
+              <div class="suno-mini"><b>Taiwan Punk</b> 台式龐克、Power Chords 與群體合唱，支援衝突與青春能量。</div>
+              <div class="suno-mini"><b>Pop / Folk</b> 華語流行、R&B、古箏與二胡，測試角色記憶與情感厚度。</div>
+              <div class="suno-mini"><b>8-bit / Retro</b> 晶片音色、電玩節奏與復古卡通感，對應輕快或幻想場景。</div>
+              <div class="suno-mini"><b>Sound Design</b> Foley、自然聲與喜劇元素，作為聲音設計實驗。</div>
+            </div>
+            <p class="source-note"><b>帳號使用檢核</b> Suno 分析顯示學生會以專案、情緒類別與版本重製建立工作區；課程據此把 Prompt 設計、版本命名與素材來源記錄納入實作要求。</p>
           </div>
           <div class="module-media">
             <div class="module-photo">
-              <img src="assets/site/studio-demo.jpg" alt="教師在 50208 環繞錄音室示範聲音工作流程" loading="lazy">
+              <button type="button" data-full="assets/site/ai-tool-studio-briefing.webp" aria-label="放大 50208 錄音室 AI 配樂與音訊工具講解照片">
+                <img src="assets/site/ai-tool-studio-briefing.webp" alt="教師在 50208 環繞錄音室向學生講解 AI 配樂與音訊工具" loading="lazy" decoding="async">
+              </button>
             </div>
             <div class="module-work">
-              <video controls preload="metadata" poster="assets/videos/suno-score.jpg">
-                <source src="assets/videos/suno-score.mp4" type="video/mp4">
-              </video>
+              <iframe src="https://www.youtube.com/embed/P7z3zbZDDqc" title="suno score" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <div class="work-info">
                 <span class="work-type">AI SCORE</span>
                 <h4>置換自己的第一個 Suno 配樂</h4>
@@ -1061,16 +1214,23 @@
             <span class="module-label">STAGE 04 / 50208 錄音室 ADR 與 Foley</span>
             <h3>把聲音當成表演，而不是檔案素材。</h3>
             <p>學生進入 50208 環繞錄音室，進行 ADR 人聲配音與 Foley 實體擬音，學習麥克風距離、同步點、表演力與錄音室工作秩序。</p>
+            <div class="krotos-discussion">
+              <img src="assets/site/krotos-footsteps.webp" alt="Krotos Studio Footsteps 介面，用於比較 AI 腳步聲與真實 Foley 腳步聲" loading="lazy" decoding="async">
+              <div>
+                <h4>Krotos 腳步聲與真實 Foley 的比較</h4>
+                <p>課堂以 Krotos Studio 的 Footsteps 模組示範 AI 腳步聲，再和現場錄製的真實腳步聲比較。討論結論是：真實 Foley 的自由度與完成度較高，能依照演員動作、材質、距離與情緒做更細緻的控制；但在人力不足、無法安排完整擬音錄製的情況下，AI 腳步聲仍是一個能快速解決問題、補足製作缺口的選項。</p>
+              </div>
+            </div>
             <p class="source-note"><b>課程教材來源</b> 高雄市電影館 2021 年電影教育種子教師單元二教材；實作片段採 2018 年高雄拍補助短片《鋼琴課》。</p>
           </div>
           <div class="module-media">
             <div class="module-photo">
-              <img src="assets/site/adr-session.jpg" alt="學生在錄音室麥克風前進行 ADR 與擬音實作" loading="lazy">
+              <button type="button" data-full="assets/site/foley-floor-panel.webp" aria-label="放大搬動地板材質進行 Foley 腳步聲示範照片">
+                <img src="assets/site/foley-floor-panel.webp" alt="教師在錄音室搬動地板材質，示範 Foley 腳步聲與材質聲音差異" loading="lazy" decoding="async">
+              </button>
             </div>
             <div class="module-work">
-              <video controls preload="metadata" poster="assets/videos/adr-original.jpg">
-                <source src="assets/videos/adr-original.mp4" type="video/mp4">
-              </video>
+              <iframe src="https://www.youtube.com/embed/BWYQNKrXMoY" title="adr original" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <div class="work-info">
                 <span class="work-type">ADR PRACTICE</span>
                 <h4>學生原始配音</h4>
@@ -1084,17 +1244,17 @@
           <div class="module-copy">
             <span class="module-label">STAGE 05 / 期末重製與 AI 反思</span>
             <h3>完成作品，也檢驗 AI 的界線。</h3>
-            <p>學生整合 AI 產出、現場錄音與 Foley 素材，完成影片片段的全面聲音重新設計；課堂也以 Dry / Wet 效果器比例作為混音判斷練習，讓學生比較原始聲、處理聲與最終聲場之間的差異。</p>
+            <p>學生整合 AI 產出、現場錄音與 Foley 素材，完成影片片段的全面聲音重新設計；課堂也以 Dry / Wet 效果器比例作為混音判斷練習，讓學生比較原始聲、處理聲與最終聲場之間的差異，並在片尾清楚標示 AI 音樂、AI 語音或 AI 音效的實際用途。</p>
             <p class="source-note"><b>課程教材來源</b> 延續高雄市電影館 2021 年電影教育種子教師單元二教材，以 2018 年高雄拍補助短片《鋼琴課》片段作為期末聲音重製素材。</p>
           </div>
           <div class="module-media">
             <div class="module-photo">
-              <img src="assets/site/wet-dry.jpg" alt="Dry 與 Wet 效果器比例的混音應用示意" loading="lazy">
+              <button type="button" data-full="assets/site/wet-dry.webp" aria-label="放大 Dry 與 Wet 效果器比例示意圖">
+                <img src="assets/site/wet-dry.webp" alt="Dry 與 Wet 效果器比例的混音應用示意" loading="lazy" decoding="async">
+              </button>
             </div>
             <div class="module-work">
-              <video controls preload="metadata" poster="assets/videos/adr-ai-voice.jpg">
-                <source src="assets/videos/adr-ai-voice.mp4" type="video/mp4">
-              </video>
+              <iframe src="https://www.youtube.com/embed/w7d-bxYrOiQ" title="adr ai voice" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
               <div class="work-info">
                 <span class="work-type">AI VOICE COMPARISON</span>
                 <h4>AI 置換語音版本</h4>
@@ -1118,7 +1278,7 @@
       <div class="notes-grid">
         <article class="note-card">
           <div class="note-preview">
-            <img src="assets/notes/51-studio-notes-1.png" alt="5.1聲道錄音室教學筆記首頁預覽" loading="lazy">
+            <img src="assets/notes/51-studio-notes-1.webp" alt="5.1聲道錄音室教學筆記首頁預覽" loading="lazy" decoding="async">
           </div>
           <div class="note-body">
             <span class="note-author">黃可馨｜錄音室技術筆記</span>
@@ -1135,7 +1295,7 @@
 
         <article class="note-card">
           <div class="note-preview">
-            <img src="assets/notes/zhuang-51-film-reflection-1.png" alt="莊英晧初探5.1聲道觀影心得首頁預覽" loading="lazy">
+            <img src="assets/notes/zhuang-51-film-reflection-1.webp" alt="莊英晧初探5.1聲道觀影心得首頁預覽" loading="lazy" decoding="async">
           </div>
           <div class="note-body">
             <span class="note-author">莊英晧｜5.1 觀影心得</span>
@@ -1180,7 +1340,7 @@
 
       <div class="lab">
         <div class="lab-visual">
-          <img src="assets/site/bus-stem.jpg" alt="專業音訊工作流示意圖，說明聲音素材、Stem、Bus 與 Master Output 的關係" loading="lazy">
+          <img src="assets/site/bus-stem.webp" alt="專業音訊工作流示意圖，說明聲音素材、Stem、Bus 與 Master Output 的關係" loading="lazy" decoding="async">
         </div>
         <div class="lab-copy">
           <h3>5.1 聲場配置與混音判斷</h3>
@@ -1201,6 +1361,83 @@
       </div>
     </section>
 
+    <section id="ai-credit">
+      <div class="section-head">
+        <div>
+          <p class="kicker">AI 音樂來源追溯</p>
+          <h2>AI 配樂不只要能生成，更要能被說明與標注。</h2>
+        </div>
+        <p class="lead">課程提供學生使用 Suno 與 ElevenLabs 帳號，但要求每一次 AI 生成都回到影像需求、版本迭代與片尾揭露。這項訓練延伸到金種子影展，也就是本系期末全系成果影展，學生作品進入公開放映脈絡時，AI 音樂與音效來源必須清楚標注，並能對應授權帳號與生成月份。</p>
+      </div>
+
+      <div class="ai-credit">
+        <div class="credit-intro">
+          <article class="usage-panel">
+            <h3>AI 帳號使用檢核</h3>
+            <p>依據「AI 音樂生成工具應用：創作統計報告 20260609」，學校專用 Suno 帳號 isufilmtv_team1 的學生創作量已突破 1,000 首。工作區名稱顯示學生並非零散試玩，而是以影像專案、情緒類別與版本重製為單位進行反覆測試。</p>
+            <p>ElevenLabs 變聲器分析則顯示，2026 年 4 月至 6 月的語音實作已從單純變聲前進到角色建立：學生會依據科幻、都市喜劇、親情寫實與校園文本，選擇沉穩男聲、在地日常聲線、長者女聲或自訂青春音色。</p>
+            <div class="metric-grid" aria-label="AI 帳號使用統計摘要">
+              <div class="metric"><b>1,000+</b><span>帳號累計生成歌曲，顯示高頻率課堂實作。</span></div>
+              <div class="metric"><b>307</b><span>主工作區生成量，作為近期學生實驗核心。</span></div>
+              <div class="metric"><b>183</b><span>A 組主題曲測試與重製累計，反映版本迭代。</span></div>
+            </div>
+          </article>
+
+          <article class="credit-panel">
+            <h3>為什麼把標注納入課程</h3>
+            <p>當 AI 音樂進入影片片尾，它就不再只是課堂工具，而是作品公開呈現的一部分。學生必須能交代素材來自哪個工具、用在什麼功能、使用哪個學校授權帳號、由誰做最後剪輯與混音判斷，才算完成聲音創作者應有的專業責任。</p>
+            <p>因此課程把「Prompt 生成」「版本選擇」「音樂同步」「片尾 credit」連成同一個流程：生成不是終點，能追溯、能標注、能解釋取捨，才是成果。</p>
+          </article>
+        </div>
+
+        <div class="credit-rules" aria-label="AI 音樂標注課程要求">
+          <article class="credit-rule">
+            <span class="num">1</span>
+            <h3>標明工具與授權</h3>
+            <p>例如 Suno AI、Suno AI V4.5、ElevenLabs AI，並補上學校授權帳號與生成月份，不以模糊的「AI 協作」取代具體來源。</p>
+          </article>
+          <article class="credit-rule">
+            <span class="num">2</span>
+            <h3>區分角色與貢獻</h3>
+            <p>分清楚音樂生成、歌詞生成、音效生成、授權素材與人工剪輯混音，避免把所有聲音工作混成一筆。</p>
+          </article>
+          <article class="credit-rule">
+            <span class="num">3</span>
+            <h3>回到片尾可讀性</h3>
+            <p>金種子影展作為本系期末全系成果影展，片尾文字必須讓觀眾、評審與後續查核者能看懂 AI 工具在作品中的實際位置。</p>
+          </article>
+        </div>
+
+        <div class="credit-gallery" aria-label="金種子影展片尾 AI 標注案例">
+          <figure class="credit-shot">
+            <button type="button" data-full="assets/credits/suno-generated-using.webp" aria-label="放大 generated using Suno AI 片尾標注截圖">
+              <img src="assets/credits/suno-generated-using.webp" alt="金種子影展作品片尾標注 theme song generated using Suno AI" loading="lazy" decoding="async">
+            </button>
+            <figcaption><b>generated using Suno AI</b>將主題曲生成來源直接寫入片尾。</figcaption>
+          </figure>
+          <figure class="credit-shot">
+            <button type="button" data-full="assets/credits/suno-generate.webp" aria-label="放大 Suno AI V4.5 片尾標注截圖">
+              <img src="assets/credits/suno-generate.webp" alt="金種子影展作品片尾標注 Generate by Suno AI V4.5" loading="lazy" decoding="async">
+            </button>
+            <figcaption><b>Suno AI V4.5</b>標出具體工具版本，利於後續檢核。</figcaption>
+          </figure>
+          <figure class="credit-shot">
+            <button type="button" data-full="assets/credits/suno-performed.webp" aria-label="放大 Performed by Suno AI 片尾標注截圖">
+              <img src="assets/credits/suno-performed.webp" alt="金種子影展作品片尾標注 Performed by Suno AI" loading="lazy" decoding="async">
+            </button>
+            <figcaption><b>Performed by Suno AI</b>把演出與生成角色分開標記。</figcaption>
+          </figure>
+          <figure class="credit-shot">
+            <button type="button" data-full="assets/credits/elevenlabs-sfx.webp" aria-label="放大 ElevenLabs AI 音效生成片尾標注截圖">
+              <img src="assets/credits/elevenlabs-sfx.webp" alt="金種子影展作品片尾標注 Sound effects generated with ElevenLabs AI" loading="lazy" decoding="async">
+            </button>
+            <figcaption><b>ElevenLabs AI</b>音效生成也需列入聲音來源說明。</figcaption>
+          </figure>
+        </div>
+
+      </div>
+    </section>
+
     <section aria-labelledby="gallery-title">
       <div class="section-head">
         <div>
@@ -1210,26 +1447,26 @@
       </div>
 
       <div class="gallery">
-        <button type="button" data-full="assets/site/listening-room.jpg" aria-label="放大觀影現場照片">
-          <img src="assets/site/listening-room.jpg" alt="學生於黑盒劇場觀看影片與討論聲音" loading="lazy"><span>觀影感知</span>
+        <button type="button" data-full="assets/site/listening-room.webp" aria-label="放大觀影現場照片">
+          <img src="assets/site/listening-room.webp" alt="學生於黑盒劇場觀看影片與討論聲音" loading="lazy" decoding="async"><span>觀影感知</span>
         </button>
-        <button type="button" data-full="assets/site/surround-room.jpg" aria-label="放大錄音室課程照片">
-          <img src="assets/site/surround-room.jpg" alt="50208 環繞錄音室課堂講解" loading="lazy"><span>環繞錄音室</span>
+        <button type="button" data-full="assets/site/surround-room.webp" aria-label="放大錄音室課程照片">
+          <img src="assets/site/surround-room.webp" alt="50208 環繞錄音室課堂講解" loading="lazy" decoding="async"><span>環繞錄音室</span>
         </button>
-        <button type="button" data-full="assets/site/workflow-demo.jpg" aria-label="放大工作流程示範照片">
-          <img src="assets/site/workflow-demo.jpg" alt="教師示範聲音後製工作流程" loading="lazy"><span>流程示範</span>
+        <button type="button" data-full="assets/site/workflow-demo.webp" aria-label="放大工作流程示範照片">
+          <img src="assets/site/workflow-demo.webp" alt="教師示範聲音後製工作流程" loading="lazy" decoding="async"><span>流程示範</span>
         </button>
-        <button type="button" data-full="assets/site/foley-session.jpg" aria-label="放大 Foley 實作照片">
-          <img src="assets/site/foley-session.jpg" alt="學生在麥克風前觀察 Foley 實體擬音" loading="lazy"><span>Foley 表演</span>
+        <button type="button" data-full="assets/site/foley-session.webp" aria-label="放大 Foley 實作照片">
+          <img src="assets/site/foley-session.webp" alt="學生在麥克風前觀察 Foley 實體擬音" loading="lazy" decoding="async"><span>Foley 表演</span>
         </button>
-        <button type="button" data-full="assets/site/mixing-console.jpg" aria-label="放大混音控制台照片">
-          <img src="assets/site/mixing-console.jpg" alt="學生在控制台前操作混音設備" loading="lazy"><span>控制台操作</span>
+        <button type="button" data-full="assets/site/mixing-console.webp" aria-label="放大混音控制台照片">
+          <img src="assets/site/mixing-console.webp" alt="學生在控制台前操作混音設備" loading="lazy" decoding="async"><span>控制台操作</span>
         </button>
-        <button type="button" data-full="assets/site/student-mix.jpg" aria-label="放大學生混音照片">
-          <img src="assets/site/student-mix.jpg" alt="學生以筆電與錄音室設備進行作品整理" loading="lazy"><span>學生混音</span>
+        <button type="button" data-full="assets/site/student-mix.webp" aria-label="放大學生混音照片">
+          <img src="assets/site/student-mix.webp" alt="學生以筆電與錄音室設備進行作品整理" loading="lazy" decoding="async"><span>學生混音</span>
         </button>
-        <button type="button" data-full="assets/site/protools-session.jpg" aria-label="放大學生接通自己筆電的課程照片">
-          <img src="assets/site/protools-session.jpg" alt="學生在錄音室接通自己的筆電進行聲音作業檢查" loading="lazy"><span>讓學生接通自己的筆電</span>
+        <button type="button" data-full="assets/site/protools-session.webp" aria-label="放大學生接通自己筆電的課程照片">
+          <img src="assets/site/protools-session.webp" alt="學生在錄音室接通自己的筆電進行聲音作業檢查" loading="lazy" decoding="async"><span>讓學生接通自己的筆電</span>
         </button>
       </div>
     </section>
@@ -1259,8 +1496,24 @@
           </article>
 
           <div class="quote-panel" aria-label="Suno 與 ElevenLabs 文字回饋摘要">
-            <div><b>Suno 的價值</b>多數回覆聚焦在「快速生成音樂」、「提供配樂參考」與「在靈感不足時刺激想法」，尤其適合作為影像配樂初稿與情緒方向測試。</div>
-            <div><b>ElevenLabs 的價值</b>回覆集中在「替換人聲」、「快速生成不同聲音」與「聲音角色轉換」，學生特別能感受到語音置換對 ADR 練習的幫助。</div>
+            <div class="quote-card">
+              <div class="quote-logo">
+                <img src="assets/logos/suno.svg" alt="Suno logo" loading="lazy" decoding="async">
+              </div>
+              <div class="quote-copy">
+                <b>Suno 的價值</b>
+                <p>多數回覆聚焦在「快速生成音樂」、「提供配樂參考」與「在靈感不足時刺激想法」，尤其適合作為影像配樂初稿與情緒方向測試。</p>
+              </div>
+            </div>
+            <div class="quote-card">
+              <div class="quote-logo">
+                <img src="assets/logos/elevenlabs.svg" alt="ElevenLabs logo" loading="lazy" decoding="async">
+              </div>
+              <div class="quote-copy">
+                <b>ElevenLabs 的價值</b>
+                <p>回覆集中在「替換人聲」、「快速生成不同聲音」與「聲音角色轉換」，學生特別能感受到語音置換對 ADR 練習的幫助。</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1312,35 +1565,6 @@
 
     </section>
 
-    <section id="evidence">
-      <div class="section-head">
-        <div>
-          <p class="kicker">EVIDENCE</p>
-          <h2>用作業、評量與技術圖表呈現成果。</h2>
-        </div>
-        <p class="lead">本頁整理課堂資料夾內的評分總表與課程文件，將學習歷程轉換為可讀的成果指標。觀影心得共 57 份，涵蓋 26 位學生。</p>
-      </div>
-
-      <div class="evidence">
-        <article class="e-card">
-          <h3>觀影與體驗作業分布</h3>
-          <div class="bar"><span>5.1 作品觀影</span><div class="track"><div class="fill" style="width: 100%"></div></div><b>22</b></div>
-          <div class="bar"><span>《大藝術家》</span><div class="track"><div class="fill" style="width: 95%"></div></div><b>21</b></div>
-          <div class="bar"><span>錄音室體驗</span><div class="track"><div class="fill" style="width: 64%"></div></div><b>14</b></div>
-          <p class="lead">作業從默片觀察、多聲道影片到錄音室聆聽逐步加深，平均評分 82.6，最高 94。</p>
-        </article>
-
-        <article class="e-card">
-          <h3>課程評量比例</h3>
-          <div class="rubric" aria-label="實作參與 40%、作業報告 40%、學習態度 20%">
-            <div class="r1">40%<small>實作參與</small></div>
-            <div class="r2">40%<small>作業與報告</small></div>
-            <div class="r3">20%<small>學習態度</small></div>
-          </div>
-        </article>
-      </div>
-    </section>
-
   </main>
 
   <footer>
@@ -1357,14 +1581,18 @@
     const lightboxImg = document.querySelector("#lightboxImg");
     const closeBtn = document.querySelector("#lightboxClose");
 
-    document.querySelectorAll(".gallery button").forEach((button) => {
+    function openLightbox(button) {
+      const img = button.querySelector("img");
+      lightboxImg.src = button.dataset.full;
+      lightboxImg.alt = img.alt;
+      lightbox.classList.add("open");
+      lightbox.setAttribute("aria-hidden", "false");
+      closeBtn.focus();
+    }
+
+    document.querySelectorAll(".gallery button, .credit-shot button, .module-photo button").forEach((button) => {
       button.addEventListener("click", () => {
-        const img = button.querySelector("img");
-        lightboxImg.src = button.dataset.full;
-        lightboxImg.alt = img.alt;
-        lightbox.classList.add("open");
-        lightbox.setAttribute("aria-hidden", "false");
-        closeBtn.focus();
+        openLightbox(button);
       });
     });
 
