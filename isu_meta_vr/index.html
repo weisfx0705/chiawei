@@ -531,6 +531,11 @@
       font-size: 15px;
     }
 
+    .video-grid + .workflow,
+    .video-grid + .panel {
+      margin-top: 18px;
+    }
+
     .workflow {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -564,6 +569,60 @@
     .flow-card p {
       margin: 0;
       color: rgba(243,239,226,.74);
+    }
+
+    .spotlight-grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .spotlight {
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.055);
+      overflow: hidden;
+      min-height: 100%;
+    }
+
+    .spotlight img {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      display: block;
+    }
+
+    .spotlight-body {
+      padding: 18px;
+    }
+
+    .spotlight-body h3 {
+      margin: 0 0 8px;
+      font-size: clamp(22px, 3vw, 38px);
+    }
+
+    .spotlight-body p {
+      margin: 0;
+      color: rgba(243,239,226,.72);
+    }
+
+    .spotlight-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .mini-label {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 9px;
+      margin-bottom: 12px;
+      background: var(--lime);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
     .process-diagram {
@@ -823,6 +882,10 @@
         grid-template-columns: 1fr;
       }
 
+      .spotlight-grid {
+        grid-template-columns: 1fr;
+      }
+
       .metrics,
       .timeline,
       .workflow,
@@ -847,6 +910,7 @@
       .workflow,
       .gallery,
       .evidence-grid,
+      .spotlight-grid,
       .teaching-links,
       .equipment-grid {
         grid-template-columns: 1fr;
@@ -874,7 +938,7 @@
         <a href="#vp">VP 成果</a>
         <a href="#vr">VR 流程</a>
         <a href="#gallery">側拍</a>
-        <a href="#evidence">佐證</a>
+        <a href="#teaching">教學設計</a>
       </div>
     </nav>
   </header>
@@ -894,9 +958,9 @@
         </div>
         <aside class="hero-facts" aria-label="課程基本資料">
           <div class="fact-row"><b>Course</b><span>A1952100｜影視三｜必修｜3 學分</span></div>
-          <div class="fact-row"><b>Teachers</b><span>張國甫老師、陳嘉暐老師</span></div>
+          <div class="fact-row"><b>Teachers</b><span>張國輔老師、陳嘉暐老師</span></div>
           <div class="fact-row"><b>Frame</b><span>LED Virtual Production、X+AI、VR180</span></div>
-          <div class="fact-row"><b>Output</b><span>4 部 VP 作品、VR 教學與後期實作</span></div>
+          <div class="fact-row"><b>Output</b><span>4 部 VP 作品、1 部 VR180 成果、教學影片與互動教材</span></div>
         </aside>
       </div>
     </section>
@@ -909,15 +973,15 @@
             <h2>一門課把影像製作推進三個新現場</h2>
           </div>
           <p class="intro-text">
-            課程從 LED 虛擬棚與 Virtual Production 啟動，接著導入 Runway、Google Flow、Google Gemini 等生成式 AI 工具，最後進入 Insta360 Titan、Equirectangular、VR180、Premiere 與 Showtime VR 的沉浸式製作流程。
+            課程從 LED 虛擬棚與 Virtual Production 啟動，接著導入生成式 AI 與現場互動遊戲示範，最後進入 Insta360 Titan、Equirectangular、VR180、Premiere 與 Showtime VR 的沉浸式製作流程。
           </p>
         </div>
 
         <div class="metrics reveal" aria-label="課程成果數據">
           <div class="metric"><strong>18</strong><span>週課程設計</span></div>
           <div class="metric"><strong>3</strong><span>LED / AI / VR 模組</span></div>
-          <div class="metric"><strong>4</strong><span>Virtual Production 影片</span></div>
-          <div class="metric"><strong>VR180</strong><span>頭顯播放導向</span></div>
+          <div class="metric"><strong>4+1</strong><span>VP 與 VR 成果影片</span></div>
+          <div class="metric"><strong>2</strong><span>VR 後期教學影片</span></div>
         </div>
 
         <div class="split reveal" style="margin-top: 22px;">
@@ -942,7 +1006,7 @@
               <ul class="dense-list">
                 <li>使用 AI 進行故事、角色、場景語意分析與視覺方向探索。</li>
                 <li>透過 Runway、Google Flow、Google Gemini 等工具生成背景素材與概念圖。</li>
-                <li>把 AI 生成結果導入 LED 背景、視覺資料包與作品呈現。</li>
+                <li>以 AI 現場完成股價偵測互動小遊戲，示範創意如何快速變成可玩的原型。</li>
               </ul>
             </div>
             <div class="module-content" id="m-vr" role="tabpanel">
@@ -998,7 +1062,7 @@
           <article class="week" data-week="09" data-module="ai"><span class="week-type">AI</span><h3>角色圖像與場景概念圖</h3><p>生成角色設定、場景氛圍板與視覺風格探索。</p></article>
           <article class="week" data-week="10" data-module="ai"><span class="week-type">AI</span><h3>AI 分鏡與視覺敘事</h3><p>用 AI 生成分鏡、鏡頭語法、運動設計與草圖。</p></article>
           <article class="week" data-week="11" data-module="ai"><span class="week-type">AI</span><h3>繪本式故事表達</h3><p>以圖像與文字敘事整合 AI 生成內容。</p></article>
-          <article class="week" data-week="12" data-module="ai"><span class="week-type">AI</span><h3>專案網站與視覺資料包</h3><p>建立作品介紹網站、視覺封面、劇組資料與簡報素材。</p></article>
+          <article class="week" data-week="12" data-module="ai"><span class="week-type">AI</span><h3>AI 互動原型與視覺資料包</h3><p>示範股價偵測互動小遊戲，並建立作品介紹、視覺封面與簡報素材。</p></article>
           <article class="week" data-week="13" data-module="vr"><span class="week-type">VR</span><h3>VR 技術概論</h3><p>理解 VR 成像方式、沉浸式敘事特性與應用場景。</p></article>
           <article class="week" data-week="14" data-module="vr"><span class="week-type">VR</span><h3>VR 前期規劃</h3><p>規劃 360 度分鏡、觀看方向與場景配置。</p></article>
           <article class="week" data-week="15" data-module="vr"><span class="week-type">VR</span><h3>VR 拍攝設備與操作</h3><p>介紹 Insta360 Titan、鏡位限制、位置設計與拍攝練習。</p></article>
@@ -1017,7 +1081,7 @@
             <h2>Virtual Production 成果影片</h2>
           </div>
           <p class="intro-text">
-            學生把 LED 螢幕視為可演出的影像場域，將 AI 生成背景、跑酷場景、長廊奔跑、魚市場戰鬥、恐龍外送等敘事發想導入短片製作。以下影片來自 YouTube「陳嘉暐」頻道的不公開連結。
+            學生把 LED 螢幕視為可演出的影像場域，將 AI 生成背景、跑酷場景、長廊奔跑、魚市場戰鬥、恐龍外送等發想導入短片製作。
           </p>
         </div>
         <div class="video-grid reveal">
@@ -1049,14 +1113,28 @@
             <h2>VR 影片從拍攝到播映的工作流</h2>
           </div>
           <p class="intro-text">
-            陳嘉暐老師的 VR 單元強調：VR 不是把影片變寬，而是重新理解觀眾站在球心看出去的影像邏輯。從 Titan 拍攝、Equirectangular、圖層修補到 Premiere 剪輯，目標是讓作品能在頭顯中被正確觀看。
+            VR 不是把影片變寬，而是重新理解觀眾站在球心看出去的影像邏輯。這個單元把 Titan 拍攝、Equirectangular、圖層修補與 Premiere 剪輯串成可實作流程。
           </p>
+        </div>
+        <div class="video-grid reveal">
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/hP2KUYZrLi8" title="義守影視 ISUVR180 測試成果 2025-2026" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>VR Final Work</small><h3>義守影視 ISUVR180 測試成果</h3><p>期末 VR180 測試成果，檢視學生在頭顯播放方向、場景位置與觀看節奏上的整合。</p></div>
+          </article>
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/8OlfC8lMSEk" title="圖層編輯教學影片" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>Teaching Video 01</small><h3>圖層編輯教學</h3><p>示範以圖層修補現場影像中不順暢的物件，將修補結果重新貼回 VR 影片流程。</p></div>
+          </article>
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/tvE5U9waRmI" title="VR 剪輯教學影片" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>Teaching Video 02</small><h3>VR 影片剪輯教學</h3><p>說明 VR 素材在 Premiere 中如何依照頭顯觀看方向剪輯，並輸出可播映版本。</p></div>
+          </article>
         </div>
         <div class="workflow reveal">
           <article class="flow-card">
             <span class="flow-no">01</span>
             <h3>拍攝與縫合</h3>
-            <p>使用 Insta360 Titan 進行 VR 拍攝，將現場素材縫合成 VR180 版本，作為後期剪輯與修補的基礎。</p>
+            <p>5 月 22 日與 5 月 29 日由不同同學操作 Insta360 Titan，將現場素材縫合成 VR180 版本。</p>
           </article>
           <article class="flow-card">
             <span class="flow-no">02</span>
@@ -1111,9 +1189,9 @@
           <figure class="photo"><img src="assets/gallery/thumb/0410-ai-01.jpg" alt="0410 課堂側拍" data-full="assets/gallery/full/0410-ai-01.jpg"><figcaption>0410｜恐龍背景與實拍混合</figcaption></figure>
           <figure class="photo"><img src="assets/gallery/thumb/0417-stage-01.jpg" alt="0417 課堂側拍" data-full="assets/gallery/full/0417-stage-01.jpg"><figcaption>0417｜虛擬背景走位測試</figcaption></figure>
           <figure class="photo"><img src="assets/gallery/thumb/0424-generate-01.jpg" alt="0424 課堂側拍" data-full="assets/gallery/full/0424-generate-01.jpg"><figcaption>0424｜AI 影像生成討論</figcaption></figure>
-          <figure class="photo"><img src="assets/gallery/thumb/0508-vr-01.jpg" alt="0508 課堂側拍" data-full="assets/gallery/full/0508-vr-01.jpg"><figcaption>0508｜VR 單元銜接</figcaption></figure>
-          <figure class="photo"><img src="assets/gallery/thumb/0522-vrpost-01.jpg" alt="0522 課堂側拍" data-full="assets/gallery/full/0522-vrpost-01.jpg"><figcaption>0522｜VR 後期實作</figcaption></figure>
-          <figure class="photo"><img src="assets/gallery/thumb/0529-edit-01.jpg" alt="0529 課堂側拍" data-full="assets/gallery/full/0529-edit-01.jpg"><figcaption>0529｜剪輯與成果整理</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0508-vr-01.jpg" alt="0508 AI 互動小遊戲示範側拍" data-full="assets/gallery/full/0508-vr-01.jpg"><figcaption>0508｜AI 股價偵測互動遊戲示範</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0522-vrpost-01.jpg" alt="0522 Insta360 Titan 拍攝現場側拍" data-full="assets/gallery/full/0522-vrpost-01.jpg"><figcaption>0522｜Insta360 Titan 拍攝現場</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0529-edit-01.jpg" alt="0529 Insta360 Titan 拍攝現場側拍" data-full="assets/gallery/full/0529-edit-01.jpg"><figcaption>0529｜Titan 拍攝與 VR 素材檢視</figcaption></figure>
         </div>
         <div class="teaching-links reveal">
           <a class="resource-link" href="https://drive.google.com/drive/folders/1yfiP-QtwF0irZTuZN_GXuEVZGUjBNlM-" target="_blank" rel="noopener">
@@ -1126,34 +1204,61 @@
       </div>
     </section>
 
-    <section id="evidence">
+    <section id="teaching">
       <div class="wrap">
         <div class="section-head reveal">
           <div>
-            <span class="section-kicker">Evidence & Assessment</span>
-            <h2>成果佐證與課程評量</h2>
+            <span class="section-kicker">Teaching Design</span>
+            <h2>從示範、拍攝到後期的課堂設計</h2>
           </div>
           <p class="intro-text">
-            成果包含學生作品、YouTube 上架紀錄、課堂側拍、VR 互動教材與期末展示。評量依課程申請表：出席率 40%、平時作業與實作 20%、專題製作 40%。
+            課堂不是單向講授，而是把現場示範、學生操作、影片產出與互動教材放在同一條製作線上。
           </p>
         </div>
-        <div class="evidence-grid reveal">
-          <article class="evidence">
-            <img src="assets/youtube-studio-1.jpg" alt="YouTube 後台學生影片上架截圖一">
-            <div class="caption">YouTube 後台截圖：學生 Virtual Production 影片與 VR 測試成果上架紀錄。</div>
+        <div class="spotlight-grid reveal">
+          <article class="spotlight">
+            <img src="assets/gallery/full/0508-vr-01.jpg" alt="AI 股價偵測互動小遊戲課堂示範">
+            <div class="spotlight-body">
+              <span class="mini-label">AI Playable Prototype</span>
+              <h3>用 AI 快速做出現場可玩的互動遊戲</h3>
+              <p>陳嘉暐老師以股價偵測互動小遊戲示範：AI 不只是生成圖片，也能協助學生把靈感快速轉成可測試、可遊玩的現場原型。</p>
+            </div>
           </article>
-          <article class="evidence">
-            <img src="assets/youtube-studio-2.jpg" alt="YouTube 後台學生影片上架截圖二">
-            <div class="caption">YouTube 後台截圖：包含「二版」「大作戰_0421」「我要休學」等作品。</div>
-          </article>
+          <div class="spotlight-stack">
+            <article class="spotlight">
+              <img src="assets/gallery/full/0522-vrpost-01.jpg" alt="5 月 22 日學生操作 Insta360 Titan 拍攝">
+              <div class="spotlight-body">
+                <span class="mini-label">May 22</span>
+                <h3>第一週 Titan 現場拍攝</h3>
+                <p>學生進入 VR 拍攝現場，理解攝影機位置、全景鏡位限制與表演區域配置。</p>
+              </div>
+            </article>
+            <article class="spotlight">
+              <img src="assets/gallery/full/0529-edit-01.jpg" alt="5 月 29 日學生操作 Insta360 Titan 拍攝與素材檢視">
+              <div class="spotlight-body">
+                <span class="mini-label">May 29</span>
+                <h3>第二週 Titan 拍攝與素材檢視</h3>
+                <p>不同組別延續拍攝、確認素材，接著進入圖層修補與 VR 剪輯的後期路徑。</p>
+              </div>
+            </article>
+          </div>
         </div>
-        <div class="assessment panel panel-pad reveal" style="margin-top: 18px;">
-          <div class="donut" aria-label="出席率 40%、平時作業與實作 20%、專題製作 40%"></div>
-          <ul class="legend-list">
-            <li><span class="swatch lime"></span><strong>出席率</strong><span>40%</span></li>
-            <li><span class="swatch cyan"></span><strong>平時作業與實作</strong><span>20%</span></li>
-            <li><span class="swatch red"></span><strong>專題製作</strong><span>40%</span></li>
-          </ul>
+        <div class="workflow reveal" style="margin-top: 18px;">
+          <article class="flow-card">
+            <span class="flow-no">A</span>
+            <h3>現場示範</h3>
+            <p>以 AI 小遊戲讓學生看到工具如何立即支援創意、互動與現場體驗。</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-no">B</span>
+            <h3>學生操作</h3>
+            <p>讓學生實際接觸 LED 棚、Titan 拍攝、角色表演、背景生成與素材判讀。</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-no">C</span>
+            <h3>成果整合</h3>
+            <p>用 YouTube 作品、VR 教學影片與互動 HTML 教材，把製作方法整理成可回看的學習資源。</p>
+          </article>
         </div>
       </div>
     </section>
@@ -1162,7 +1267,7 @@
   <footer class="footer">
     <div class="wrap">
       <span>義守大學 114-2｜元宇宙 VR 影片製作｜X+AI 課程成果報告</span>
-      <span>資料來源：課程計畫書、學生影片連結、YouTube 後台截圖、Google Drive 課堂照片</span>
+      <span>資料來源：課程計畫書、學生影片連結、YouTube 教學影片、Google Drive 課堂照片</span>
     </div>
   </footer>
 
