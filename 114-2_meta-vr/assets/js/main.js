@@ -34,7 +34,8 @@
       el.dataset.loaded = '1';
       const ifr = document.createElement('iframe');
       ifr.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
-      ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      // accelerometer / gyroscope / xr-spatial-tracking：讓 VR180 / 360 影片可拖曳環視與支援動態感應
+      ifr.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; xr-spatial-tracking';
       ifr.allowFullscreen = true;
       ifr.title = el.getAttribute('aria-label') || 'YouTube 影片';
       el.appendChild(ifr);
