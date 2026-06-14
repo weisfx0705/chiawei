@@ -30,6 +30,8 @@
     // 自訂縮圖（data-poster）優先，否則用 YouTube 預設縮圖
     el.style.backgroundImage = `url(${el.dataset.poster || `https://i.ytimg.com/vi/${id}/hqdefault.jpg`})`;
     el.addEventListener('click', () => {
+      // data-href：不內嵌，直接在 YouTube 新分頁開啟（用於 VR180／360，使用官方播放器拖曳環視）
+      if (el.dataset.href) { window.open(el.dataset.href, '_blank', 'noopener'); return; }
       if (el.dataset.loaded) return;
       el.dataset.loaded = '1';
       const ifr = document.createElement('iframe');
@@ -40,6 +42,12 @@
       ifr.title = el.getAttribute('aria-label') || 'YouTube 影片';
       el.appendChild(ifr);
     }, { once: false });
+    // 鍵盤可及性：對外開啟型（data-href）支援 Enter / 空白鍵
+    if (el.dataset.href) {
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+      });
+    }
   });
 
   /* ---------- Galleries ---------- */
