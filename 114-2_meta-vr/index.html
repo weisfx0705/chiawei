@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>元宇宙 VR 影片製作 ｜ 課程成果報告 — 義守大學 電影與電視學系</title>
+<meta name="description" content="義守大學電影與電視學系 X+AI 特色課程「元宇宙 VR 影片製作」114 學年第 2 學期成果報告：LED 虛擬棚虛擬製作、生成式 AI 影像工作流、VR 360 沉浸式影片製作。授課教師：張國甫、陳嘉暐。">
+<meta property="og:title" content="元宇宙 VR 影片製作 ｜ 課程成果報告">
+<meta property="og:description" content="義守大學電影與電視學系 X+AI 特色課程成果：LED 虛擬製作 × 生成式 AI × VR 360。">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- ============================ NAV ============================ -->
+<nav class="nav">
+  <a class="nav__brand" href="#top">
+    <span class="dot"></span>
+    <span>元宇宙 VR 影片製作<small>ISU FILM &amp; TV ・ X+AI</small></span>
+  </a>
+  <div class="nav__links">
+    <a href="#about">課程簡介</a>
+    <a href="#led">LED 虛擬棚</a>
+    <a href="#ai">AI 工具</a>
+    <a href="#works">學生作品</a>
+    <a href="#vr">VR 製作</a>
+    <a href="#game">AI 遊戲</a>
+  </div>
+  <button class="nav__toggle" aria-label="選單">☰</button>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<header class="hero" id="top">
+  <div class="hero__bg" style="background-image:url('assets/img/hero-studio.jpg')"></div>
+  <div class="hero__grid"></div>
+  <!-- 旋轉的 360 球體線框 -->
+  <svg class="hero__sphere" viewBox="0 0 400 400" fill="none" aria-hidden="true">
+    <defs><radialGradient id="sg" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#34e3ff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#a986ff" stop-opacity="0"/>
+    </radialGradient></defs>
+    <circle cx="200" cy="200" r="160" fill="url(#sg)"/>
+    <circle cx="200" cy="200" r="160" stroke="#34e3ff" stroke-opacity="0.5"/>
+    <ellipse cx="200" cy="200" rx="160" ry="52" stroke="#a986ff" stroke-opacity="0.45"/>
+    <ellipse cx="200" cy="200" rx="160" ry="104" stroke="#a986ff" stroke-opacity="0.30"/>
+    <ellipse cx="200" cy="200" rx="52" ry="160" stroke="#34e3ff" stroke-opacity="0.35"/>
+    <ellipse cx="200" cy="200" rx="104" ry="160" stroke="#34e3ff" stroke-opacity="0.22"/>
+    <line x1="40" y1="200" x2="360" y2="200" stroke="#34e3ff" stroke-opacity="0.3"/>
+  </svg>
+
+  <div class="wrap">
+    <span class="eyebrow reveal">義守大學 ・ 電影與電視學系 ・ 影視三</span>
+    <h1 class="reveal" data-d="1">
+      元宇宙
+      <span class="l2 grad">VR 影片製作</span>
+    </h1>
+    <p class="hero__sub reveal" data-d="2">
+      一門 X+AI 特色課程的成果報告。我們在元宇宙教室裡，讓 <b style="color:var(--ink)">LED 虛擬棚</b>、<b style="color:var(--ink)">生成式 AI</b> 與 <b style="color:var(--ink)">VR 360 沉浸式影像</b> 三條軸線交會，帶領學生從拍攝、生成到後期，完整走過一次新科技的影像創作流程。
+    </p>
+
+    <div class="hero__meta reveal" data-d="2">
+      <span class="chip">學年期 <b>114-2</b></span>
+      <span class="chip">課程代號 <b>A1952100</b></span>
+      <span class="chip">學分數 <b>3</b></span>
+      <span class="chip">模組 <b>LED × AI × VR</b></span>
+    </div>
+
+    <div class="hero__teachers reveal" data-d="3">
+      <div class="teacher"><div class="av">張</div><div><span>授課教師 ・ LED 虛擬製作</span><b>張國甫 老師</b></div></div>
+      <div class="teacher"><div class="av">陳</div><div><span>授課教師 ・ VR 沉浸式影像</span><b>陳嘉暐 老師</b></div></div>
+    </div>
+
+    <div class="scroll-cue reveal" data-d="4"><span class="bar"></span>向下捲動，瀏覽成果</div>
+  </div>
+</header>
+
+<!-- ============================ ABOUT ============================ -->
+<section class="section" id="about">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">About the Course</span>
+      <h2>三個相互關聯的模組，<br>一條完整的新媒體創作脈絡</h2>
+      <p>本課程探索新興科技媒體在電影與電視製作中的創意應用，聚焦技術理論、實務操作，以及創意與人工智慧的整合。今年特別著重生成式 AI 在影視創作流程中的實際應用——從圖像生成、動態化到敘事編排，協助學生理解 AI 在影像製作中的效益與挑戰。</p>
+    </div>
+
+    <div class="modgrid">
+      <div class="modcard reveal" data-d="1">
+        <div class="glowline"></div>
+        <div class="num">MODULE 01</div>
+        <h3>LED 虛擬棚<br>虛擬製作</h3>
+        <p>在元宇宙教室的 LED 大型螢幕上，以 VJ 即時影像播放的方式進行虛擬製片，結合前景演員表演與道具，創造背景與表演的趣味關聯。</p>
+      </div>
+      <div class="modcard reveal" data-d="2">
+        <div class="glowline"></div>
+        <div class="num">MODULE 02</div>
+        <h3>生成式 AI<br>影像工作流</h3>
+        <p>以 Google 生態系為主軸，運用 Gemini、Google Flow 與 Google AI Pro 生成圖像並讓畫面動起來，並嘗試 Runway 強化提示詞與動態表現。</p>
+      </div>
+      <div class="modcard reveal" data-d="3">
+        <div class="glowline"></div>
+        <div class="num">MODULE 03</div>
+        <h3>VR 360<br>沉浸式影片</h3>
+        <p>使用 Insta360 Titan 進行 360 度實拍，學習全景展開、接縫修補與 VR 後期剪輯，完成從拍攝到沉浸式呈現的完整流程。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ============================ MODULE 1 — LED ============================ -->
+<section class="section" id="led">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="module-tag tag-led">Module 01 ・ 張國甫 老師</span>
+      <h2>LED 虛擬棚 × 虛擬製作</h2>
+      <p>課程前半段以張國甫老師的虛擬製作為主軸。我們在元宇宙教室的 LED 螢幕上播放動態背景——採取 <b style="color:var(--ink)">VJ 即時影像播放</b>的方式，而非即時連動 Unreal Engine。為了讓背景更豐富，課程導入多種 AI 生成工具，讓學生先生成圖像、再讓圖像動起來，最後與前景演員的表演及道具結合，產生有趣的敘事關聯。</p>
+    </div>
+
+    <div class="reveal" style="margin-bottom:40px">
+      <span class="eyebrow" style="color:var(--violet)">課堂現場</span>
+      <div class="gallery feat" data-set="led" style="margin-top:18px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ AI TOOLS ============================ -->
+<section class="section" id="ai" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="module-tag tag-ai">AI Toolkit</span>
+      <h2>我們使用的生成式 AI 工具</h2>
+      <p>主軸是 Google 生態系。去年 Google 鼓勵學生申請 Google AI Pro 帳號，期末時也為全班添購了 Google AI Pro 帳號（每個帳號可含五位家庭成員），讓全班有足夠的額度進行創作。</p>
+    </div>
+    <div class="tools">
+      <div class="tool reveal" data-d="1"><img class="tool__logo" src="assets/img/logos/googlegemini.svg" alt="Google Gemini 商標" loading="lazy"><div class="k">Google</div><h4>Gemini</h4><p>對話式生成與圖像生成的核心，用於發想、圖片產生與語意分析。</p></div>
+      <div class="tool reveal" data-d="2"><img class="tool__logo" src="assets/img/logos/google.svg" alt="Google 商標" loading="lazy"><div class="k">Google</div><h4>Google Flow</h4><p>將生成圖像轉為動態影片，串接鏡頭語言與運鏡，產出虛擬棚背景素材。</p></div>
+      <div class="tool reveal" data-d="3"><img class="tool__logo" src="assets/img/logos/google.svg" alt="Google 商標" loading="lazy"><div class="k">Google</div><h4>Google AI Pro</h4><p>全班共享的進階帳號，提供充足額度與 2TB 空間，支援圖片生成、腳本與報表分析。</p></div>
+      <div class="tool reveal" data-d="4"><img class="tool__logo" src="assets/img/logos/runway.svg" alt="Runway 商標" loading="lazy"><div class="k">Runway</div><h4>Runway（免費版）</h4><p>以免費帳號嘗試，讓提示詞更能呼應影片內容；學生也實際體驗了它的限制與取捨。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ STUDENT WORKS ============================ -->
+<section class="section" id="works">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Student Works ・ VJ 製作測試</span>
+      <h2>四部學生作品</h2>
+      <p>四組同學以 AI 生成的動態背景為舞台，加上前景演員的表演與道具，創作出四部風格各異的短片。背景與前景的趣味關聯，正是這個模組的核心練習。</p>
+    </div>
+
+    <div class="video-grid">
+      <div class="vcard reveal" data-d="1">
+        <div class="lite-yt" data-id="EULtLLSJYk0" aria-label="跑跑跑"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k">VJ 製作測試 ・ 01</div><h4>跑跑跑</h4><p>動態奔跑的逃跑情境，前景演員與不斷流動的背景產生追逐張力。</p></div>
+      </div>
+      <div class="vcard reveal" data-d="2">
+        <div class="lite-yt" data-id="72HkwcVXrxc" aria-label="我要休學"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k">VJ 製作測試 ・ 02</div><h4>我要休學</h4><p>同樣以動態奔跑為主軸的逃離敘事，幽默詮釋學生心境。</p></div>
+      </div>
+      <div class="vcard reveal" data-d="1">
+        <div class="lite-yt" data-id="tJMMV2z2D0I" aria-label="鮪魚、鮭魚大作戰"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k">VJ 製作測試 ・ 03</div><h4>東港・鮪魚、鮭魚大作戰</h4><p>讓兩隻魚化身格鬥對戰選手，前方還有主持人即時講解的趣味設定。</p></div>
+      </div>
+      <div class="vcard reveal" data-d="2">
+        <div class="lite-yt" data-id="NtrZ5vC6-WI" aria-label="呆腦送"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k">VJ 製作測試 ・ 04</div><h4>呆腦送</h4><p>一隻恐龍化身外送員，穿梭世界各地送餐的小故事。</p></div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:40px">
+      <span class="eyebrow" style="color:var(--violet)">創作與排練現場 ・ 呆腦送拍攝（04/10）</span>
+      <div class="gallery feat" data-set="works" style="margin-top:18px"></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ============================ MODULE 3 — VR ============================ -->
+<section class="section" id="vr">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="module-tag tag-vr">Module 03 ・ 陳嘉暐 老師</span>
+      <h2>VR 360 沉浸式影片製作</h2>
+      <p>課程後半段進入 VR。學校配備 <b style="color:var(--ink)">Insta360 Titan</b> 專業 360 度攝影機，學生需完成兩場實拍。陳嘉暐老師的教學涵蓋全景影像的原理、VR 剪輯思維、Equirectangular 圖層編輯，以及在 Premiere 中開啟 VR Mode 進行剪輯與遮罩去除——一步步建立沉浸式影像的完整製作觀念。</p>
+    </div>
+
+    <!-- 互動教學 -->
+    <div class="reveal" style="margin-bottom:14px"><span class="eyebrow">Interactive ・ 互動教學</span></div>
+    <div class="feature-2" style="margin-bottom:46px">
+      <a class="feature reveal" data-d="1" href="teaching/vr-panorama.html" target="_blank" rel="noopener">
+        <svg class="feature__art" viewBox="0 0 600 360" fill="none" aria-hidden="true">
+          <rect width="600" height="360" fill="#0a0c15"/>
+          <g opacity="0.5" stroke="#34e3ff"><rect x="60" y="120" width="200" height="110" rx="6" stroke-opacity="0.6"/><line x1="60" y1="175" x2="260" y2="175" stroke-opacity="0.4"/></g>
+          <g stroke="#a986ff"><circle cx="430" cy="180" r="80" stroke-opacity="0.7"/><ellipse cx="430" cy="180" rx="80" ry="28" stroke="#34e3ff" stroke-opacity="0.6"/><ellipse cx="430" cy="180" rx="28" ry="80" stroke="#34e3ff" stroke-opacity="0.4"/></g>
+          <path d="M268 180 L342 180" stroke="#34e3ff" stroke-dasharray="4 5" stroke-opacity="0.7"/><path d="M338 174 l8 6 -8 6" stroke="#34e3ff" stroke-opacity="0.7"/>
+        </svg>
+        <h4>從展開圖到球體內觀看</h4>
+        <p>互動式說明全景（Panorama）球體是如何形成、又是如何讓觀者「進入」其中觀看的。</p>
+        <span class="open">開啟互動頁 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+      </a>
+      <a class="feature reveal" data-d="2" href="teaching/vr-editing.html" target="_blank" rel="noopener">
+        <svg class="feature__art" viewBox="0 0 600 360" fill="none" aria-hidden="true">
+          <rect width="600" height="360" fill="#0a0c15"/>
+          <g opacity="0.7"><rect x="70" y="90" width="460" height="50" rx="5" fill="none" stroke="#a986ff" stroke-opacity="0.5"/><rect x="70" y="150" width="320" height="50" rx="5" fill="none" stroke="#34e3ff" stroke-opacity="0.5"/><rect x="70" y="210" width="400" height="50" rx="5" fill="none" stroke="#a986ff" stroke-opacity="0.35"/></g>
+          <line x1="250" y1="70" x2="250" y2="280" stroke="#ff5fa2" stroke-opacity="0.8" stroke-width="2"/><circle cx="250" cy="70" r="5" fill="#ff5fa2"/>
+        </svg>
+        <h4>VR 剪輯該怎麼思考</h4>
+        <p>從畫框大小、視角切換到後期工作流，重新理解 VR 影片剪輯與一般影片的差異。</p>
+        <span class="open">開啟互動頁 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg></span>
+      </a>
+    </div>
+
+    <!-- 教學影片 -->
+    <div class="reveal" style="margin-bottom:14px"><span class="eyebrow" style="color:var(--violet)">Tutorials ・ 教學影片</span></div>
+    <div class="video-grid" style="margin-bottom:46px">
+      <div class="vcard reveal" data-d="1">
+        <div class="lite-yt" data-id="8OlfC8lMSEk" aria-label="EQUIRECTANGULAR 圖層編輯教學"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k"><img class="k-logo" src="assets/img/logos/adobephotoshop.svg" alt="Adobe Photoshop 商標">教學影片 ・ Photoshop</div><h4>Equirectangular 圖層編輯</h4><p>運用 Photoshop 在全景影像上做簡單生成，蓋掉原場景；重點在掌握視角的切換。</p></div>
+      </div>
+      <div class="vcard reveal" data-d="2">
+        <div class="lite-yt" data-id="tvE5U9waRmI" aria-label="VR 影片編輯教學"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body"><div class="k">教學影片 ・ Premiere</div><h4>VR 影片剪輯教學</h4><p>在 Adobe Premiere 中思考畫框大小、開啟 VR Mode 進入視角觀看與編輯，並以遮罩移除多餘元素。</p></div>
+      </div>
+    </div>
+
+    <!-- 課堂教學現場 -->
+    <div class="reveal" style="margin-bottom:14px"><span class="eyebrow" style="color:var(--violet)">In Class ・ 課堂教學現場</span></div>
+    <p class="reveal" style="color:var(--muted);max-width:60ch;margin-bottom:18px">從 VR 概論、Insta360 Titan 操作，到電腦上的全景後期與剪輯教學——學生在課堂中一步步熟悉沉浸式影像的工作流。</p>
+    <div class="gallery feat reveal" data-set="vrteach" style="margin-bottom:46px"></div>
+
+    <!-- 實拍 -->
+    <div class="reveal" style="margin-bottom:14px"><span class="eyebrow">On Set ・ VR 360 兩場實拍</span></div>
+    <p class="reveal" style="color:var(--muted);max-width:60ch;margin-bottom:18px">兩場 360 度實拍分別於 <b style="color:var(--ink)">5/22</b> 與 <b style="color:var(--ink)">5/29</b> 進行，以 Insta360 Titan 記錄學生的拍攝現場。</p>
+    <div class="gallery feat reveal" data-set="vrshoot" style="margin-bottom:46px"></div>
+
+    <!-- 期末總結影片 -->
+    <div class="reveal" style="margin-bottom:14px"><span class="eyebrow" style="color:var(--amber)">Final Showcase ・ 兩年度成果總結</span></div>
+    <div class="video-grid single">
+      <div class="vcard reveal">
+        <div class="lite-yt" data-id="YoSTAa5e0CI" data-poster="assets/img/showcase-poster.jpg" aria-label="義守影視 VR180 測試 元宇宙VR製作課"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body">
+          <div class="k">成果總結 ・ 2025 / 2026</div>
+          <h4>義守影視 VR180 測試 — 元宇宙 VR 製作課</h4>
+          <p>集結兩個年度、橫跨一首影視作品的 VR180 沉浸式測試總結。這是本課程最重要的成果呈現之一。</p>
+          <span class="badge-unlisted">● 不公開影片（Unlisted）・ 可直接於頁面播放</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 講義下載 -->
+    <div class="reveal" style="margin-top:42px">
+      <span class="eyebrow" style="color:var(--violet)">Handouts ・ 講義與筆記</span>
+      <div class="docs" style="margin-top:16px">
+        <a class="doclink" href="docs/Insta360-Titan-講義.pdf" target="_blank" rel="noopener"><span class="ic">PDF</span><div><b>Insta360 Titan 講義</b><span>360 攝影機操作 ・ 29 MB</span></div></a>
+        <a class="doclink" href="docs/DaVinci_Resolve_21_Immersive_研究筆記.docx" target="_blank" rel="noopener"><span class="ic">DOC</span><div><b>DaVinci Resolve 21 Immersive 研究筆記</b><span>沉浸式後期 ・ DOCX</span></div></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap"><div class="divider"></div></div>
+
+<!-- ============================ GAME ============================ -->
+<section class="section" id="game">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" style="color:var(--pink)">Special ・ 特別篇</span>
+      <h2>一個下午做出來的 AI 互動遊戲</h2>
+      <p>四月初，陳嘉暐老師利用元宇宙教室的場域，在課堂前用一個下午以 Vibe Coding 做出一款 AI 體感互動小遊戲，提醒同學：在 AI 的時代，我們其實可以動手做一些好玩的事。</p>
+    </div>
+
+    <div class="game reveal">
+      <div class="game__text">
+        <span class="module-tag tag-led" style="color:var(--pink);background:rgba(255,95,162,.1);border-color:rgba(255,95,162,.3)">Film Crew Pose Game</span>
+        <h3>電影劇組 Pose 挑戰賽</h3>
+        <p>遊戲透過攝影機即時偵測玩家骨架，學生要擺出各種電影工作人員的姿勢，去符合畫面中的目標骨架框架。當相似度達到 80% 以上並維持 2 秒，即可過關。</p>
+        <p>它結合 MediaPipe 姿勢辨識與 Three.js 3D 渲染，所有運算都在瀏覽器本地完成、影像不回傳伺服器——把電影美學與科技互動，玩成了一場課堂裡的體感挑戰。</p>
+        <div class="game__stack">
+          <span>MediaPipe</span><span>Three.js</span><span>GSAP</span><span>WebAssembly</span><span>Vibe Coding</span>
+        </div>
+      </div>
+      <div class="game__art">
+        <svg viewBox="0 0 400 400" fill="none" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="400" fill="#0c0a14"/>
+          <g opacity="0.25" stroke="#ff5fa2"><line x1="0" y1="100" x2="400" y2="100"/><line x1="0" y1="200" x2="400" y2="200"/><line x1="0" y1="300" x2="400" y2="300"/><line x1="100" y1="0" x2="100" y2="400"/><line x1="200" y1="0" x2="200" y2="400"/><line x1="300" y1="0" x2="300" y2="400"/></g>
+          <!-- skeleton -->
+          <g stroke="#34e3ff" stroke-width="3" stroke-linecap="round">
+            <circle cx="200" cy="110" r="26" fill="none"/>
+            <line x1="200" y1="136" x2="200" y2="240"/>
+            <line x1="200" y1="160" x2="130" y2="200"/>
+            <line x1="130" y1="200" x2="110" y2="270"/>
+            <line x1="200" y1="160" x2="270" y2="200"/>
+            <line x1="270" y1="200" x2="290" y2="270"/>
+            <line x1="200" y1="240" x2="160" y2="330"/>
+            <line x1="200" y1="240" x2="240" y2="330"/>
+          </g>
+          <g fill="#a986ff">
+            <circle cx="200" cy="136" r="6"/><circle cx="130" cy="200" r="6"/><circle cx="110" cy="270" r="6"/><circle cx="270" cy="200" r="6"/><circle cx="290" cy="270" r="6"/><circle cx="200" cy="240" r="6"/><circle cx="160" cy="330" r="6"/><circle cx="240" cy="330" r="6"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:34px;margin-bottom:14px"><span class="eyebrow" style="color:var(--pink)">Demo ・ 遊戲示範影片</span></div>
+    <div class="video-grid single">
+      <div class="vcard reveal">
+        <div class="lite-yt" data-id="ac9nkTEusZg" aria-label="電影劇組 Pose 挑戰賽 遊戲示範"><div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
+        <div class="vcard__body">
+          <div class="k">Film Crew Pose Game ・ 實機示範</div>
+          <h4>電影劇組 Pose 挑戰賽 — 遊戲示範</h4>
+          <p>實際操作畫面：T-Pose 校準、即時骨架比對與過關判定，看看 AI 體感互動在元宇宙教室裡是怎麼玩的。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:40px">
+      <span class="eyebrow" style="color:var(--cyan)">課堂現場 ・ 04/17</span>
+      <div class="gallery feat" data-set="game" style="margin-top:18px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FOOTER ============================ -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__grid">
+      <div>
+        <div class="foot__brand">元宇宙 VR 影片製作<small>METAVERSE VR FILMMAKING ・ 114-2 ・ X+AI</small></div>
+        <p style="color:var(--muted);max-width:42ch;margin-top:16px;font-size:0.92rem">義守大學 電影與電視學系 特色課程成果報告。<br>授課教師：張國甫、陳嘉暐。</p>
+        <a class="btn-isu" href="https://filmtv.isu.edu.tw/" target="_blank" rel="noopener" style="margin-top:20px">
+          前往 義守大學電影與電視學系
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </a>
+      </div>
+      <div class="foot__links">
+        <a href="#about">課程簡介</a>
+        <a href="#led">LED 虛擬棚</a>
+        <a href="#works">學生作品</a>
+        <a href="#vr">VR 製作</a>
+        <a href="#game">AI 互動遊戲</a>
+      </div>
+    </div>
+    <div class="foot__copy">© <span id="year">2026</span> 義守大學 電影與電視學系 ・ I-Shou University, Department of Film &amp; Television. 課程成果報告網站。</div>
+  </div>
+</footer>
+
+<!-- ============================ LIGHTBOX ============================ -->
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="照片瀏覽">
+  <button class="lb__close" aria-label="關閉">✕</button>
+  <button class="lb__nav prev" aria-label="上一張">‹</button>
+  <img src="" alt="放大照片">
+  <button class="lb__nav next" aria-label="下一張">›</button>
+  <div class="lb__count"></div>
+</div>
+
+<script src="assets/js/photos-manifest.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
