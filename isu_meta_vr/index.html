@@ -1,0 +1,1242 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>元宇宙 VR 影片製作課｜114-2 互動成果報告</title>
+  <meta name="description" content="義守大學 114-2 元宇宙 VR 影片製作課互動成果報告，整合 Virtual Production、X+AI、VR180 與學生影片作品。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b08;
+      --paper: #f3efe2;
+      --ink: #171711;
+      --muted: #b9b19e;
+      --line: rgba(243, 239, 226, .18);
+      --panel: rgba(20, 20, 15, .84);
+      --panel-2: rgba(243, 239, 226, .08);
+      --lime: #d6ff42;
+      --cyan: #38d5e7;
+      --red: #ff4b2e;
+      --gold: #ffb12e;
+      --green: #5ee06f;
+      --shadow: 0 28px 80px rgba(0, 0, 0, .42);
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0 / 64px 64px,
+        linear-gradient(0deg, rgba(255,255,255,.025) 1px, transparent 1px) 0 0 / 64px 64px,
+        var(--bg);
+      color: var(--paper);
+      font-family: "Noto Sans TC", sans-serif;
+      line-height: 1.7;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      opacity: .18;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.08) 0 1px, transparent 1px 3px),
+        radial-gradient(circle at 20% 10%, rgba(214,255,66,.11), transparent 28%),
+        radial-gradient(circle at 80% 20%, rgba(255,75,46,.1), transparent 30%);
+      mix-blend-mode: screen;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 0;
+      background: linear-gradient(90deg, var(--lime), var(--cyan), var(--red));
+      z-index: 40;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      backdrop-filter: blur(18px);
+      background: rgba(11, 11, 8, .72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 220px;
+      font-weight: 900;
+      letter-spacing: .06em;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: var(--lime);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 24px;
+    }
+
+    .navlinks {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .navlinks a {
+      white-space: nowrap;
+      padding: 8px 11px;
+      color: rgba(243,239,226,.78);
+      border: 1px solid transparent;
+      font-size: 14px;
+    }
+
+    .navlinks a:hover,
+    .navlinks a.active {
+      color: var(--lime);
+      border-color: rgba(214,255,66,.28);
+      background: rgba(214,255,66,.08);
+    }
+
+    .hero {
+      min-height: 92svh;
+      display: grid;
+      align-items: end;
+      position: relative;
+      isolation: isolate;
+      border-bottom: 1px solid var(--line);
+      overflow: hidden;
+    }
+
+    .hero-media {
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+    }
+
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.12) contrast(1.02);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background:
+        linear-gradient(90deg, rgba(11,11,8,.92) 0%, rgba(11,11,8,.68) 42%, rgba(11,11,8,.28) 100%),
+        linear-gradient(0deg, rgba(11,11,8,.96) 0%, transparent 42%);
+    }
+
+    .hero-inner {
+      width: min(var(--max), calc(100% - 36px));
+      margin: 0 auto;
+      padding: 96px 0 54px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .72fr);
+      gap: 40px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      gap: 10px;
+      align-items: center;
+      padding: 7px 10px;
+      border: 1px solid rgba(214,255,66,.34);
+      background: rgba(214,255,66,.08);
+      color: var(--lime);
+      font-size: 13px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .hero h1 {
+      margin: 18px 0 18px;
+      font-family: "Noto Serif TC", serif;
+      font-size: clamp(48px, 8vw, 112px);
+      line-height: .98;
+      letter-spacing: 0;
+      max-width: 880px;
+    }
+
+    .hero h1 span {
+      color: var(--lime);
+      text-shadow: 0 0 30px rgba(214,255,66,.24);
+    }
+
+    .hero-lead {
+      max-width: 760px;
+      margin: 0;
+      color: rgba(243,239,226,.82);
+      font-size: clamp(17px, 2vw, 22px);
+    }
+
+    .hero-facts {
+      border: 1px solid rgba(243,239,226,.22);
+      background: rgba(11,11,8,.64);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .fact-row {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .fact-row:last-child { border-bottom: 0; }
+    .fact-row b {
+      color: var(--lime);
+      font-size: 12px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    .fact-row span {
+      color: rgba(243,239,226,.9);
+      font-weight: 700;
+    }
+
+    section {
+      padding: 94px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wrap {
+      width: min(var(--max), 100%);
+      margin: 0 auto;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, .78fr) minmax(280px, .52fr);
+      gap: 38px;
+      align-items: end;
+      margin-bottom: 42px;
+    }
+
+    .section-kicker {
+      display: block;
+      margin-bottom: 12px;
+      color: var(--cyan);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 23px;
+      letter-spacing: .12em;
+    }
+
+    h2 {
+      margin: 0;
+      font-family: "Noto Serif TC", serif;
+      font-size: clamp(34px, 5vw, 66px);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .intro-text {
+      margin: 0;
+      color: rgba(243,239,226,.74);
+      font-size: 17px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .metric {
+      min-height: 150px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .metric strong {
+      color: var(--lime);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 54px;
+      line-height: .9;
+      letter-spacing: .02em;
+    }
+
+    .metric span {
+      color: rgba(243,239,226,.76);
+      font-weight: 700;
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, .95fr) minmax(320px, .75fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-pad { padding: 24px; }
+
+    .module-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tab {
+      min-height: 76px;
+      border: 0;
+      border-right: 1px solid var(--line);
+      background: rgba(243,239,226,.04);
+      color: rgba(243,239,226,.78);
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .tab:last-child { border-right: 0; }
+    .tab.active {
+      color: var(--ink);
+      background: var(--lime);
+    }
+
+    .module-content { display: none; padding: 28px; }
+    .module-content.active { display: block; }
+
+    .tagline {
+      margin: 0 0 18px;
+      color: var(--lime);
+      font-size: 14px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 900;
+    }
+
+    .dense-list {
+      display: grid;
+      gap: 12px;
+      margin: 20px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .dense-list li {
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 10px;
+      color: rgba(243,239,226,.78);
+    }
+
+    .dense-list li::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      margin-top: 10px;
+      background: var(--red);
+    }
+
+    .equipment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .equipment {
+      padding: 18px;
+      min-height: 138px;
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.055);
+    }
+
+    .equipment b {
+      display: block;
+      color: var(--gold);
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    .equipment span { color: rgba(243,239,226,.72); }
+
+    .timeline-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: -14px 0 26px;
+    }
+
+    .filter-btn,
+    .text-btn {
+      border: 1px solid rgba(243,239,226,.22);
+      background: rgba(243,239,226,.05);
+      color: rgba(243,239,226,.78);
+      padding: 9px 12px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .filter-btn.active,
+    .text-btn:hover {
+      color: var(--ink);
+      background: var(--cyan);
+      border-color: var(--cyan);
+    }
+
+    .timeline {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .week {
+      position: relative;
+      min-height: 214px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.055);
+      overflow: hidden;
+    }
+
+    .week::after {
+      content: attr(data-week);
+      position: absolute;
+      right: -6px;
+      bottom: -28px;
+      color: rgba(243,239,226,.05);
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 112px;
+      line-height: 1;
+    }
+
+    .week.hide { display: none; }
+    .week-type {
+      display: inline-block;
+      color: var(--ink);
+      background: var(--gold);
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .week[data-module="ai"] .week-type { background: var(--lime); }
+    .week[data-module="vr"] .week-type { background: var(--cyan); }
+
+    .week h3 {
+      font-size: 19px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .week p {
+      margin: 0;
+      color: rgba(243,239,226,.72);
+      font-size: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .video-card {
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.055);
+      overflow: hidden;
+    }
+
+    .embed {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #050505;
+    }
+
+    .embed iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .video-meta { padding: 18px; }
+    .video-meta small {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--cyan);
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .video-meta p {
+      margin: 10px 0 0;
+      color: rgba(243,239,226,.72);
+      font-size: 15px;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .flow-card {
+      border: 1px solid var(--line);
+      padding: 22px;
+      min-height: 280px;
+      background: rgba(243,239,226,.055);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .flow-no {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: white;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 31px;
+    }
+
+    .flow-card:nth-child(2) .flow-no { background: var(--cyan); color: var(--ink); }
+    .flow-card:nth-child(3) .flow-no { background: var(--lime); color: var(--ink); }
+
+    .flow-card p {
+      margin: 0;
+      color: rgba(243,239,226,.74);
+    }
+
+    .process-diagram {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .process-step {
+      min-height: 110px;
+      padding: 13px;
+      border: 1px solid rgba(243,239,226,.18);
+      background: rgba(0,0,0,.22);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .process-step b {
+      color: var(--lime);
+      font-size: 12px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+    }
+
+    .process-step span {
+      color: rgba(243,239,226,.8);
+      font-weight: 900;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .photo {
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.05);
+      cursor: zoom-in;
+      overflow: hidden;
+    }
+
+    .photo img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      transition: transform .28s ease, filter .28s ease;
+      filter: saturate(1.05) contrast(1.02);
+    }
+
+    .photo:hover img {
+      transform: scale(1.045);
+      filter: saturate(1.2) contrast(1.08);
+    }
+
+    .photo figcaption {
+      margin: 0;
+      padding: 10px 12px;
+      color: rgba(243,239,226,.72);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .evidence {
+      border: 1px solid var(--line);
+      background: rgba(243,239,226,.055);
+      overflow: hidden;
+    }
+
+    .evidence img {
+      width: 100%;
+      max-height: 680px;
+      object-fit: contain;
+      background: #eee;
+    }
+
+    .evidence .caption {
+      padding: 16px;
+      color: rgba(243,239,226,.72);
+    }
+
+    .teaching-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .resource-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 120px;
+      padding: 18px;
+      border: 1px solid rgba(243,239,226,.22);
+      background: rgba(243,239,226,.05);
+    }
+
+    .resource-link:hover {
+      border-color: var(--lime);
+      background: rgba(214,255,66,.08);
+    }
+
+    .resource-link b {
+      display: block;
+      color: var(--paper);
+      margin-bottom: 4px;
+    }
+
+    .resource-link span {
+      color: rgba(243,239,226,.66);
+      font-size: 14px;
+    }
+
+    .arrow {
+      flex: 0 0 auto;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      background: var(--lime);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .assessment {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 22px;
+      align-items: center;
+    }
+
+    .donut {
+      width: min(360px, 100%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      margin: 0 auto;
+      background: conic-gradient(var(--lime) 0 40%, var(--cyan) 40% 60%, var(--red) 60% 100%);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 0 80px rgba(214,255,66,.12);
+    }
+
+    .donut::before {
+      content: "40 / 20 / 40";
+      width: 58%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--bg);
+      display: grid;
+      place-items: center;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 36px;
+      color: var(--paper);
+      border: 1px solid var(--line);
+    }
+
+    .legend-list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .legend-list li {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      color: rgba(243,239,226,.78);
+    }
+
+    .swatch { width: 18px; height: 18px; }
+    .swatch.lime { background: var(--lime); }
+    .swatch.cyan { background: var(--cyan); }
+    .swatch.red { background: var(--red); }
+    .legend-list strong { color: var(--paper); }
+
+    .footer {
+      padding: 40px 18px;
+      color: rgba(243,239,226,.64);
+    }
+
+    .footer .wrap {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--line);
+      padding-top: 22px;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.86);
+      padding: 24px;
+    }
+
+    .lightbox.open { display: grid; }
+    .lightbox img {
+      max-width: min(1100px, 96vw);
+      max-height: 82vh;
+      object-fit: contain;
+      border: 1px solid rgba(243,239,226,.26);
+      background: #111;
+    }
+
+    .lightbox button {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+
+    .reveal.in {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .photo img { transition: none; }
+    }
+
+    @media (max-width: 940px) {
+      .hero-inner,
+      .section-head,
+      .split,
+      .assessment {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics,
+      .timeline,
+      .workflow,
+      .gallery {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .process-diagram {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .nav { align-items: flex-start; flex-direction: column; }
+      .navlinks { width: 100%; max-width: 100%; }
+      .brand { min-width: 0; }
+      .hero-inner { padding-top: 76px; }
+      section { padding: 64px 16px; }
+      .metrics,
+      .timeline,
+      .video-grid,
+      .workflow,
+      .gallery,
+      .evidence-grid,
+      .teaching-links,
+      .equipment-grid {
+        grid-template-columns: 1fr;
+      }
+      .module-tabs { grid-template-columns: 1fr; }
+      .tab { border-right: 0; border-bottom: 1px solid var(--line); }
+      .process-diagram { grid-template-columns: 1fr; }
+      .hero-facts { padding: 12px; }
+      .fact-row { grid-template-columns: 74px 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+
+  <header class="topbar">
+    <nav class="nav" aria-label="主導覽">
+      <a class="brand" href="#top" aria-label="回到頁首">
+        <span class="brand-mark">VR</span>
+        <span>114-2 X+AI 成果報告</span>
+      </a>
+      <div class="navlinks">
+        <a href="#overview">總覽</a>
+        <a href="#timeline">週次</a>
+        <a href="#vp">VP 成果</a>
+        <a href="#vr">VR 流程</a>
+        <a href="#gallery">側拍</a>
+        <a href="#evidence">佐證</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-media">
+        <img src="assets/led-virtual-production.png" alt="元宇宙教室 LED 螢幕前進行 Virtual Production 的課堂成果畫面">
+      </div>
+      <div class="hero-inner">
+        <div>
+          <span class="eyebrow">Metaverse VR Video Production</span>
+          <h1 id="hero-title">元宇宙 <span>VR 影片製作</span> 課</h1>
+          <p class="hero-lead">
+            本成果報告整理 114 學年度第 2 學期「元宇宙 VR 影片製作」課程，呈現學生如何在 LED 虛擬棚、生成式 AI 與 VR180 製作流程之間建立跨媒體創作能力。
+          </p>
+        </div>
+        <aside class="hero-facts" aria-label="課程基本資料">
+          <div class="fact-row"><b>Course</b><span>A1952100｜影視三｜必修｜3 學分</span></div>
+          <div class="fact-row"><b>Teachers</b><span>張國甫老師、陳嘉暐老師</span></div>
+          <div class="fact-row"><b>Frame</b><span>LED Virtual Production、X+AI、VR180</span></div>
+          <div class="fact-row"><b>Output</b><span>4 部 VP 作品、VR 教學與後期實作</span></div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="overview">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">Course Architecture</span>
+            <h2>一門課把影像製作推進三個新現場</h2>
+          </div>
+          <p class="intro-text">
+            課程從 LED 虛擬棚與 Virtual Production 啟動，接著導入 Runway、Google Flow、Google Gemini 等生成式 AI 工具，最後進入 Insta360 Titan、Equirectangular、VR180、Premiere 與 Showtime VR 的沉浸式製作流程。
+          </p>
+        </div>
+
+        <div class="metrics reveal" aria-label="課程成果數據">
+          <div class="metric"><strong>18</strong><span>週課程設計</span></div>
+          <div class="metric"><strong>3</strong><span>LED / AI / VR 模組</span></div>
+          <div class="metric"><strong>4</strong><span>Virtual Production 影片</span></div>
+          <div class="metric"><strong>VR180</strong><span>頭顯播放導向</span></div>
+        </div>
+
+        <div class="split reveal" style="margin-top: 22px;">
+          <article class="panel">
+            <div class="module-tabs" role="tablist" aria-label="課程模組">
+              <button class="tab active" data-tab="m-led" role="tab">LED 虛擬棚</button>
+              <button class="tab" data-tab="m-ai" role="tab">生成式 AI</button>
+              <button class="tab" data-tab="m-vr" role="tab">VR 影片</button>
+            </div>
+            <div class="module-content active" id="m-led" role="tabpanel">
+              <p class="tagline">Weeks 01-06</p>
+              <h3>從螢幕背景到拍攝現場的整合</h3>
+              <ul class="dense-list">
+                <li>理解 LED 虛擬棚的原理、棚景規劃、背景播放與即時呈現。</li>
+                <li>練習鏡頭運動、透視控制、前景與背景的協作關係。</li>
+                <li>以 VJ Virtual Production 的概念，把背景變成可演出的影像環境。</li>
+              </ul>
+            </div>
+            <div class="module-content" id="m-ai" role="tabpanel">
+              <p class="tagline">Weeks 07-12</p>
+              <h3>讓生成式 AI 進入影像前期與背景創作</h3>
+              <ul class="dense-list">
+                <li>使用 AI 進行故事、角色、場景語意分析與視覺方向探索。</li>
+                <li>透過 Runway、Google Flow、Google Gemini 等工具生成背景素材與概念圖。</li>
+                <li>把 AI 生成結果導入 LED 背景、視覺資料包與作品呈現。</li>
+              </ul>
+            </div>
+            <div class="module-content" id="m-vr" role="tabpanel">
+              <p class="tagline">Weeks 13-18</p>
+              <h3>從全景拍攝到頭顯播映的完整路徑</h3>
+              <ul class="dense-list">
+                <li>理解 VR 成像、沉浸式敘事、Equirectangular 與 VR180 的空間邏輯。</li>
+                <li>使用 Insta360 Titan 拍攝，再縫合為 VR180 素材進入後期。</li>
+                <li>以 Affinity、Photoshop、Premiere 完成圖層修補、剪輯與 Showtime VR 播映。</li>
+              </ul>
+            </div>
+          </article>
+
+          <aside class="panel panel-pad">
+            <p class="tagline">Tools & Spaces</p>
+            <div class="equipment-grid">
+              <div class="equipment"><b>元宇宙教室 LED 螢幕</b><span>作為虛擬棚背景與 VJ 式影像演出場域。</span></div>
+              <div class="equipment"><b>Runway / Google Flow / Gemini</b><span>生成背景、建立視覺敘事與測試角色場景概念。</span></div>
+              <div class="equipment"><b>Insta360 Titan</b><span>課程核心 VR 攝影機，用於拍攝可後製的高品質全景影像。</span></div>
+              <div class="equipment"><b>Affinity / Photoshop / Premiere</b><span>進行 EQ 視角調整、生成式圖層修補與 VR 剪輯。</span></div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="timeline">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">18-Week Track</span>
+            <h2>從虛擬棚到沉浸式輸出的週次軌跡</h2>
+          </div>
+          <p class="intro-text">
+            週次不是單純的技術清單，而是把「拍攝現場」「AI 生成」「沉浸式後期」逐步串成學生可實作的製作方法。
+          </p>
+        </div>
+        <div class="timeline-tools reveal" aria-label="篩選週次">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="led">LED 虛擬棚</button>
+          <button class="filter-btn" data-filter="ai">生成式 AI</button>
+          <button class="filter-btn" data-filter="vr">VR 影片</button>
+        </div>
+        <div class="timeline reveal">
+          <article class="week" data-week="01" data-module="led"><span class="week-type">LED</span><h3>LED 虛擬棚技術概論</h3><p>介紹 LED 虛擬棚原理、歷史、拍攝與合成方式。</p></article>
+          <article class="week" data-week="02" data-module="led"><span class="week-type">LED</span><h3>虛擬棚設計與搭建流程</h3><p>棚景規劃、設備架構與背景播放技術示範。</p></article>
+          <article class="week" data-week="03" data-module="led"><span class="week-type">LED</span><h3>虛擬棚中的攝影語言</h3><p>練習鏡頭運動、透視控制、前景與背景協作。</p></article>
+          <article class="week" data-week="04" data-module="led"><span class="week-type">LED</span><h3>燈光配置技巧</h3><p>整合棚內光、背景光、反差控制與材質呈現。</p></article>
+          <article class="week" data-week="05" data-module="led"><span class="week-type">LED</span><h3>即時合成與視覺呈現</h3><p>示範背景即時呈現、畫面整合與視覺控制。</p></article>
+          <article class="week" data-week="06" data-module="led"><span class="week-type">LED</span><h3>LED 小型專題拍攝</h3><p>學生完成短篇虛擬棚拍攝練習，進入作品化階段。</p></article>
+          <article class="week" data-week="07" data-module="ai"><span class="week-type">AI</span><h3>生成式 AI 影像概論</h3><p>理解影像模型原理與在影視工作中的應用範疇。</p></article>
+          <article class="week" data-week="08" data-module="ai"><span class="week-type">AI</span><h3>故事與場景語意解析</h3><p>使用 AI 解析劇本、角色性格與場景語意。</p></article>
+          <article class="week" data-week="09" data-module="ai"><span class="week-type">AI</span><h3>角色圖像與場景概念圖</h3><p>生成角色設定、場景氛圍板與視覺風格探索。</p></article>
+          <article class="week" data-week="10" data-module="ai"><span class="week-type">AI</span><h3>AI 分鏡與視覺敘事</h3><p>用 AI 生成分鏡、鏡頭語法、運動設計與草圖。</p></article>
+          <article class="week" data-week="11" data-module="ai"><span class="week-type">AI</span><h3>繪本式故事表達</h3><p>以圖像與文字敘事整合 AI 生成內容。</p></article>
+          <article class="week" data-week="12" data-module="ai"><span class="week-type">AI</span><h3>專案網站與視覺資料包</h3><p>建立作品介紹網站、視覺封面、劇組資料與簡報素材。</p></article>
+          <article class="week" data-week="13" data-module="vr"><span class="week-type">VR</span><h3>VR 技術概論</h3><p>理解 VR 成像方式、沉浸式敘事特性與應用場景。</p></article>
+          <article class="week" data-week="14" data-module="vr"><span class="week-type">VR</span><h3>VR 前期規劃</h3><p>規劃 360 度分鏡、觀看方向與場景配置。</p></article>
+          <article class="week" data-week="15" data-module="vr"><span class="week-type">VR</span><h3>VR 拍攝設備與操作</h3><p>介紹 Insta360 Titan、鏡位限制、位置設計與拍攝練習。</p></article>
+          <article class="week" data-week="16" data-module="vr"><span class="week-type">VR</span><h3>VR 剪輯與後期處理</h3><p>處理 360 影片剪輯、接縫修補、圖層覆蓋與空間音效概念。</p></article>
+          <article class="week" data-week="17" data-module="vr"><span class="week-type">VR</span><h3>沉浸式體驗設計</h3><p>討論 VR 在敘事、互動、觀看模式與頭顯體驗上的表現。</p></article>
+          <article class="week" data-week="18" data-module="vr"><span class="week-type">VR</span><h3>VR 專題製作與成果展示</h3><p>學生完成 VR 作品展示與製作反思。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="vp">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">Student Works</span>
+            <h2>Virtual Production 成果影片</h2>
+          </div>
+          <p class="intro-text">
+            學生把 LED 螢幕視為可演出的影像場域，將 AI 生成背景、跑酷場景、長廊奔跑、魚市場戰鬥、恐龍外送等敘事發想導入短片製作。以下影片來自 YouTube「陳嘉暐」頻道的不公開連結。
+          </p>
+        </div>
+        <div class="video-grid reveal">
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/EULtLLSJYk0" title="二版" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>VP Work 01</small><h3>二版</h3><p>以遊戲化、跑酷式背景與表演者身體動作建立 LED 場景的節奏感。</p></div>
+          </article>
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/tJMMV2z2D0I" title="大作戰 0421" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>VP Work 02</small><h3>大作戰_0421</h3><p>以魚的角色與戰鬥意象，把在地漁市場想像轉化為誇張的影像敘事。</p></div>
+          </article>
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/72HkwcVXrxc" title="我要休學" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>VP Work 03</small><h3>我要休學</h3><p>結合長廊奔跑、情緒表演與虛擬背景，測試角色與空間的緊張關係。</p></div>
+          </article>
+          <article class="video-card">
+            <div class="embed"><iframe src="https://www.youtube.com/embed/NtrZ5vC6-WI" title="恐龍外送意象作品" loading="lazy" allowfullscreen></iframe></div>
+            <div class="video-meta"><small>VP Work 04</small><h3>gzmc25rC7_0TYDw3Oc8rUY6OO...</h3><p>以恐龍在城市角落外送的超現實設定，示範 AI 背景與實拍角色的混合。</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="vr">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">VR180 Pipeline</span>
+            <h2>VR 影片從拍攝到播映的工作流</h2>
+          </div>
+          <p class="intro-text">
+            陳嘉暐老師的 VR 單元強調：VR 不是把影片變寬，而是重新理解觀眾站在球心看出去的影像邏輯。從 Titan 拍攝、Equirectangular、圖層修補到 Premiere 剪輯，目標是讓作品能在頭顯中被正確觀看。
+          </p>
+        </div>
+        <div class="workflow reveal">
+          <article class="flow-card">
+            <span class="flow-no">01</span>
+            <h3>拍攝與縫合</h3>
+            <p>使用 Insta360 Titan 進行 VR 拍攝，將現場素材縫合成 VR180 版本，作為後期剪輯與修補的基礎。</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-no">02</span>
+            <h3>圖層修補與視角轉換</h3>
+            <p>在 Affinity 中理解 Equirectangular 視角，再用 Photoshop 的生成式圖層或空白圖層覆蓋不順暢物件。</p>
+          </article>
+          <article class="flow-card">
+            <span class="flow-no">03</span>
+            <h3>剪輯與頭顯播映</h3>
+            <p>使用 Adobe Premiere 依照頭顯觀看方向進行剪輯，最後透過 Showtime VR 在學校設備中播映檢視。</p>
+          </article>
+        </div>
+        <div class="panel panel-pad reveal" style="margin-top: 18px;">
+          <h3>Equirectangular 後期思考</h3>
+          <div class="process-diagram" aria-label="VR 後期步驟">
+            <div class="process-step"><b>Input</b><span>VR180 素材</span></div>
+            <div class="process-step"><b>Map</b><span>2:1 展開圖</span></div>
+            <div class="process-step"><b>Project</b><span>球心視角</span></div>
+            <div class="process-step"><b>Patch</b><span>生成圖層修補</span></div>
+            <div class="process-step"><b>Output</b><span>頭顯播放版</span></div>
+          </div>
+          <div class="teaching-links">
+            <a class="resource-link" href="VR 後期製作互動教學-panorama.html" target="_blank" rel="noopener">
+              <span><b>VR 後期製作互動教學：Panorama</b><span>從展開圖到球體內觀看，理解 360 影像空間。</span></span><span class="arrow">↗</span>
+            </a>
+            <a class="resource-link" href="VR 後期製作互動教學-editing.html" target="_blank" rel="noopener">
+              <span><b>VR 後期製作互動教學：Editing</b><span>進入投影模式、局部修補，再重新展開輸出。</span></span><span class="arrow">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">Behind The Scenes</span>
+            <h2>每週側拍與課堂紀錄</h2>
+          </div>
+          <p class="intro-text">
+            這裡已將關鍵工作照下載到網站資料夾，HTML 以小圖快速載入，點擊後展開本機大圖。Drive 連結保留為素材庫入口，網站本身不再依賴 Drive 權限才顯示圖庫。
+          </p>
+        </div>
+        <div class="gallery reveal">
+          <figure class="photo"><img src="assets/gallery/thumb/0306-setup-01.jpg" alt="0306 課堂側拍" data-full="assets/gallery/full/0306-setup-01.jpg"><figcaption>0306｜課程啟動與設備認識</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0306-setup-02.jpg" alt="0306 課堂側拍" data-full="assets/gallery/full/0306-setup-02.jpg"><figcaption>0306｜東港漁市場背景測試</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0313-runner-01.jpg" alt="0313 課堂側拍" data-full="assets/gallery/full/0313-runner-01.jpg"><figcaption>0313｜LED 棚內拍攝調度</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0313-runner-02.jpg" alt="0313 課堂側拍" data-full="assets/gallery/full/0313-runner-02.jpg"><figcaption>0313｜演員與背景整合</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0320-vp-01.jpg" alt="0320 課堂側拍" data-full="assets/gallery/full/0320-vp-01.jpg"><figcaption>0320｜燈光與表演區架設</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0327-team-01.jpg" alt="0327 課堂側拍" data-full="assets/gallery/full/0327-team-01.jpg"><figcaption>0327｜學生分組實作</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0410-ai-01.jpg" alt="0410 課堂側拍" data-full="assets/gallery/full/0410-ai-01.jpg"><figcaption>0410｜恐龍背景與實拍混合</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0417-stage-01.jpg" alt="0417 課堂側拍" data-full="assets/gallery/full/0417-stage-01.jpg"><figcaption>0417｜虛擬背景走位測試</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0424-generate-01.jpg" alt="0424 課堂側拍" data-full="assets/gallery/full/0424-generate-01.jpg"><figcaption>0424｜AI 影像生成討論</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0508-vr-01.jpg" alt="0508 課堂側拍" data-full="assets/gallery/full/0508-vr-01.jpg"><figcaption>0508｜VR 單元銜接</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0522-vrpost-01.jpg" alt="0522 課堂側拍" data-full="assets/gallery/full/0522-vrpost-01.jpg"><figcaption>0522｜VR 後期實作</figcaption></figure>
+          <figure class="photo"><img src="assets/gallery/thumb/0529-edit-01.jpg" alt="0529 課堂側拍" data-full="assets/gallery/full/0529-edit-01.jpg"><figcaption>0529｜剪輯與成果整理</figcaption></figure>
+        </div>
+        <div class="teaching-links reveal">
+          <a class="resource-link" href="https://drive.google.com/drive/folders/1yfiP-QtwF0irZTuZN_GXuEVZGUjBNlM-" target="_blank" rel="noopener">
+            <span><b>課堂照片總資料夾</b><span>含 0306 到 0612 週次資料夾。</span></span><span class="arrow">↗</span>
+          </a>
+          <a class="resource-link" href="https://drive.google.com/drive/folders/13727b8WnPsFhzPtdxQOqX6AIEyy13242" target="_blank" rel="noopener">
+            <span><b>114-2VR Drive 根目錄</b><span>含學生資料、分組名單與課程側拍。</span></span><span class="arrow">↗</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <div>
+            <span class="section-kicker">Evidence & Assessment</span>
+            <h2>成果佐證與課程評量</h2>
+          </div>
+          <p class="intro-text">
+            成果包含學生作品、YouTube 上架紀錄、課堂側拍、VR 互動教材與期末展示。評量依課程申請表：出席率 40%、平時作業與實作 20%、專題製作 40%。
+          </p>
+        </div>
+        <div class="evidence-grid reveal">
+          <article class="evidence">
+            <img src="assets/youtube-studio-1.jpg" alt="YouTube 後台學生影片上架截圖一">
+            <div class="caption">YouTube 後台截圖：學生 Virtual Production 影片與 VR 測試成果上架紀錄。</div>
+          </article>
+          <article class="evidence">
+            <img src="assets/youtube-studio-2.jpg" alt="YouTube 後台學生影片上架截圖二">
+            <div class="caption">YouTube 後台截圖：包含「二版」「大作戰_0421」「我要休學」等作品。</div>
+          </article>
+        </div>
+        <div class="assessment panel panel-pad reveal" style="margin-top: 18px;">
+          <div class="donut" aria-label="出席率 40%、平時作業與實作 20%、專題製作 40%"></div>
+          <ul class="legend-list">
+            <li><span class="swatch lime"></span><strong>出席率</strong><span>40%</span></li>
+            <li><span class="swatch cyan"></span><strong>平時作業與實作</strong><span>20%</span></li>
+            <li><span class="swatch red"></span><strong>專題製作</strong><span>40%</span></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <span>義守大學 114-2｜元宇宙 VR 影片製作｜X+AI 課程成果報告</span>
+      <span>資料來源：課程計畫書、學生影片連結、YouTube 後台截圖、Google Drive 課堂照片</span>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-modal="true" role="dialog" aria-label="照片放大檢視">
+    <button type="button" id="lightboxClose" aria-label="關閉">×</button>
+    <img alt="">
+  </div>
+
+  <script>
+    const progress = document.getElementById("progress");
+    const navLinks = Array.from(document.querySelectorAll(".navlinks a"));
+    const sections = navLinks.map(link => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+
+    function updateProgress() {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? (window.scrollY / max) * 100 : 0;
+      progress.style.width = pct + "%";
+    }
+
+    const activeObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        navLinks.forEach(link => {
+          link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id);
+        });
+      });
+    }, { rootMargin: "-45% 0px -50% 0px", threshold: 0 });
+    sections.forEach(section => activeObserver.observe(section));
+
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add("in");
+      });
+    }, { threshold: .12 });
+    document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+
+    document.querySelectorAll(".tab").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+        document.querySelectorAll(".module-content").forEach(panel => panel.classList.remove("active"));
+        button.classList.add("active");
+        document.getElementById(button.dataset.tab).classList.add("active");
+      });
+    });
+
+    document.querySelectorAll(".filter-btn").forEach(button => {
+      button.addEventListener("click", () => {
+        const filter = button.dataset.filter;
+        document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+        button.classList.add("active");
+        document.querySelectorAll(".week").forEach(card => {
+          card.classList.toggle("hide", filter !== "all" && card.dataset.module !== filter);
+        });
+      });
+    });
+
+    const lightbox = document.getElementById("lightbox");
+    const lightboxImg = lightbox.querySelector("img");
+    document.querySelectorAll(".photo img").forEach(img => {
+      img.addEventListener("click", () => {
+        lightboxImg.src = img.dataset.full || img.src;
+        lightboxImg.alt = img.alt;
+        lightbox.classList.add("open");
+      });
+    });
+    document.getElementById("lightboxClose").addEventListener("click", () => lightbox.classList.remove("open"));
+    lightbox.addEventListener("click", event => {
+      if (event.target === lightbox) lightbox.classList.remove("open");
+    });
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape") lightbox.classList.remove("open");
+    });
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    updateProgress();
+  </script>
+</body>
+</html>
