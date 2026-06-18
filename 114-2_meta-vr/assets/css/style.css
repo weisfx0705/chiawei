@@ -277,6 +277,7 @@ section { position: relative; z-index: 3; }
 
 /* ============================ GALLERY（固定四欄等高格狀）============================ */
 .gallery, .gallery.feat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.gallery.trio { grid-template-columns: repeat(3, 1fr); }
 .g-item {
   position: relative; border-radius: 12px; overflow: hidden; cursor: pointer;
   background: var(--surface-2); aspect-ratio: 4 / 3;
@@ -310,6 +311,29 @@ section { position: relative; z-index: 3; }
 .date-body { max-height: 0; overflow: hidden; transition: max-height .5s ease; }
 .date-block.open .date-body { max-height: 4000px; }
 .date-body .pad { padding: 0 16px 18px; }
+
+/* final VR edit lab */
+.final-lab {
+  display: grid; grid-template-columns: 0.9fr 1.5fr; gap: 22px; align-items: stretch;
+  border: 1px solid var(--line); border-radius: 20px; padding: 18px;
+  background:
+    linear-gradient(135deg, rgba(52,227,255,0.08), transparent 36%),
+    linear-gradient(180deg, var(--surface), var(--bg-2));
+}
+.final-lab__copy {
+  min-height: 100%; padding: 22px 20px; display: flex; flex-direction: column; justify-content: center;
+}
+.final-lab__copy h3 {
+  font-family: var(--font-display); font-weight: 800; font-size: 1.55rem;
+  line-height: 1.14; letter-spacing: -0.01em; margin-bottom: 12px;
+}
+.final-lab__copy p { color: var(--muted); font-size: 0.94rem; }
+.final-lab__steps { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.final-lab__steps span {
+  font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.08em;
+  color: var(--cyan); border: 1px solid rgba(52,227,255,0.28); border-radius: 7px;
+  background: rgba(52,227,255,0.08); padding: 5px 10px;
+}
 
 /* ============================ LIGHTBOX ============================ */
 .lb { position: fixed; inset: 0; z-index: 200; background: rgba(4,5,10,0.94); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; }
@@ -377,6 +401,7 @@ section { position: relative; z-index: 3; }
 /* ============================ RESPONSIVE ============================ */
 @media (max-width: 900px) {
   .modgrid, .video-grid, .feature-2 { grid-template-columns: 1fr; }
+  .final-lab { grid-template-columns: 1fr; }
   .game { grid-template-columns: 1fr; }
   .game__art { min-height: 220px; order: -1; }
   .nav__links { display: none; position: absolute; top: 100%; right: 12px; left: 12px; flex-direction: column; align-items: stretch; gap: 2px; background: rgba(10,12,21,0.97); border: 1px solid var(--line-2); border-radius: 14px; padding: 10px; backdrop-filter: blur(14px); }
@@ -389,6 +414,9 @@ section { position: relative; z-index: 3; }
   .section { padding: 64px 0; }
   .hero { padding-top: 100px; }
   .gallery, .gallery.feat { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .gallery.trio { grid-template-columns: 1fr; }
+  .final-lab { padding: 12px; }
+  .final-lab__copy { padding: 12px 8px 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
