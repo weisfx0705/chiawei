@@ -38,6 +38,8 @@ const STORAGE_KEYS = {
 };
 
 const LAYOUT_MODES = ['default', 'focus', 'cinema'];
+// Cinema hides the top bar, so it must never be restored from storage on load.
+const RESTORABLE_LAYOUT_MODES = ['default', 'focus'];
 
 const OPENAI_TTS_VOICES = [
   'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'nova',
@@ -155,6 +157,7 @@ const el = {
   modeTag: document.getElementById('modeTag'),
   layoutSwitch: document.getElementById('layoutSwitch'),
   layoutOptions: Array.from(document.querySelectorAll('.layout-option')),
+  cinemaExitButton: document.getElementById('cinemaExitButton'),
   avatarArt: document.getElementById('avatarArt'),
   avatarImage: document.getElementById('avatarImage'),
   orbCanvas: document.getElementById('orbCanvas'),
@@ -299,7 +302,11 @@ function bindEvents() {
   el.layoutOptions.forEach((button) => {
     button.addEventListener('click', () => setLayout(button.dataset.layout, { fromUser: true }));
   });
+  el.cinemaExitButton.addEventListener('click', () => setLayout('default', { fromUser: true }));
   document.addEventListener('fullscreenchange', handleFullscreenChange);
+  // Safari dispatches the prefixed event; without this, leaving OS fullscreen
+  // through the system UI would strand the page in the cinema CSS layout.
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && document.body.dataset.layout === 'cinema' && !el.settingsDialog.open) {
       setLayout('default', { fromUser: true });
@@ -414,8 +421,10 @@ function loadPreferences() {
   const storedAutoSpeak = safeLocalStorageGet(STORAGE_KEYS.autoSpeak);
   if (storedAutoSpeak === '0') el.autoSpeakToggle.checked = false;
 
+  // Only the two layouts that keep the top bar reachable may be restored. This
+  // also rescues devices that stored 'cinema' before it stopped being persisted.
   const storedLayout = safeLocalStorageGet(STORAGE_KEYS.layout);
-  setLayout(LAYOUT_MODES.includes(storedLayout) ? storedLayout : 'default');
+  setLayout(RESTORABLE_LAYOUT_MODES.includes(storedLayout) ? storedLayout : 'default');
 }
 
 function setupMicrophoneSelection() {
@@ -547,14 +556,22 @@ function setLayout(mode, { fromUser = false } = {}) {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
-  safeLocalStorageSet(STORAGE_KEYS.layout, next);
+  // Cinema is an action, not a preference — persisting it would reopen the app
+  // in a chrome-less layout, which on touch devices there is no way out of.
+  safeLocalStorageSet(STORAGE_KEYS.layout, next === 'cinema' ? 'default' : next);
 
   // The real Fullscreen API needs a user gesture, so only call it on a click.
   if (fromUser) {
     if (next === 'cinema') {
       requestBrowserFullscreen();
-    } else if (document.fullscreenElement) {
-      Promise.resolve(document.exitFullscreen?.()).catch(() => {});
+    } else if (document.fullscreenElement || document.webkitFullscreenElement) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      try {
+        const result = exit?.call(document);
+        if (result && typeof result.catch === 'function') result.catch(() => {});
+      } catch (error) {
+        // Already out of fullscreen, or the browser refused; the layout is what matters.
+      }
     }
   }
 }
@@ -575,7 +592,8 @@ function requestBrowserFullscreen() {
 
 function handleFullscreenChange() {
   // Leaving OS fullscreen (e.g. pressing Esc) while in cinema returns to the work layout.
-  if (!document.fullscreenElement && document.body.dataset.layout === 'cinema') {
+  const active = document.fullscreenElement || document.webkitFullscreenElement;
+  if (!active && document.body.dataset.layout === 'cinema') {
     setLayout('default');
   }
 }

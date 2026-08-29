@@ -1276,6 +1276,49 @@ body[data-layout="cinema"] .avatar-art {
   width: min(92vw, 82dvh);
 }
 
+/* The exit affordance for cinema. Deliberately always visible — a button that
+   fades out is exactly how people get stranded here on a touch screen. The
+   safe-area insets keep it clear of the Dynamic Island and the display corners. */
+.cinema-exit { display: none; }
+body[data-layout="cinema"] .cinema-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: fixed;
+  z-index: 50;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  min-width: 44px;
+  min-height: 44px;          /* Apple HIG minimum touch target */
+  padding: 0 16px;
+  border: 1px solid rgba(255,255,255,.28);
+  border-radius: 999px;
+  background: rgba(20,18,17,.55);
+  color: #fff;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  transition: background .2s var(--ease), border-color .2s var(--ease);
+}
+body[data-layout="cinema"] .cinema-exit:hover,
+body[data-layout="cinema"] .cinema-exit:focus-visible {
+  background: rgba(20,18,17,.78);
+  border-color: rgba(255,255,255,.5);
+}
+.cinema-exit svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .sr-only,
 .sr-only:focus:not(:focus-visible) {
   position: absolute !important;
