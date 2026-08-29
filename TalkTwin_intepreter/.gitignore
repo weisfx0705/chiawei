@@ -1,0 +1,10 @@
+# 這是純靜態版：沒有伺服器、沒有金鑰檔案。
+# API Key 只存在使用者自己的瀏覽器 localStorage，絕不會進入這個 repo。
+
+# 編輯器與工具設定
+.claude/
+.vscode/
+.idea/
+
+# macOS
+.DS_Store

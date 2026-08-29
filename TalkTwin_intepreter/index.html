@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; media-src 'self' blob: data:; connect-src 'self' https://api.openai.com; form-action 'none'; base-uri 'none'; object-src 'none'" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#f7f2ec" />
+  <title>TalkTwin 即席口譯 — 雙向即時翻譯</title>
+  <link rel="stylesheet" href="styles.css?v=1.0.0" />
+</head>
+<body>
+  <div class="page-glow page-glow-a" aria-hidden="true"></div>
+  <div class="page-glow page-glow-b" aria-hidden="true"></div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="TalkTwin 即席口譯首頁">
+        <span class="brand-mark" aria-hidden="true">⇄</span>
+        <span>
+          <strong>TalkTwin 即席口譯</strong>
+          <small id="brandPair">中文 ⇄ English</small>
+        </span>
+      </a>
+
+      <div class="topbar-actions">
+        <div class="layout-switch" id="layoutSwitch" role="group" aria-label="版面切換">
+          <button type="button" class="layout-option is-active" data-layout="default" title="工作版面（Avatar + 對話）" aria-label="工作版面">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="1.5" /><rect x="13" y="4" width="8" height="16" rx="1.5" /></svg>
+          </button>
+          <button type="button" class="layout-option" data-layout="focus" title="Avatar 置中（隱藏對話窗）" aria-label="Avatar 置中">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7" /></svg>
+          </button>
+          <button type="button" class="layout-option" data-layout="cinema" title="Avatar 全螢幕" aria-label="Avatar 全螢幕">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M20 9V5a1 1 0 0 0-1-1h-4M4 15v4a1 1 0 0 0 1 1h4M20 15v4a1 1 0 0 1-1 1h-4" /></svg>
+          </button>
+        </div>
+        <div class="engine-pill" id="enginePill" title="目前對話引擎">
+          <span class="status-dot" id="statusDot" aria-hidden="true"></span>
+          <span id="engineLabel">偵測中…</span>
+        </div>
+        <button class="settings-button" id="settingsButton" type="button" title="OpenAI 設定" aria-label="開啟 OpenAI 設定">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.09A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.09A1.7 1.7 0 0 0 4.6 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.09A1.7 1.7 0 0 0 15.5 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.4.25.75.6 1 1 .19.33.3.71.31 1.1V11h.09v4h-.09a1.7 1.7 0 0 0-1.31 0Z" /></svg>
+          <span>設定</span>
+        </button>
+        <button class="icon-button" id="clearChatButton" type="button" title="清除對話" aria-label="清除對話">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v5m4-5v5" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="panel avatar-panel" aria-labelledby="avatarHeading">
+        <div class="panel-heading compact-heading">
+          <div>
+            <p class="eyebrow">LIVE INTERPRETER</p>
+            <h1 id="avatarHeading">你的即席雙向口譯官</h1>
+          </div>
+          <span class="mode-tag pair-tag" id="modeTag">中文 ⇄ English</span>
+        </div>
+
+        <div class="avatar-zone">
+          <div class="avatar-halo" aria-hidden="true"></div>
+          <div class="avatar-art" id="avatarArt">
+            <canvas class="orb-canvas" id="orbCanvas" aria-hidden="true"></canvas>
+            <img class="avatar-source-image" id="avatarImage" src="assets/avatar.jpeg" alt="角色來源圖片" hidden />
+
+            <div class="orb-fallback" aria-hidden="true">
+              <span class="orb-fallback-sphere"></span>
+              <span class="orb-fallback-mouth"></span>
+            </div>
+
+            <div class="orb-state-chip" id="orbStateChip" aria-hidden="true">
+              <span class="orb-state-dot"></span>
+              <span id="orbStateLabel">待機</span>
+            </div>
+
+            <div class="source-chip" id="sourceChip" title="這顆能量體由此圖片生成">
+              <img id="sourceChipImage" src="assets/avatar.jpeg" alt="" />
+              <span id="sourceChipName">預設角色</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="realtime-card" id="realtimeCard">
+          <div class="realtime-copy">
+            <span class="realtime-orb" id="realtimeOrb" aria-hidden="true"></span>
+            <div>
+              <strong id="realtimeTitle">即席口譯 · OpenAI Realtime</strong>
+              <small id="realtimeStatus">設定 API Key 後，按右邊開始逐句雙向翻譯</small>
+            </div>
+          </div>
+          <div class="realtime-actions">
+            <label class="realtime-voice-picker" title="選擇下一次即時對話使用的聲音">
+              <span>聲音</span>
+              <select id="quickRealtimeVoiceSelect" aria-label="選擇 Realtime 聲音">
+                <option value="cedar">👨 Cedar</option>
+                <option value="marin">👩 Marin</option>
+                <option value="alloy">👨 Alloy</option>
+                <option value="ash">👨 Ash</option>
+                <option value="ballad">👨 Ballad</option>
+                <option value="coral">👩 Coral</option>
+                <option value="echo">👨 Echo</option>
+                <option value="sage">👩 Sage</option>
+                <option value="shimmer">👩 Shimmer</option>
+                <option value="verse">👨 Verse</option>
+              </select>
+            </label>
+            <button class="secondary-button realtime-mute" id="realtimeMuteButton" type="button" disabled>靜音</button>
+            <button class="primary-button realtime-button" id="realtimeButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Zm-7-4a7 7 0 0 0 14 0M12 18v3m-4 0h8" /></svg>
+              <span>開始即席口譯</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="live-caption" aria-live="polite">
+          <span class="caption-label" id="captionLabel">READY</span>
+          <p class="caption-source" id="captionSource" hidden></p>
+          <p id="liveCaption">選好兩種語言後，按「開始即席口譯」，講者說一句就翻一句。</p>
+        </div>
+
+        <div class="voice-controls">
+          <button class="secondary-button" id="repeatButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2-5M5 4v5h5M9 12l7-4v8z" /></svg>
+            重播
+          </button>
+          <button class="secondary-button" id="stopVoiceButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1" /></svg>
+            停止
+          </button>
+
+          <label class="voice-select-label">
+            <span>OpenAI TTS 聲音</span>
+            <select id="voiceSelect" aria-label="選擇 OpenAI TTS 聲音">
+              <option value="cedar">👨 Cedar</option>
+            </select>
+            <small>AI 合成語音</small>
+          </label>
+
+          <label class="rate-control">
+            <span>語速 <output id="rateOutput">1.0×</output></span>
+            <input id="rateSlider" type="range" min="0.7" max="1.3" step="0.05" value="1" />
+          </label>
+        </div>
+      </section>
+
+      <section class="panel conversation-panel" aria-labelledby="conversationHeading">
+        <div class="tabs" role="tablist" aria-label="分身控制區">
+          <button class="tab-button is-active" id="chatTab" type="button" role="tab" aria-selected="true" aria-controls="chatView">逐句紀錄</button>
+          <button class="tab-button" id="profileTab" type="button" role="tab" aria-selected="false" aria-controls="profileView">翻譯設定</button>
+        </div>
+
+        <div class="tab-view is-active" id="chatView" role="tabpanel" aria-labelledby="chatTab">
+          <div class="panel-heading chat-heading">
+            <div>
+              <p class="eyebrow">TRANSCRIPT</p>
+              <h2 id="conversationHeading">原文與譯文逐句紀錄</h2>
+            </div>
+            <label class="switch-label" title="收到回答後自動朗讀">
+              <input id="autoSpeakToggle" type="checkbox" checked />
+              <span class="switch" aria-hidden="true"></span>
+              <span>文字翻譯自動朗讀</span>
+            </label>
+          </div>
+
+          <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-relevant="additions">
+            <article class="message assistant-message">
+              <div class="message-avatar" aria-hidden="true">⇄</div>
+              <div class="message-body">
+                <p>選好兩種語言後按「開始即席口譯」。也可以直接在下面打字，我會翻成另一種語言。</p>
+                <span class="message-meta">口譯官 · 剛剛</span>
+              </div>
+            </article>
+          </div>
+
+          <div class="prompt-chips" aria-label="快速測試句">
+            <button type="button" data-prompt="大家好，歡迎來到今天的演講。">測試句 · 中文</button>
+            <button type="button" data-prompt="Hello everyone, welcome to today\u2019s speech.">測試句 · English</button>
+            <button type="button" data-prompt="我很高興在這裡見到大家。">測試句 · 中文</button>
+          </div>
+
+          <form class="composer" id="messageForm">
+            <label class="sr-only" for="messageInput">輸入要翻譯的句子</label>
+            <textarea id="messageInput" rows="3" maxlength="4000" placeholder="輸入要翻譯的句子；按 Enter 送出，Shift + Enter 換行…" required></textarea>
+            <div class="composer-actions">
+              <div class="composer-left">
+                <button class="mic-button" id="micButton" type="button" title="語音輸入" aria-label="開始語音輸入">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Zm-7-4a7 7 0 0 0 14 0M12 18v3m-4 0h8" /></svg>
+                </button>
+                <span id="inputHint">可打字翻譯；現場口譯請按左側「開始即席口譯」</span>
+              </div>
+              <button class="primary-button" id="sendButton" type="submit">
+                <span>送出</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 16 8-16 8 3-8-3-8Zm3 8h13" /></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="tab-view" id="profileView" role="tabpanel" aria-labelledby="profileTab" hidden>
+          <div class="panel-heading profile-heading">
+            <div>
+              <p class="eyebrow">INTERPRETER SETUP</p>
+              <h2>選擇你常用的兩種語言</h2>
+            </div>
+            <div class="profile-heading-actions">
+              <span class="save-state" id="saveState">尚未修改</span>
+              <button class="primary-button compact-save" id="saveInterpreterButtonTop" type="button">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Zm3 0v6h8V4M8 20v-6h8v6" /></svg>
+                儲存翻譯設定
+              </button>
+            </div>
+          </div>
+
+          <div class="lang-pair" role="group" aria-label="翻譯語言配對">
+            <label class="lang-slot">
+              <span class="field-title">語言 A</span>
+              <select id="languageASelect"></select>
+            </label>
+            <button class="swap-button" id="swapLanguagesButton" type="button" title="對調兩種語言" aria-label="對調兩種語言">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3m3 13H7l3 3" /></svg>
+            </button>
+            <label class="lang-slot">
+              <span class="field-title">語言 B</span>
+              <select id="languageBSelect"></select>
+            </label>
+          </div>
+          <p class="lang-pair-hint" id="languagePairHint">講者說 A 就翻成 B，切換到 B 就翻回 A，逐句雙向。</p>
+
+          <div class="interpreter-grid">
+            <label class="field-block">
+              <span class="field-title">服務場域</span>
+              <span class="field-help">寫進提示詞，幫助模型用對校名、單位與稱謂。</span>
+              <input id="venueInput" type="text" maxlength="200" autocomplete="off" placeholder="義守大學 I-Shou University" />
+            </label>
+
+            <label class="field-block">
+              <span class="field-title">語氣</span>
+              <span class="field-help">口譯時的情緒溫度。</span>
+              <select id="toneSelect">
+                <option value="warm">友善、帶有情感（建議）</option>
+                <option value="neutral">中性、專業、精準</option>
+                <option value="formal">正式、莊重（典禮致詞）</option>
+              </select>
+            </label>
+
+            <label class="field-block">
+              <span class="field-title">斷句節奏</span>
+              <span class="field-help">決定要多快接話。講者句子長就選「耐心」。</span>
+              <select id="pacingSelect">
+                <option value="fast">快 · 講者一停就翻</option>
+                <option value="balanced">平衡（建議）</option>
+                <option value="patient">耐心 · 等整句說完</option>
+              </select>
+            </label>
+
+            <label class="field-block">
+              <span class="field-title">譯文風格</span>
+              <span class="field-help">是否允許補一句極短的文化說明。</span>
+              <select id="styleSelect">
+                <option value="strict">只給譯文（建議）</option>
+                <option value="assist">必要時補極短說明</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="toggle-row">
+            <input id="showSourceToggle" type="checkbox" checked />
+            <span>
+              <strong>顯示原文字幕</strong>
+              <small>用 Realtime 語音辨識同時顯示講者原句；關閉可略為降低延遲與費用。</small>
+            </span>
+          </label>
+
+          <div class="profile-grid">
+            <label class="field-block">
+              <span class="field-title">詞彙表／專有名詞對照</span>
+              <span class="field-help">每行一組對照，例如「國際及兩岸事務處 = Office of International and Cross-Strait Affairs」。口譯時會整份載入，優先採用。</span>
+              <textarea id="knowledgeInput" rows="12" maxlength="120000" spellcheck="false" placeholder="義守大學 = I-Shou University&#10;主校區 = Main Campus&#10;陳嘉暐 = Chia-Wei Chen"></textarea>
+            </label>
+
+            <label class="field-block">
+              <span class="field-title">補充指示（選填）</span>
+              <span class="field-help">給口譯官的額外規則，會加在提示詞最後、優先於通則。</span>
+              <textarea id="notesInput" rows="5" maxlength="4000" spellcheck="false" placeholder="例如：校長致詞時請用最正式的敬語；數字一律重複一次確認。"></textarea>
+            </label>
+          </div>
+
+          <details class="prompt-preview">
+            <summary>進階：檢視／自訂送給模型的提示詞</summary>
+            <p class="field-help">按「儲存翻譯設定」會依上面的選項重新產生這段提示詞並覆寫。若要手動微調，改完直接按「只儲存提示詞」。</p>
+            <textarea id="personaInput" rows="16" maxlength="30000" spellcheck="false"></textarea>
+            <div class="preview-actions">
+              <button class="ghost-button" id="regeneratePromptButton" type="button">依設定重新產生</button>
+              <button class="ghost-button" id="saveProfileButton" type="button">只儲存提示詞</button>
+            </div>
+          </details>
+
+          <div class="profile-actions">
+            <button class="ghost-button" id="resetProfileButton" type="button">恢復預設設定</button>
+            <button class="primary-button" id="saveInterpreterButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Zm3 0v6h8V4M8 20v-6h8v6" /></svg>
+              儲存翻譯設定
+            </button>
+          </div>
+
+          <aside class="engine-card" aria-labelledby="engineCardTitle">
+            <div>
+              <p class="eyebrow">BRAIN CONNECTION</p>
+              <h3 id="engineCardTitle">目前引擎</h3>
+            </div>
+            <dl>
+              <div><dt>模式</dt><dd id="engineModeDetail">偵測中…</dd></div>
+              <div><dt>模型</dt><dd id="engineModelDetail">—</dd></div>
+              <div><dt>資料位置</dt><dd id="profileStorageDetail">瀏覽器本機</dd></div>
+            </dl>
+            <p id="engineHelp">按右上角「設定」輸入你自己的 OpenAI API Key 即可開始。所有資料都留在這個瀏覽器。</p>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer-note">
+      <span><a class="footer-link" href="https://weisfx0705.github.io/chiawei/" target="_blank" rel="noopener noreferrer">義守大學陳嘉暐老師開發</a> 20260830</span>
+    </footer>
+  </div>
+
+  <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+    <form class="settings-form" id="settingsForm" method="dialog">
+      <div class="settings-heading">
+        <div>
+          <p class="eyebrow">OPENAI CONNECTION</p>
+          <h2 id="settingsTitle">連接你的 OpenAI API</h2>
+          <p>這是靜態網頁版。Key 只存在你自己的瀏覽器，直接送給 OpenAI，不會經過任何中間伺服器。</p>
+        </div>
+        <button class="dialog-close" id="settingsCloseButton" type="button" aria-label="關閉設定">×</button>
+      </div>
+
+      <div class="settings-grid">
+        <label class="settings-field api-key-field">
+          <span>OpenAI API Key</span>
+          <span class="input-with-action">
+            <input id="apiKeyInput" type="password" inputmode="text" autocomplete="off" spellcheck="false" placeholder="sk-…" />
+            <button id="toggleApiKeyButton" type="button">顯示</button>
+          </span>
+          <small id="apiKeyState">尚未設定</small>
+        </label>
+
+        <div class="key-notice" role="note">
+          <details class="key-risk" open>
+            <summary><span aria-hidden="true">⚠️</span> 使用前請先了解風險</summary>
+            <ul>
+              <li>Key 存在<strong>這台裝置的瀏覽器</strong>（localStorage）。清除瀏覽資料就會消失，換一台電腦要重新輸入。</li>
+              <li>靜態網頁沒有後端可以代為保管，因此 Key 會出現在瀏覽器的開發者工具中，也可能被有權限的瀏覽器擴充功能讀取。<strong>請不要在公用或共用電腦上輸入。</strong></li>
+              <li>請使用可獨立設定額度的 <strong>Project API Key</strong>，並在 OpenAI 後台設定每月用量上限，萬一外洩損失有限。</li>
+              <li>所有 API 用量都會計入<strong>你自己的</strong> OpenAI 帳單。Realtime 即時語音的費率高於一般文字，長時間開著請留意用量。</li>
+              <li>離開前若使用的是他人電腦，請按下方的「移除 OpenAI Key」。</li>
+            </ul>
+          </details>
+
+          <details class="key-howto">
+            <summary><span aria-hidden="true">🔑</span> 還沒有 API Key？三分鐘申請教學</summary>
+            <ol>
+              <li>到 <strong>platform.openai.com</strong> 註冊或登入 OpenAI 帳號（與 ChatGPT 帳號相同即可）。</li>
+              <li>進入 <strong>Settings → Billing</strong>，綁定信用卡並儲值（最低約 US$5）。<em>沒有付款方式的帳號無法呼叫 API，這與 ChatGPT Plus 訂閱是兩回事。</em></li>
+              <li>進入 <strong>Dashboard → API keys</strong>，按 <strong>Create new secret key</strong>。</li>
+              <li>建議選擇某個 <strong>Project</strong> 底下建立，方便單獨設定額度與追蹤用量。</li>
+              <li>複製那串 <code>sk-</code> 開頭的字串——<strong>它只會顯示這一次</strong>，關掉視窗就看不到了。</li>
+              <li>貼到上面的欄位，按下方「儲存並連接」。</li>
+              <li>回到 <strong>Settings → Limits</strong> 設定每月用量上限（建議先設 US$5–10）。</li>
+            </ol>
+            <p class="key-howto-foot">若出現 <code>insufficient_quota</code>，代表帳戶餘額不足；若出現 <code>invalid_api_key</code>，請確認複製時沒有多餘空白。</p>
+          </details>
+        </div>
+
+        <label class="settings-field">
+          <span>文字對話模型</span>
+          <input id="chatModelInput" type="text" value="gpt-5.4-mini" autocomplete="off" spellcheck="false" />
+        </label>
+
+        <label class="settings-field">
+          <span>Realtime 模型</span>
+          <input id="realtimeModelInput" type="text" value="gpt-realtime-2.1" autocomplete="off" spellcheck="false" />
+        </label>
+
+        <label class="settings-field">
+          <span>Realtime 聲音</span>
+          <select id="realtimeVoiceSelect">
+            <option value="cedar">👨 Cedar · 台灣華語提示（建議）</option>
+            <option value="marin">👩 Marin · 台灣華語提示</option>
+            <option value="alloy">👨 Alloy</option>
+            <option value="ash">👨 Ash</option>
+            <option value="ballad">👨 Ballad</option>
+            <option value="coral">👩 Coral</option>
+            <option value="echo">👨 Echo</option>
+            <option value="sage">👩 Sage</option>
+            <option value="shimmer">👩 Shimmer</option>
+            <option value="verse">👨 Verse</option>
+          </select>
+          <small>👨／👩 是一般聽感的參考，OpenAI 官方並未標示聲音性別，建議實際試聽再決定。你指定的 Onyx／Onxy 目前不支援 Realtime；本專案預設以 Cedar 取代，再用 Prompt 固定自然台灣華語。</small>
+        </label>
+
+        <div class="settings-field">
+          <label for="microphoneSelect">Realtime 輸入麥克風</label>
+          <div class="microphone-setting">
+            <select id="microphoneSelect" aria-describedby="microphoneHelp">
+              <option value="">系統預設麥克風</option>
+            </select>
+            <button id="refreshMicrophonesButton" type="button">重新掃描</button>
+          </div>
+          <small id="microphoneHelp">選擇會儲存在這個瀏覽器，並於下一次 Realtime 連線套用。</small>
+        </div>
+
+        <label class="settings-field">
+          <span>一般文字朗讀模型</span>
+          <input id="ttsModelInput" type="text" value="gpt-4o-mini-tts" autocomplete="off" spellcheck="false" />
+        </label>
+
+        <label class="settings-field">
+          <span>一般文字朗讀聲音</span>
+          <select id="ttsVoiceSelect" disabled aria-describedby="ttsVoiceHelp">
+            <option value="cedar">👨 Cedar · 與 Realtime 相同（預設）</option>
+            <option value="onyx">👨 Onyx · 台灣華語提示</option>
+            <option value="marin">👩 Marin · 台灣華語提示</option>
+            <option value="alloy">👨 Alloy</option>
+            <option value="ash">👨 Ash</option>
+            <option value="ballad">👨 Ballad</option>
+            <option value="coral">👩 Coral</option>
+            <option value="echo">👨 Echo</option>
+            <option value="fable">👨 Fable</option>
+            <option value="nova">👩 Nova</option>
+            <option value="sage">👩 Sage</option>
+            <option value="shimmer">👩 Shimmer</option>
+            <option value="verse">👨 Verse</option>
+          </select>
+          <small id="ttsVoiceHelp">自動跟隨 Realtime 聲音；一般文字回答會透過 OpenAI Speech API 產生。</small>
+        </label>
+      </div>
+
+      <section class="avatar-settings-section" aria-labelledby="avatarSettingsTitle">
+        <div class="avatar-settings-heading">
+          <div>
+            <p class="eyebrow">AVATAR ESSENCE</p>
+            <h3 id="avatarSettingsTitle">角色庫與能量體生成</h3>
+            <p>上傳任何 PNG、JPEG 或 WebP——不限人臉。圖片的色彩會成為能量體的靈魂色盤，影像本身會漂浮在球體核心。每次上傳都會存成一個新角色。</p>
+          </div>
+          <span class="avatar-save-state" id="avatarSaveState">目前使用預設角色</span>
+        </div>
+
+        <div class="avatar-library-bar">
+          <label class="settings-field avatar-library-select-field">
+            <span>目前角色</span>
+            <select id="avatarLibrarySelect" aria-label="選擇角色"></select>
+            <small id="avatarLibraryHint">從下拉選單切換已儲存的角色。</small>
+          </label>
+          <div class="avatar-library-actions">
+            <button class="ghost-button" id="renameAvatarButton" type="button">重新命名</button>
+            <button class="ghost-button danger-button" id="deleteAvatarButton" type="button">刪除此角色</button>
+          </div>
+        </div>
+
+        <div class="avatar-editor-grid">
+          <div class="avatar-preview-column">
+            <div class="avatar-preview-frame" id="avatarPreviewFrame" tabindex="0" aria-label="能量體最終預覽；可拖曳中央影像調整位置">
+              <canvas class="essence-preview-canvas" id="essencePreviewCanvas" aria-hidden="true"></canvas>
+              <img id="avatarPreviewImage" src="assets/avatar.jpeg" alt="角色來源圖片預覽" hidden />
+              <span class="preview-orbit-line" aria-hidden="true"></span>
+              <span class="preview-crosshair" aria-hidden="true"></span>
+              <span class="preview-drag-hint">拖曳中央影像</span>
+            </div>
+            <div class="preview-status-row">
+              <span><i aria-hidden="true"></i> AVATAR ESSENCE</span>
+              <strong>即時成品預覽</strong>
+            </div>
+          </div>
+
+          <div class="avatar-editor-controls">
+            <label class="avatar-file-button">
+              <input id="avatarFileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+              <span>選擇來源圖片</span>
+            </label>
+
+            <label class="settings-field">
+              <span>能量體風格</span>
+              <select id="avatarRigModeSelect">
+                <option value="sophon">智子 · 鏡面星核</option>
+                <option value="aurora">極光 · 流動光譜</option>
+                <option value="ember">熔核 · 暖光脈動</option>
+              </select>
+              <small>三種風格共用同一套呼吸與說話動態，只改變球體的質感。</small>
+            </label>
+
+            <div class="avatar-framing-block">
+              <div class="avatar-framing-head">
+                <span>中央影像構圖</span>
+                <output id="avatarZoomOutput">100%</output>
+              </div>
+              <label class="avatar-zoom-control">
+                <span>縮放</span>
+                <input id="avatarZoomRange" type="range" min="0.7" max="3" step="0.01" value="1" />
+              </label>
+              <label class="avatar-zoom-control avatar-opacity-control">
+                <span>可見度</span>
+                <input id="avatarOpacityRange" type="range" min="15" max="100" step="1" value="94" />
+                <output id="avatarOpacityOutput">94%</output>
+              </label>
+              <div class="avatar-framing-actions">
+                <button class="ghost-button" id="autoFocusAvatarButton" type="button">自動抓臉</button>
+                <button class="ghost-button" id="centerAvatarButton" type="button">回到中央</button>
+              </div>
+              <small id="avatarFramingHint">直接拖曳左側預覽決定中央內容；「可見度」越高，原圖色彩與人物細節越清楚。若瀏覽器支援，會嘗試抓到最大的人臉。</small>
+            </div>
+
+            <div class="orb-palette-block">
+              <div class="orb-palette-head">
+                <span class="orb-palette-title">能量體色彩</span>
+                <label class="switch-label orb-color-mode-toggle" title="關閉時自動從圖片萃取；開啟後可自訂三色">
+                  <input id="orbCustomColorToggle" type="checkbox" />
+                  <span class="switch" aria-hidden="true"></span>
+                  <span>自訂色彩</span>
+                </label>
+              </div>
+
+              <div class="orb-candidate-row" id="orbCandidateRow" role="group" aria-label="圖片色彩候選；點選以此色配色"></div>
+
+              <div class="orb-color-inputs">
+                <label class="orb-color-input">
+                  <input id="orbColorA" type="color" value="#55c8f0" disabled />
+                  <span>主色</span>
+                </label>
+                <label class="orb-color-input">
+                  <input id="orbColorB" type="color" value="#8f7bf5" disabled />
+                  <span>流動色</span>
+                </label>
+                <label class="orb-color-input">
+                  <input id="orbColorC" type="color" value="#f08fd0" disabled />
+                  <span>光暈色</span>
+                </label>
+              </div>
+
+              <small id="orbPaletteHint">上傳圖片後會自動萃取主色；點上方候選色可用該色重新配色。</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="avatar-settings-actions">
+          <button class="ghost-button danger-button" id="resetAvatarButton" type="button">恢復預設角色</button>
+          <button class="primary-button" id="saveAvatarButton" type="button">儲存角色圖片</button>
+        </div>
+      </section>
+
+      <div class="settings-notice">
+        <strong>安全提醒</strong>
+        <span>請使用可控額度的 Project API Key。API 使用量會依你的 OpenAI 帳戶計費。</span>
+      </div>
+
+      <div class="settings-actions">
+        <button class="ghost-button danger-button" id="clearApiKeyButton" type="button">移除 OpenAI Key</button>
+        <button class="primary-button" id="settingsSaveButton" type="submit">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Zm3 0v6h8V4M8 20v-6h8v6" /></svg>
+          儲存並連接
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <audio id="realtimeAudio" autoplay playsinline hidden></audio>
+  <audio id="ttsAudio" playsinline hidden></audio>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="static-api.js?v=1.0.0" defer></script>
+  <script src="orb.js?v=1.0.0" defer></script>
+  <script src="app.js?v=1.0.0" defer></script>
+</body>
+</html>
