@@ -26,41 +26,59 @@ const TalkTwinStaticAPI = (() => {
   // --- 語言目錄（與 server.py 的 INTERPRETER_LANGUAGES 對應）---------------
   const LANGUAGES = [
     { code: 'zh-TW', label: '中文（台灣）', native: '繁體中文', english: 'Traditional Chinese (Taiwan Mandarin)',
-      voice_note: '自然、清楚、穩定的台灣華語口音；用台灣慣用詞與語速，避免中國大陸播報腔、兒化音與過度捲舌。' },
+      voice_note: '自然、清楚、穩定的台灣華語口音；用台灣慣用詞與語速，避免中國大陸播報腔、兒化音與過度捲舌。',
+      voice_note_en: 'natural, clear, steady Taiwan Mandarin; Taiwanese word choice and pacing, no Mainland news-anchor delivery, no erhua, no heavy retroflex.' },
     { code: 'zh-CN', label: '中文（简体 · 普通话）', native: '简体中文', english: 'Simplified Chinese (Mandarin)',
-      voice_note: '標準普通話發音，語速平穩自然。' },
+      voice_note: '標準普通話發音，語速平穩自然。',
+      voice_note_en: 'standard Mandarin pronunciation at a steady, natural pace.' },
     { code: 'en', label: '英文 English', native: 'English', english: 'English',
-      voice_note: 'clear, natural, neutral international English; conversational pace, not a news anchor.' },
+      voice_note: 'clear, natural, neutral international English; conversational pace, not a news anchor.',
+      voice_note_en: 'clear, natural, neutral international English; conversational pace, not a news anchor.' },
     { code: 'ja', label: '日文 日本語', native: '日本語', english: 'Japanese',
-      voice_note: '自然で丁寧な日本語。場面に合わせた敬語を使う。' },
+      voice_note: '自然で丁寧な日本語。場面に合わせた敬語を使う。',
+      voice_note_en: 'natural, polite Japanese with keigo appropriate to the setting.' },
     { code: 'ko', label: '韓文 한국어', native: '한국어', english: 'Korean',
-      voice_note: '자연스러운 표준 한국어, 상황에 맞는 존댓말.' },
+      voice_note: '자연스러운 표준 한국어, 상황에 맞는 존댓말.',
+      voice_note_en: 'natural standard Korean using honorifics suited to the setting.' },
     { code: 'vi', label: '越南文 Tiếng Việt', native: 'Tiếng Việt', english: 'Vietnamese',
-      voice_note: 'tiếng Việt tự nhiên, giọng chuẩn, tốc độ vừa phải.' },
+      voice_note: 'tiếng Việt tự nhiên, giọng chuẩn, tốc độ vừa phải.',
+      voice_note_en: 'natural Vietnamese with a standard accent at a moderate pace.' },
     { code: 'id', label: '印尼文 Bahasa Indonesia', native: 'Bahasa Indonesia', english: 'Indonesian',
-      voice_note: 'Bahasa Indonesia yang natural dan jelas.' },
+      voice_note: 'Bahasa Indonesia yang natural dan jelas.',
+      voice_note_en: 'natural, clear Bahasa Indonesia.' },
     { code: 'th', label: '泰文 ไทย', native: 'ภาษาไทย', english: 'Thai',
-      voice_note: 'ภาษาไทยที่เป็นธรรมชาติ ชัดเจน สุภาพ' },
+      voice_note: 'ภาษาไทยที่เป็นธรรมชาติ ชัดเจน สุภาพ',
+      voice_note_en: 'natural, clear and polite Thai.' },
     { code: 'ms', label: '馬來文 Bahasa Melayu', native: 'Bahasa Melayu', english: 'Malay',
-      voice_note: 'Bahasa Melayu yang natural dan jelas.' },
+      voice_note: 'Bahasa Melayu yang natural dan jelas.',
+      voice_note_en: 'natural, clear Bahasa Melayu.' },
     { code: 'fil', label: '菲律賓文 Filipino', native: 'Filipino', english: 'Filipino (Tagalog)',
-      voice_note: 'natural at malinaw na Filipino.' },
+      voice_note: 'natural at malinaw na Filipino.',
+      voice_note_en: 'natural, clear Filipino (Tagalog).' },
     { code: 'hi', label: '印地文 हिन्दी', native: 'हिन्दी', english: 'Hindi',
-      voice_note: 'स्वाभाविक और स्पष्ट हिन्दी।' },
+      voice_note: 'स्वाभाविक और स्पष्ट हिन्दी।',
+      voice_note_en: 'natural, clear Hindi.' },
     { code: 'fr', label: '法文 Français', native: 'Français', english: 'French',
-      voice_note: 'français naturel et clair, rythme conversationnel.' },
+      voice_note: 'français naturel et clair, rythme conversationnel.',
+      voice_note_en: 'natural, clear French at a conversational rhythm.' },
     { code: 'de', label: '德文 Deutsch', native: 'Deutsch', english: 'German',
-      voice_note: 'natürliches, klares Hochdeutsch.' },
+      voice_note: 'natürliches, klares Hochdeutsch.',
+      voice_note_en: 'natural, clear standard German.' },
     { code: 'es', label: '西班牙文 Español', native: 'Español', english: 'Spanish',
-      voice_note: 'español natural y claro, ritmo conversacional.' },
+      voice_note: 'español natural y claro, ritmo conversacional.',
+      voice_note_en: 'natural, clear Spanish at a conversational rhythm.' },
     { code: 'pt', label: '葡萄牙文 Português', native: 'Português', english: 'Portuguese',
-      voice_note: 'português natural e claro.' },
+      voice_note: 'português natural e claro.',
+      voice_note_en: 'natural, clear Portuguese.' },
     { code: 'it', label: '義大利文 Italiano', native: 'Italiano', english: 'Italian',
-      voice_note: 'italiano naturale e chiaro.' },
+      voice_note: 'italiano naturale e chiaro.',
+      voice_note_en: 'natural, clear Italian.' },
     { code: 'ru', label: '俄文 Русский', native: 'Русский', english: 'Russian',
-      voice_note: 'естественный и чёткий русский язык.' },
+      voice_note: 'естественный и чёткий русский язык.',
+      voice_note_en: 'natural, clear Russian.' },
     { code: 'ar', label: '阿拉伯文 العربية', native: 'العربية', english: 'Arabic',
-      voice_note: 'عربية فصحى حديثة، واضحة وطبيعية.' }
+      voice_note: 'عربية فصحى حديثة، واضحة وطبيعية.',
+      voice_note_en: 'natural, clear Modern Standard Arabic.' }
   ];
   const LANGUAGE_MAP = new Map(LANGUAGES.map((item) => [item.code, item]));
 
@@ -73,6 +91,18 @@ const TalkTwinStaticAPI = (() => {
   const STYLES = {
     strict: '只輸出譯文本身，不做任何補充說明。',
     assist: '以譯文為主；只有在原句含有對方文化中不存在的概念時，才在譯文後補一句最多十個字的極短說明。'
+  };
+
+  // 語言配對若完全不含中文，整份提示詞改用英文骨架：中文骨架會讓模型
+  // 誤以為中文也是工作語言，在 Vietnamese ⇄ English 這類配對上尤其明顯。
+  const TONES_EN = {
+    warm: 'Keep the delivery friendly and warm, like someone standing beside the speaker who genuinely wants to help.',
+    neutral: 'Keep the delivery neutral, professional and precise, with no personal emotion added.',
+    formal: 'Keep the delivery formal and dignified, suitable for ceremonies, addresses and distinguished guests.'
+  };
+  const STYLES_EN = {
+    strict: 'Output the translation only, with no added explanation.',
+    assist: 'Lead with the translation; only when the source sentence contains a concept that does not exist in the other culture, append one very short clarification of at most ten words.'
   };
 
   const REALTIME_VOICES = ['alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse', 'marin', 'cedar'];
@@ -263,8 +293,21 @@ const TalkTwinStaticAPI = (() => {
     };
   }
 
+  // 只要配對中有任何一種中文，中文骨架就是安全的；兩邊都不是中文時改用英文，
+  // 避免模型把提示詞本身的語言誤讀成第三種工作語言。
+  function usesChineseScaffold(interpreter) {
+    const s = normalizeInterpreter(interpreter);
+    return [s.language_a, s.language_b].some((code) => String(code || '').toLowerCase().startsWith('zh'));
+  }
+
+  // "English (English)" 讀起來很怪；英文骨架裡兩個名稱相同時只印一次。
+  function displayNameEN(info) {
+    return info.english === info.native ? info.english : `${info.english} (${info.native})`;
+  }
+
   function buildInterpreterPersona(interpreter) {
     const s = normalizeInterpreter(interpreter);
+    if (!usesChineseScaffold(s)) return buildInterpreterPersonaEN(s);
     const a = languageInfo(s.language_a);
     const b = languageInfo(s.language_b);
     const venueBlock = s.venue ? `通常你服務的地方是 ${s.venue}。` : '服務場域由講者現場說明。';
@@ -298,8 +341,51 @@ ${venueBlock}
 - 始終保持友善、積極、鼓勵講者。${notesBlock}`;
   }
 
+  function buildInterpreterPersonaEN(interpreter) {
+    const s = normalizeInterpreter(interpreter);
+    const a = languageInfo(s.language_a);
+    const b = languageInfo(s.language_b);
+    const an = displayNameEN(a);
+    const bn = displayNameEN(b);
+    const venueBlock = s.venue
+      ? `You usually work at ${s.venue}.`
+      : 'The speaker will describe the venue on site.';
+    const notesBlock = s.notes
+      ? `\n\n# Speaker's additional instructions (these override the general rules above)\n${s.notes}`
+      : '';
+
+    return `You are a professional simultaneous interpreter. Your job is to interpret sentence by sentence between ${an} and ${bn} while the speaker presents. ${TONES_EN[s.tone]}
+
+${venueBlock}
+
+# How you work
+- Interpret bidirectionally, one sentence at a time: when the speaker talks in ${a.english}, you render it in ${b.english}; when the speaker switches to ${b.english}, you render it in ${a.english}.
+- These two languages are the ONLY languages you ever speak. Never output a third language, and never fall back to a habitual default such as English or Chinese unless it is one of the two languages named above.
+- Translate a single sentence at a time; wait until the speaker finishes a sentence before you interpret it.
+- ${STYLES_EN[s.style]}
+- Say only the translation. Never add lead-ins such as "he said", "the translation is", or "okay", and never repeat the source sentence.
+- Do not answer the speaker's questions, give advice, summarize or comment. You are the interpreter, not a conversation partner.
+- Stay natural, warm and conversational; avoid lengthy explanations.
+
+# Accuracy
+- Personal names, institution names, departments, titles, numbers, dates, amounts and units must be carried over exactly.
+- If a proper noun is uncertain, keep the original wording; never guess or rewrite it.
+- When the speaker misspeaks or repeats themselves, render what they actually meant; do not copy the slip or the repetition.
+- If you hear something that belongs to neither of these two languages, render it in ${a.english}.
+- When you cannot hear clearly, say only one short line in ${a.english} asking the speaker to repeat; never guess the content.
+
+# Opening
+- Once connected, give one short greeting in ${a.english} and one in ${b.english}, stating that sentence-by-sentence ${a.english} ⇄ ${b.english} interpreting is ready, then wait silently.
+- After that, never speak on your own initiative; only interpret after the speaker finishes a sentence.
+
+# Notes
+- Every response must be clear, natural spoken language, paced for real-time voice interaction.
+- Stay friendly, positive and encouraging toward the speaker.${notesBlock}`;
+  }
+
   function buildInterpreterVoiceRules(interpreter) {
     const s = normalizeInterpreter(interpreter);
+    if (!usesChineseScaffold(s)) return buildInterpreterVoiceRulesEN(s);
     const a = languageInfo(s.language_a);
     const b = languageInfo(s.language_b);
     return `## 輸出語言（逐句雙向翻譯）
@@ -312,6 +398,23 @@ ${venueBlock}
 - 說 ${a.native} 時：${a.voice_note}
 - 說 ${b.native} 時：${b.voice_note}
 - 兩種語言都要從第一個字到最後一個字保持一致的口音，語氣要像真人對話，不要像新聞主播或導航機器。`;
+  }
+
+  function buildInterpreterVoiceRulesEN(interpreter) {
+    const s = normalizeInterpreter(interpreter);
+    const a = languageInfo(s.language_a);
+    const b = languageInfo(s.language_b);
+    return `## Output languages (sentence-by-sentence, both directions)
+- This session uses exactly two languages: ${displayNameEN(a)} and ${displayNameEN(b)}.
+- Speaker talks in ${a.english} → you output ${b.english} only. Speaker talks in ${b.english} → you output ${a.english} only.
+- No other language may ever appear in your output. In particular, do not slip into Chinese or English unless that language is one of the two above.
+- Every utterance must be in a single language; never mix both in one sentence, except when the source itself is a proper noun.
+- Do not switch direction because of background noise, an accent, filler words, personal names or a stray foreign word; decide by the dominant language of the whole sentence.
+
+## Accent
+- When speaking ${a.english}: ${a.voice_note_en || a.voice_note}
+- When speaking ${b.english}: ${b.voice_note_en || b.voice_note}
+- Hold a consistent accent from the first word to the last in both languages, and sound like a real person in conversation, not a news anchor or a navigation system.`;
   }
 
   function interpreterPublic(interpreter) {
@@ -337,6 +440,7 @@ ${venueBlock}
   // --- 提示詞組裝 ----------------------------------------------------------
   function buildRealtimeInterpreterInstructions(personaText, glossary, interpreter) {
     const s = normalizeInterpreter(interpreter);
+    if (!usesChineseScaffold(s)) return buildRealtimeInterpreterInstructionsEN(personaText, glossary, s);
     const a = languageInfo(s.language_a);
     const b = languageInfo(s.language_b);
     const glossaryText = glossary.trim() || '（目前沒有詞彙表。）';
@@ -364,6 +468,38 @@ ${glossaryText}
 - 不要念出 Markdown 符號、括號註記或格式標記。
 - 講者若直接對你說話（例如「換成日文」「再說一次」），照做並用最短的一句回覆，然後回到純翻譯狀態。
 - 若一段話中途被打斷，翻譯已經聽到的部分即可，不要憑空補完。`;
+  }
+
+  function buildRealtimeInterpreterInstructionsEN(personaText, glossary, interpreter) {
+    const s = normalizeInterpreter(interpreter);
+    const a = languageInfo(s.language_a);
+    const b = languageInfo(s.language_b);
+    const glossaryText = glossary.trim() || '(No glossary provided.)';
+
+    return `# Role and goal
+- You are a professional simultaneous interpreter working live between ${displayNameEN(a)} and ${displayNameEN(b)}, sentence by sentence, in both directions.
+- Follow the interpreting instructions below in full; they define your identity, tone and way of working.
+- These instructions are written in English purely as a working language. English is NOT one of your output languages unless it appears in the language pair above.
+- You are not a chat assistant. Apart from the translation and, when necessary, a single short confirmation, say nothing else.
+
+# Interpreting instructions (highest priority)
+${personaText}
+# End of interpreting instructions
+
+# Language and accent
+${buildInterpreterVoiceRules(s)}
+
+# Glossary and proper-noun mapping (always apply it)
+${glossaryText}
+# End of glossary
+
+# Interpreting rules
+- Interpret sentence by sentence: render each sentence as soon as the speaker finishes it. Do not wait for a whole paragraph and do not batch two or three sentences together.
+- Be faithful and complete: do not omit, summarize, embellish, or add anything the source did not contain. The translation may be as long as the original.
+- For any name, institution, title or term that appears in the glossary, always use the mapping given there.
+- Do not read out Markdown symbols, bracketed notes or formatting marks.
+- If the speaker addresses you directly (for example "say that again" or "speak more slowly"), comply with the shortest possible reply and then return to pure interpreting.
+- If an utterance is cut off mid-way, interpret only what you actually heard; never invent the rest.`;
   }
 
   function buildRealtimeInstructions(persona, knowledge, interpreter) {
@@ -436,6 +572,7 @@ ${knowledgeExcerpt || '（目前沒有背景資料。）'}
   function buildSystemPrompt(persona, knowledge, interpreter) {
     if (interpreter && interpreter.enabled) {
       const s = normalizeInterpreter(interpreter);
+      if (!usesChineseScaffold(s)) return buildSystemPromptEN(persona, knowledge, s);
       const glossary = shortenPreservingEnds(knowledge.trim(), 20000) || '（目前沒有詞彙表。）';
       return `# 口譯指令（最高優先）
 ${persona.trim() || buildInterpreterPersona(s)}
@@ -463,6 +600,30 @@ ${persona.trim() || '你是一個有幫助的助理，用自然的方式回答�
 # 背景資料
 ${shortenPreservingEnds(knowledge.trim(), 12000) || '（這次沒有背景資料。）'}
 # 背景資料結束`;
+  }
+
+  function buildSystemPromptEN(persona, knowledge, interpreter) {
+    const s = normalizeInterpreter(interpreter);
+    const a = languageInfo(s.language_a);
+    const b = languageInfo(s.language_b);
+    const glossary = shortenPreservingEnds(knowledge.trim(), 20000) || '(No glossary provided.)';
+    return `# Interpreting instructions (highest priority)
+${persona.trim() || buildInterpreterPersonaEN(s)}
+# End of interpreting instructions
+
+# Languages and direction
+${buildInterpreterVoiceRulesEN(s)}
+
+# Interpreting rules
+- Interpret sentence by sentence, one sentence at a time; be faithful and complete — no omissions, no summaries, no added notes.
+- Output the translation itself only: no lead-ins, and never repeat the source sentence.
+- This prompt is written in English as a working language only; your output must be ${a.english} or ${b.english} and nothing else.
+- Do not answer the user's questions and do not offer opinions. You are the interpreter, not a conversation partner.
+- For any name, institution, title or term in the glossary, always use the mapping given there.
+
+# Glossary and proper-noun mapping
+${glossary}
+# End of glossary`;
   }
 
   function buildTTSPayload(text, config, voice, rate) {

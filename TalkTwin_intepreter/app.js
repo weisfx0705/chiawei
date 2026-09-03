@@ -1453,7 +1453,13 @@ function readInterpreterForm() {
   };
 }
 
+// 打字區的瀏覽器語音輸入跟著 A 語言走；固定 zh-TW 會讓非中文配對聽錯。
+function speechRecognitionLang() {
+  return el.languageASelect?.value || state.interpreter?.language_a || 'zh-TW';
+}
+
 function updateInterpreterLabels() {
+  if (state.recognition) state.recognition.lang = speechRecognitionLang();
   const a = nativeNameFor(el.languageASelect.value || state.interpreter.language_a);
   const b = nativeNameFor(el.languageBSelect.value || state.interpreter.language_b);
   const pair = `${a} ⇄ ${b}`;
@@ -3011,7 +3017,7 @@ function setupSpeechRecognition() {
   }
 
   const recognition = new Recognition();
-  recognition.lang = 'zh-TW';
+  recognition.lang = speechRecognitionLang();
   recognition.continuous = false;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
