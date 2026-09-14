@@ -1,0 +1,1256 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>義守大學影視二｜Zoom H4n 影視錄音實務自學頁</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+:root{
+  --ink:#17140f; --muted:#6b6153; --soft:#4e463d;
+  --paper:#f7f2e7; --panel:#fffaf0; --line:#d7c7ae; --line-soft:#e6dac4;
+  --black:#101114; --signal:#d3382b; --green:#2f765f; --blue:#245a80; --yellow:#f0bd45;
+  --lcd:#2a2410; --lcd-ink:#f4c452;
+  --shadow:0 14px 34px rgba(44,34,20,.10);
+  --r:10px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--ink); background:var(--paper);
+  font-family:"Noto Sans TC","PingFang TC",sans-serif; line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+img,svg{max-width:100%}
+h1,h2,h3,h4{margin:0;font-family:"Noto Serif TC",serif;line-height:1.2}
+h1{font-size:clamp(38px,6.4vw,74px)}
+h2{font-size:clamp(28px,4vw,46px)}
+h3{font-size:clamp(19px,2.2vw,25px)}
+h4{font-size:17px}
+figure{margin:0}
+p{margin:0 0 14px}
+p:last-child{margin-bottom:0}
+
+.shell{width:min(1120px,calc(100% - 40px));margin:0 auto}
+
+/* ---------- hero ---------- */
+.hero{padding:52px 0 44px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:44px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:7px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--muted);font-size:13.5px;font-weight:900}
+.eyebrow::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--signal);box-shadow:16px 0 0 var(--yellow),32px 0 0 var(--green)}
+.hero h1{margin:22px 0 0}
+.lead{margin-top:20px;font-size:clamp(17px,1.7vw,20px);color:var(--soft);max-width:56ch}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.pill{display:inline-flex;align-items:center;min-height:44px;padding:10px 18px;border:1px solid var(--black);border-radius:999px;background:var(--black);color:#fff;font-weight:900;text-decoration:none;font-size:15px}
+.pill.light{background:transparent;color:var(--ink);border-color:var(--line)}
+.pill:hover{opacity:.88}
+.cover{border:1px solid var(--black);border-radius:var(--r);background:linear-gradient(150deg,#fffaf0,#eee0c6);box-shadow:var(--shadow);padding:26px;display:grid;place-items:center}
+.cover img{width:min(100%,320px);box-shadow:0 10px 22px rgba(70,50,28,.20)}
+.cover figcaption{margin-top:16px;color:var(--muted);font-size:13px;font-weight:700;text-align:center}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:20;border-top:1px solid var(--black);border-bottom:1px solid var(--black);background:rgba(247,242,231,.94);backdrop-filter:blur(12px)}
+.nav-inner{display:flex;gap:6px;overflow-x:auto;padding:9px 0}
+.nav-inner a{flex:0 0 auto;padding:8px 13px;border:1px solid transparent;border-radius:999px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:900;white-space:nowrap}
+.nav-inner a:hover{border-color:var(--line);color:var(--ink);background:var(--panel)}
+
+/* ---------- section rhythm ---------- */
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+.sec-head{max-width:78ch;margin-bottom:36px}
+.kicker{display:block;color:var(--signal);font-size:13px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.sec-head p{margin-top:14px;color:var(--muted);font-size:17.5px}
+
+/* ---------- layout primitives ---------- */
+.stack{display:grid;gap:20px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.split-wide{display:grid;grid-template-columns:1.3fr .9fr;gap:20px;align-items:start}
+.trio{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;align-items:start}
+.quad{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:start}
+@media(max-width:1000px){.quad{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr;gap:30px;padding-top:34px}
+  .split,.split-wide,.trio,.quad{grid-template-columns:1fr}
+}
+
+/* ---------- cards ---------- */
+.card{border:1px solid var(--black);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow)}
+.card.pad{padding:24px}
+.card h3,.card h4{margin-bottom:10px}
+.card p,.card li{color:var(--soft)}
+.card ul{margin:0;padding-left:20px}
+.card ul li{margin-bottom:8px}
+.card ul li:last-child{margin-bottom:0}
+.tone-red{border-left:6px solid var(--signal)}
+.tone-green{border-left:6px solid var(--green)}
+.tone-blue{border-left:6px solid var(--blue)}
+.tone-yellow{border-left:6px solid var(--yellow)}
+.bg-alert{background:#fff4ee}
+.bg-ok{background:#f0f7f2}
+
+.badge{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;background:var(--black);color:#fff;font-size:12.5px;font-weight:900;letter-spacing:.02em}
+.badge.red{background:var(--signal)}
+.badge.green{background:var(--green)}
+.badge.blue{background:var(--blue)}
+.badge.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+
+/* ---------- rule cards ---------- */
+.rule{display:grid;gap:12px;padding:26px}
+.rule .big{font-family:"Noto Serif TC",serif;font-size:clamp(26px,3.4vw,36px);line-height:1.25}
+.rule .why{color:var(--muted);font-size:15px}
+
+/* ---------- svg figure ---------- */
+.svgbox{background:#fff;border:1px solid var(--line-soft);border-radius:8px;padding:18px;display:grid;place-items:center}
+.svgbox svg{width:100%;height:auto;display:block}
+.svgbox text{font-family:"Noto Sans TC","PingFang TC",sans-serif}
+.figcap{margin-top:12px;color:var(--muted);font-size:14px;font-weight:700;line-height:1.6}
+
+/* ---------- numbered legend ---------- */
+.legend{list-style:none;margin:16px 0 0;padding:0;display:grid;gap:9px}
+.legend li{display:grid;grid-template-columns:26px 1fr;gap:11px;align-items:start;font-size:14.5px;color:var(--soft);line-height:1.6}
+.legend .n{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--black);color:#fff;font-size:12.5px;font-weight:900;line-height:1}
+.legend .n.red{background:var(--signal)}
+.legend .n.green{background:var(--green)}
+.legend .n.blue{background:var(--blue)}
+.legend b{color:var(--ink)}
+
+/* ---------- menu path ---------- */
+.mpath{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 14px}
+.mpath .chip{display:inline-flex;align-items:center;padding:6px 12px;border-radius:6px;background:var(--lcd);color:var(--lcd-ink);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13.5px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+.mpath .chip.out{background:var(--green);color:#fff}
+.mpath .arrow{color:var(--muted);font-weight:900;font-size:15px}
+
+/* ---------- steps ---------- */
+.steps{counter-reset:s;display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.steps li{counter-increment:s;display:grid;grid-template-columns:42px 1fr;gap:14px;align-items:start;padding:15px 17px;border:1px solid var(--line-soft);border-radius:8px;background:#fffdf7}
+.steps li::before{content:counter(s,decimal-leading-zero);display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:var(--black);color:#fff;font-weight:900;font-size:14px}
+.steps li>b,.steps li>span{grid-column:2}
+.steps b{display:block;font-size:17px;margin-bottom:2px}
+.steps span{display:block;color:var(--muted);font-size:14.5px;line-height:1.65}
+
+/* ---------- compact recipe list ---------- */
+.recipe{margin:0;padding-left:22px;font-size:15px}
+.recipe li{margin-bottom:7px;color:var(--soft)}
+.recipe li:last-child{margin-bottom:0}
+.recipe code{background:var(--lcd);color:var(--lcd-ink);padding:2px 7px;border-radius:4px;font-size:12.5px;font-weight:700}
+
+/* ---------- table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--black);border-radius:var(--r);background:var(--panel);box-shadow:var(--shadow)}
+table.matrix{width:100%;min-width:620px;border-collapse:collapse;font-size:15px}
+.matrix th,.matrix td{padding:14px 16px;border-bottom:1px solid var(--line-soft);vertical-align:top;text-align:left;color:var(--soft)}
+.matrix th{background:var(--black);color:#fff;font-weight:900;white-space:nowrap}
+.matrix tr:last-child td{border-bottom:0}
+.matrix td b{color:var(--ink)}
+
+/* ---------- checklist ---------- */
+.check{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.check li{display:grid;grid-template-columns:22px 1fr;gap:11px;align-items:start;font-size:15px;color:var(--soft)}
+.check li::before{content:"";width:19px;height:19px;margin-top:5px;border:2px solid var(--black);border-radius:4px;background:#fff}
+
+/* ---------- transcript ---------- */
+.script{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.script li{display:grid;grid-template-columns:88px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--line-soft);font-size:15px;color:var(--soft);line-height:1.7}
+.script li:last-child{border-bottom:0}
+.script .tc{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:13px;font-weight:700;color:var(--signal)}
+
+/* ---------- playlist rail ---------- */
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.plist button{width:100%;display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;padding:11px 13px;border:1px solid var(--line-soft);border-radius:8px;background:#fffdf7;font-family:inherit;font-size:15px;color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s}
+.plist button:hover{border-color:var(--black);background:#fff}
+.plist button:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.plist button[aria-current="true"]{border-color:var(--signal);background:#fdf0ec}
+.plist .ep{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--black);color:#fff;font-weight:900;font-size:13px}
+.plist button[aria-current="true"] .ep{background:var(--signal)}
+.plist .ep-name{font-weight:700;line-height:1.4;min-width:0}
+.plist .tag{display:block;font-size:12.5px;font-weight:900;color:var(--signal)}
+.plist .dur{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+
+/* ---------- video ---------- */
+.video{position:relative;padding-top:56.25%;border-radius:8px;overflow:hidden;background:#000;border:1px solid var(--black)}
+.video iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+footer{padding:44px 0 64px;color:var(--muted);font-size:14px}
+footer p{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header class="shell hero" id="top">
+  <div>
+    <span class="eyebrow">義守大學 電影與電視學系｜陳嘉暐老師｜影視二《影視錄音實務》</span>
+    <h1>Zoom H4n<br>現場錄音操作指南</h1>
+    <p class="lead">這一頁照著上課示範的順序走：<b>組裝 → 設定 → 選輸入 → 調電平 → 錄音回放</b>。H4n 是舊機，每一步都要自己手動確認；它不會替你把事情做對，但它會誠實地把你做錯的地方錄下來。</p>
+    <div class="hero-actions">
+      <a class="pill" href="#assemble">從組裝開始</a>
+      <a class="pill light" href="#monitor">聽到 ≠ 錄到</a>
+      <a class="pill light" href="h4essential.html">切換到 H4essential</a>
+    </div>
+  </div>
+  <figure class="cover">
+    <a href="https://zoomcorp.com/media/documents/H4n-manual.pdf" target="_blank" rel="noopener" aria-label="開啟 Zoom H4n 官方操作手冊 PDF">
+      <img src="assets/h4n/h4n-cover.png" alt="Zoom H4n 官方操作手冊封面">
+    </a>
+    <figcaption>Zoom《H4n Operation Manual》官方手冊（點擊開啟 PDF）</figcaption>
+  </figure>
+</header>
+
+<nav>
+  <div class="shell nav-inner" aria-label="章節導覽">
+    <a href="#rules">三條鐵則</a>
+    <a href="#body-map">機身按鍵</a>
+    <a href="#assemble">組裝</a>
+    <a href="#setup">開機設定</a>
+    <a href="#source">選輸入</a>
+    <a href="#input-menu">INPUT 選單</a>
+    <a href="#monitor">聽到≠錄到</a>
+    <a href="#record">錄音與回放</a>
+    <a href="#recipes">速查卡</a>
+    <a href="#checklist">檢查表</a>
+    <a href="#video">教學影片</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ 三條鐵則 ============ -->
+<section id="rules">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Three hard rules</span>
+      <h2>先記住三條鐵則</h2>
+      <p>其他都可以現場再查，這三件事錯了，整場戲的聲音就救不回來。上課示範裡老師講得最重的也是這三件。</p>
+    </div>
+    <div class="trio">
+      <article class="card rule tone-red">
+        <span class="badge red">鐵則 1</span>
+        <div class="big">STAMINA 一定要關</div>
+        <p class="why">這不是建議，是強迫。STAMINA 是省電開關，一旦打開，<b>phantom power 就無法啟動</b>，能錄的格式也會被砍到很小——對電影電視來說那個格式根本不能用。為了省一點電，讓後面所有工作都做不了，非常不划算。</p>
+      </article>
+      <article class="card rule tone-blue">
+        <span class="badge blue">鐵則 2</span>
+        <div class="big">48 kHz / 24 bit</div>
+        <p class="why">上過這門課就知道，錄音一定要在 48 kHz、24 bit 以上。H4n 的最高規格剛好就是 <b>WAV 48 kHz / 24 bit</b>，所以進選單直接選滿，不要猶豫。</p>
+      </article>
+      <article class="card rule tone-green">
+        <span class="badge green">鐵則 3</span>
+        <div class="big">對話錄到 −12 dB</div>
+        <p class="why">錄音電平大致要推到 <b>−12 dB 左右</b>，對話尤其要夠。H4n 不是非常專業的錄音機，你錄太小就是給自己找麻煩，後期拉起來連底噪一起拉。寧可稍微錄大一點點。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 機身按鍵 ============ -->
+<section id="body-map">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Body map</span>
+      <h2>23 個按鍵與孔位，先認得再開機</h2>
+      <p>由上而下、由左至右，把 H4n 身上每一個東西認一遍。之後所有操作講到「右側的 REC LEVEL」「左側的耳機孔」，你要能直接摸到。</p>
+    </div>
+
+    <div class="split">
+      <!-- 正面 -->
+      <article class="card pad">
+        <span class="badge">正面</span>
+        <h3 style="margin-top:12px">螢幕、輸入選擇與走帶鍵</h3>
+        <div class="svgbox">
+          <svg viewBox="0 0 300 470" role="img" aria-label="H4n 正面按鍵示意圖">
+            <!-- mic head -->
+            <rect x="92" y="30" width="116" height="32" rx="9" fill="#b9bcc2" stroke="#101114" stroke-width="1.5"/>
+            <circle cx="122" cy="30" r="21" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+            <circle cx="122" cy="30" r="13" fill="#6e7278"/>
+            <circle cx="122" cy="30" r="6" fill="#3a3e44"/>
+            <circle cx="178" cy="30" r="21" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+            <circle cx="178" cy="30" r="13" fill="#6e7278"/>
+            <circle cx="178" cy="30" r="6" fill="#3a3e44"/>
+            <!-- body -->
+            <rect x="64" y="58" width="172" height="386" rx="18" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+            <!-- mode LEDs -->
+            <circle cx="120" cy="78" r="4.5" fill="#d3382b"/>
+            <circle cx="150" cy="78" r="4.5" fill="#54585e"/>
+            <circle cx="180" cy="78" r="4.5" fill="#54585e"/>
+            <!-- LCD -->
+            <rect x="80" y="90" width="140" height="92" rx="5" fill="#2a2410" stroke="#0d0b05" stroke-width="1.5"/>
+            <text x="90" y="112" fill="#f4c452" font-size="15" font-weight="700" font-family="monospace">00:00:01</text>
+            <text x="176" y="112" fill="#f4c452" font-size="9" font-family="monospace">037</text>
+            <rect x="90" y="122" width="120" height="8" rx="2" fill="#4a3f18"/>
+            <rect x="90" y="122" width="78" height="8" rx="2" fill="#f4c452"/>
+            <rect x="90" y="136" width="120" height="8" rx="2" fill="#4a3f18"/>
+            <rect x="90" y="136" width="66" height="8" rx="2" fill="#f4c452"/>
+            <text x="90" y="166" fill="#c9a24a" font-size="10" font-family="monospace">STE-000.WAV</text>
+            <!-- shortcut keys -->
+            <rect x="82" y="192" width="26" height="15" rx="3.5" fill="#585d64"/>
+            <rect x="116" y="192" width="26" height="15" rx="3.5" fill="#585d64"/>
+            <rect x="150" y="192" width="26" height="15" rx="3.5" fill="#585d64"/>
+            <rect x="184" y="192" width="26" height="15" rx="3.5" fill="#585d64"/>
+            <!-- input select keys -->
+            <rect x="72" y="220" width="20" height="20" rx="5" fill="#d8dade"/>
+            <rect x="72" y="248" width="20" height="20" rx="5" fill="#d8dade"/>
+            <rect x="72" y="276" width="20" height="20" rx="5" fill="#d8dade"/>
+            <text x="82" y="234" font-size="9" font-weight="700" text-anchor="middle" fill="#101114">M</text>
+            <text x="82" y="262" font-size="9" font-weight="700" text-anchor="middle" fill="#101114">1</text>
+            <text x="82" y="290" font-size="9" font-weight="700" text-anchor="middle" fill="#101114">2</text>
+            <!-- transport -->
+            <circle cx="135" cy="238" r="15" fill="#d8dade" stroke="#8b8f95"/>
+            <circle cx="180" cy="238" r="15" fill="#d8dade" stroke="#8b8f95"/>
+            <circle cx="135" cy="282" r="15" fill="#d8dade" stroke="#8b8f95"/>
+            <circle cx="180" cy="282" r="15" fill="#d8dade" stroke="#8b8f95"/>
+            <text x="135" y="243" font-size="11" text-anchor="middle" fill="#101114">◀◀</text>
+            <text x="180" y="243" font-size="11" text-anchor="middle" fill="#101114">▶▶</text>
+            <text x="135" y="287" font-size="11" text-anchor="middle" fill="#101114">▶</text>
+            <text x="180" y="287" font-size="11" text-anchor="middle" fill="#101114">■</text>
+            <!-- REC -->
+            <circle cx="150" cy="345" r="24" fill="#1a1c20" stroke="#d3382b" stroke-width="2.5"/>
+            <circle cx="150" cy="345" r="10" fill="#d3382b"/>
+            <text x="150" y="392" font-size="10" font-weight="700" text-anchor="middle" fill="#9aa0a8">REC</text>
+            <!-- callouts -->
+            <g stroke="#101114" stroke-width="1.2">
+              <line x1="196" y1="20" x2="252" y2="14"/>
+              <line x1="118" y1="78" x2="42" y2="78"/>
+              <line x1="80" y1="120" x2="42" y2="126"/>
+              <line x1="82" y1="199" x2="42" y2="206"/>
+              <line x1="70" y1="258" x2="42" y2="272"/>
+              <line x1="196" y1="260" x2="252" y2="252"/>
+              <line x1="176" y1="345" x2="252" y2="345"/>
+            </g>
+            <g font-size="12" font-weight="900" text-anchor="middle" fill="#ffffff">
+              <circle cx="264" cy="14" r="12" fill="#101114"/><text x="264" y="18">1</text>
+              <circle cx="30" cy="78" r="12" fill="#101114"/><text x="30" y="82">2</text>
+              <circle cx="30" cy="126" r="12" fill="#101114"/><text x="30" y="130">3</text>
+              <circle cx="30" cy="206" r="12" fill="#101114"/><text x="30" y="210">4</text>
+              <circle cx="30" cy="272" r="12" fill="#101114"/><text x="30" y="276">5</text>
+              <circle cx="264" cy="252" r="12" fill="#101114"/><text x="264" y="256">6</text>
+              <circle cx="264" cy="345" r="12" fill="#d3382b"/><text x="264" y="349">16</text>
+            </g>
+          </svg>
+        </div>
+        <ul class="legend">
+          <li><span class="n">1</span><span><b>內建 XY 立體聲麥克風</b>　可切 90 度與 120 度收音角度。</span></li>
+          <li><span class="n">2</span><span><b>模式指示燈</b>　立體聲錄音 / 4 軌錄音 / MTR 錄音。</span></li>
+          <li><span class="n">3</span><span><b>LCD 顯示</b>　時間碼、電平表、檔號（例如 STE-000）都在這裡看。</span></li>
+          <li><span class="n">4</span><span><b>快捷鍵</b>　FOLDER、FILE、播放速度、MP3 等快捷功能。</span></li>
+          <li><span class="n">5</span><span><b>輸入音源選擇</b>　MIC ／ 1 ／ 2，決定這次要錄哪一路。</span></li>
+          <li><span class="n">6</span><span><b>播放、停止、倒轉、快轉控制鍵</b>　錄完馬上用它們回放確認。</span></li>
+          <li><span class="n red">16</span><span><b>錄音鈕</b>　<b>輕按一次＝預備（standby）</b>，再按一次才真的開始錄。</span></li>
+        </ul>
+      </article>
+
+      <!-- 右側 + 左側 -->
+      <div class="stack">
+        <article class="card pad">
+          <span class="badge">右側面板</span>
+          <h3 style="margin-top:12px">選單與「錄多大聲」都在這一面</h3>
+          <div class="svgbox">
+            <svg viewBox="0 0 300 330" role="img" aria-label="H4n 右側面板示意圖">
+              <ellipse cx="150" cy="26" rx="34" ry="14" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+              <rect x="118" y="34" width="64" height="278" rx="14" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+              <!-- jog dial -->
+              <rect x="138" y="56" width="24" height="38" rx="6" fill="#c6c9ce" stroke="#101114"/>
+              <path d="M150 64 l-5 7 h10 z M150 86 l-5 -7 h10 z" fill="#3a3e44"/>
+              <!-- menu -->
+              <circle cx="150" cy="118" r="11" fill="#d8dade" stroke="#101114"/>
+              <text x="150" y="122" font-size="8" font-weight="700" text-anchor="middle" fill="#101114">MENU</text>
+              <!-- rec level -->
+              <rect x="134" y="146" width="32" height="52" rx="8" fill="#d8dade" stroke="#101114"/>
+              <text x="150" y="166" font-size="15" font-weight="900" text-anchor="middle" fill="#d3382b">+</text>
+              <text x="150" y="190" font-size="15" font-weight="900" text-anchor="middle" fill="#245a80">−</text>
+              <!-- sd slot -->
+              <rect x="128" y="232" width="44" height="56" rx="5" fill="#14161a" stroke="#101114"/>
+              <path d="M134 226 h26 l8 8 v14 h-34 z" fill="#f0bd45" stroke="#101114"/>
+              <g stroke="#101114" stroke-width="1.2">
+                <line x1="166" y1="74" x2="212" y2="66"/>
+                <line x1="162" y1="118" x2="212" y2="118"/>
+                <line x1="168" y1="172" x2="212" y2="172"/>
+                <line x1="134" y1="240" x2="90" y2="250"/>
+              </g>
+              <g font-size="12" font-weight="900" text-anchor="middle" fill="#ffffff">
+                <circle cx="226" cy="66" r="12" fill="#101114"/><text x="226" y="70">10</text>
+                <circle cx="226" cy="118" r="12" fill="#101114"/><text x="226" y="122">11</text>
+                <circle cx="226" cy="172" r="12" fill="#d3382b"/><text x="226" y="176">12</text>
+                <circle cx="76" cy="250" r="12" fill="#101114"/><text x="76" y="254">13</text>
+              </g>
+            </svg>
+          </div>
+          <ul class="legend">
+            <li><span class="n">10</span><span><b>選擇功能滾輪</b>　上下滾動尋找功能，向下壓一下選擇功能。</span></li>
+            <li><span class="n">11</span><span><b>MENU 菜單</b>　FORMAT、REC 格式、INPUT 設定全部從這裡進去。</span></li>
+            <li><span class="n red">12</span><span><b>錄音音量大小調整（REC LEVEL ＋／−）</b>　這個決定「錄進檔案的大小聲」。</span></li>
+            <li><span class="n">13</span><span><b>SD CARD 插槽</b>　卡片就在機身側邊，關機時插拔。</span></li>
+          </ul>
+        </article>
+
+        <article class="card pad">
+          <span class="badge">左側面板</span>
+          <h3 style="margin-top:12px">耳機、電源與那個不能開的開關</h3>
+          <div class="svgbox">
+            <svg viewBox="0 0 300 330" role="img" aria-label="H4n 左側面板示意圖">
+              <ellipse cx="150" cy="26" rx="34" ry="14" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+              <rect x="118" y="34" width="64" height="278" rx="14" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+              <circle cx="150" cy="58" r="7" fill="#14161a" stroke="#6a6e74"/>
+              <circle cx="150" cy="88" r="9" fill="#14161a" stroke="#6a6e74" stroke-width="1.6"/>
+              <circle cx="150" cy="88" r="3.5" fill="#3a3e44"/>
+              <rect x="134" y="112" width="32" height="52" rx="8" fill="#d8dade" stroke="#101114"/>
+              <text x="150" y="132" font-size="15" font-weight="900" text-anchor="middle" fill="#2f765f">+</text>
+              <text x="150" y="156" font-size="15" font-weight="900" text-anchor="middle" fill="#2f765f">−</text>
+              <rect x="134" y="182" width="32" height="18" rx="4" fill="#c6c9ce" stroke="#101114"/>
+              <rect x="136" y="184" width="13" height="14" rx="3" fill="#d3382b"/>
+              <rect x="134" y="222" width="32" height="12" rx="2.5" fill="#14161a" stroke="#6a6e74"/>
+              <rect x="138" y="225" width="24" height="6" rx="1.5" fill="#6a6e74"/>
+              <rect x="134" y="254" width="32" height="42" rx="7" fill="#c6c9ce" stroke="#101114"/>
+              <rect x="137" y="257" width="26" height="16" rx="4" fill="#5c6066"/>
+              <g stroke="#101114" stroke-width="1.2">
+                <line x1="166" y1="58" x2="212" y2="52"/>
+                <line x1="166" y1="88" x2="212" y2="96"/>
+                <line x1="168" y1="138" x2="212" y2="146"/>
+                <line x1="134" y1="190" x2="90" y2="190"/>
+                <line x1="134" y1="228" x2="90" y2="240"/>
+                <line x1="134" y1="274" x2="90" y2="290"/>
+              </g>
+              <g font-size="12" font-weight="900" text-anchor="middle" fill="#ffffff">
+                <circle cx="226" cy="52" r="12" fill="#101114"/><text x="226" y="56">18</text>
+                <circle cx="226" cy="96" r="12" fill="#101114"/><text x="226" y="100">19</text>
+                <circle cx="226" cy="146" r="12" fill="#2f765f"/><text x="226" y="150">20</text>
+                <circle cx="76" cy="190" r="12" fill="#d3382b"/><text x="76" y="194">21</text>
+                <circle cx="76" cy="240" r="12" fill="#101114"/><text x="76" y="244">22</text>
+                <circle cx="76" cy="290" r="12" fill="#101114"/><text x="76" y="294">23</text>
+              </g>
+            </svg>
+          </div>
+          <ul class="legend">
+            <li><span class="n">18</span><span><b>遙控器接孔</b>　課程現場幾乎用不到。</span></li>
+            <li><span class="n">19</span><span><b>耳機接孔</b>　耳機就插這裡。沒戴耳機等於沒在錄音。</span></li>
+            <li><span class="n green">20</span><span><b>耳機音量調整（VOLUME ＋／−）</b>　這個只改「你聽到的大小聲」。</span></li>
+            <li><span class="n red">21</span><span><b>省電裝置 STAMINA（建議不開）</b>　本課程規定：<b>強迫關閉</b>。</span></li>
+            <li><span class="n">22</span><span><b>USB 孔</b>　連接電腦傳檔用，不是現場的供電方案。</span></li>
+            <li><span class="n">23</span><span><b>電源開關 / HOLD</b>　開機就從這裡推。</span></li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+    <article class="card pad" style="margin-top:20px">
+      <span class="badge">底部與背面</span>
+      <h3 style="margin-top:12px">兩支外接麥克風插這裡</h3>
+      <div class="split" style="margin-top:14px">
+        <div class="svgbox">
+          <svg viewBox="0 0 320 220" role="img" aria-label="H4n 底部 INPUT 1 與 INPUT 2 示意圖">
+            <rect x="46" y="70" width="228" height="104" rx="16" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+            <circle cx="108" cy="126" r="40" fill="#14161a" stroke="#7a7e84" stroke-width="2"/>
+            <circle cx="108" cy="126" r="26" fill="#23262b" stroke="#5c6066"/>
+            <circle cx="108" cy="112" r="4" fill="#8b8f95"/><circle cx="97" cy="134" r="4" fill="#8b8f95"/><circle cx="119" cy="134" r="4" fill="#8b8f95"/>
+            <circle cx="212" cy="126" r="40" fill="#14161a" stroke="#7a7e84" stroke-width="2"/>
+            <circle cx="212" cy="126" r="26" fill="#23262b" stroke="#5c6066"/>
+            <circle cx="212" cy="112" r="4" fill="#8b8f95"/><circle cx="201" cy="134" r="4" fill="#8b8f95"/><circle cx="223" cy="134" r="4" fill="#8b8f95"/>
+            <text x="108" y="196" font-size="14" font-weight="900" text-anchor="middle" fill="#101114">INPUT 1</text>
+            <text x="212" y="196" font-size="14" font-weight="900" text-anchor="middle" fill="#101114">INPUT 2</text>
+            <circle cx="160" cy="88" r="6" fill="#14161a" stroke="#7a7e84"/>
+            <g stroke="#101114" stroke-width="1.2">
+              <line x1="108" y1="82" x2="76" y2="40"/>
+              <line x1="212" y1="82" x2="244" y2="40"/>
+              <line x1="160" y1="82" x2="160" y2="44"/>
+            </g>
+            <g font-size="12" font-weight="900" text-anchor="middle" fill="#ffffff">
+              <circle cx="66" cy="28" r="12" fill="#d3382b"/><text x="66" y="32">7</text>
+              <circle cx="254" cy="28" r="12" fill="#d3382b"/><text x="254" y="32">7</text>
+              <circle cx="160" cy="30" r="12" fill="#101114"/><text x="160" y="34">17</text>
+            </g>
+          </svg>
+        </div>
+        <div class="svgbox">
+          <svg viewBox="0 0 320 220" role="img" aria-label="H4n 背面示意圖">
+            <rect x="112" y="14" width="96" height="196" rx="14" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+            <circle cx="160" cy="28" r="6" fill="#14161a" stroke="#7a7e84"/>
+            <circle cx="160" cy="66" r="20" fill="#23262b" stroke="#5c6066"/>
+            <g fill="#6a6e74"><circle cx="153" cy="60" r="2"/><circle cx="160" cy="60" r="2"/><circle cx="167" cy="60" r="2"/><circle cx="153" cy="67" r="2"/><circle cx="160" cy="67" r="2"/><circle cx="167" cy="67" r="2"/><circle cx="153" cy="74" r="2"/><circle cx="160" cy="74" r="2"/><circle cx="167" cy="74" r="2"/></g>
+            <circle cx="160" cy="104" r="10" fill="#14161a" stroke="#7a7e84" stroke-width="1.6"/>
+            <circle cx="160" cy="104" r="5" fill="#4a4e54"/>
+            <rect x="124" y="126" width="72" height="76" rx="7" fill="#3a3e44" stroke="#101114" stroke-dasharray="5 4"/>
+            <text x="160" y="169" font-size="11" font-weight="700" text-anchor="middle" fill="#b9bcc2">電池盒</text>
+            <g stroke="#101114" stroke-width="1.2">
+              <line x1="154" y1="28" x2="86" y2="28"/>
+              <line x1="140" y1="66" x2="86" y2="72"/>
+              <line x1="170" y1="104" x2="234" y2="104"/>
+              <line x1="196" y1="164" x2="234" y2="164"/>
+            </g>
+            <g font-size="12" font-weight="900" text-anchor="middle" fill="#ffffff">
+              <circle cx="72" cy="28" r="12" fill="#101114"/><text x="72" y="32">8</text>
+              <circle cx="72" cy="72" r="12" fill="#101114"/><text x="72" y="76">9</text>
+              <circle cx="248" cy="104" r="12" fill="#101114"/><text x="248" y="108">14</text>
+              <circle cx="248" cy="164" r="12" fill="#101114"/><text x="248" y="168">15</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="split" style="margin-top:18px">
+        <ul class="legend" style="margin-top:0">
+          <li><span class="n red">7</span><span><b>INPUT 1 與 INPUT 2 輸入孔</b>　XLR 與 Phone Jack 複合孔，shotgun、無線接收器都接這裡。</span></li>
+          <li><span class="n">17</span><span><b>外接電源 DC IN（DC5V）</b>　長時間室內錄音可接原廠變壓器。</span></li>
+          <li><span class="n">8</span><span><b>微型外接麥克風接孔</b>　若要使用，要在 <b>MENU 內把 plug-in power 開啟</b>。</span></li>
+        </ul>
+        <ul class="legend" style="margin-top:0">
+          <li><span class="n">9</span><span><b>內建小喇叭</b>　可以快速確認有沒有錄到，但正式監聽一定要戴耳機。</span></li>
+          <li><span class="n">14</span><span><b>腳架接孔</b>　可上腳架或固定在器材上。</span></li>
+          <li><span class="n">15</span><span><b>電池盒</b>　兩顆 AA 三號電池就裝在這裡。</span></li>
+        </ul>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ 組裝 ============ -->
+<section id="assemble">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 1 · Assembly</span>
+      <h2>組裝：電池、那條布、還有 SD 卡</h2>
+      <p>開機之前只有兩件事：把電池裝對，把卡插對。這兩件看起來最不重要，卻是現場最常出事的地方。</p>
+    </div>
+
+    <div class="split-wide">
+      <article class="card pad">
+        <h3>電池盒裡那條布，是拿來拉電池的</h3>
+        <p>打開電池蓋，你會看到電池槽裡有<b>一條布（拉帶）</b>。裝電池時要讓<b>電池壓在布上面</b>——之後要換電池，拉一下布，電池就彈出來了。如果電池壓在布下面，你在現場會拿指甲跟它奮鬥很久。</p>
+        <div class="svgbox" style="margin-top:8px">
+          <svg viewBox="0 0 420 200" role="img" aria-label="電池盒拉帶正確裝法示意圖">
+            <!-- 正確 -->
+            <text x="104" y="20" font-size="14" font-weight="900" text-anchor="middle" fill="#2f765f">✓ 正確：電池壓在布上面</text>
+            <rect x="24" y="34" width="160" height="112" rx="10" fill="#e9e2d2" stroke="#101114" stroke-width="1.5"/>
+            <path d="M34 130 h130 q14 0 14 -14 v-56" fill="none" stroke="#245a80" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+            <rect x="42" y="58" width="124" height="26" rx="7" fill="#f0bd45" stroke="#101114" stroke-width="1.5"/>
+            <rect x="42" y="94" width="124" height="26" rx="7" fill="#f0bd45" stroke="#101114" stroke-width="1.5"/>
+            <text x="104" y="76" font-size="12" font-weight="900" text-anchor="middle" fill="#101114">AA 鹼性</text>
+            <text x="104" y="112" font-size="12" font-weight="900" text-anchor="middle" fill="#101114">AA 鹼性</text>
+            <path d="M178 62 l0 -22" stroke="#245a80" stroke-width="3" marker-end="url(#ar)"/>
+            <text x="196" y="40" font-size="11" font-weight="700" fill="#245a80">拉這裡</text>
+            <text x="104" y="166" font-size="12" text-anchor="middle" fill="#4e463d">布在下、電池在上 → 一拉就出來</text>
+
+            <!-- 錯誤 -->
+            <text x="316" y="20" font-size="14" font-weight="900" text-anchor="middle" fill="#d3382b">✗ 錯誤：布壓在電池下面</text>
+            <rect x="236" y="34" width="160" height="112" rx="10" fill="#e9e2d2" stroke="#101114" stroke-width="1.5"/>
+            <rect x="254" y="58" width="124" height="26" rx="7" fill="#cfcabd" stroke="#101114" stroke-width="1.5"/>
+            <rect x="254" y="94" width="124" height="26" rx="7" fill="#cfcabd" stroke="#101114" stroke-width="1.5"/>
+            <path d="M246 130 h130" fill="none" stroke="#b9b2a2" stroke-width="9" stroke-linecap="round"/>
+            <text x="316" y="166" font-size="12" text-anchor="middle" fill="#4e463d">布被壓住 → 現場用指甲摳電池</text>
+            <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#245a80"/></marker></defs>
+          </svg>
+        </div>
+        <div class="figcap">電池盒示意：布（拉帶）壓在電池下方，換電池時一拉就出來。</div>
+      </article>
+
+      <article class="card pad tone-yellow">
+        <span class="badge">電池</span>
+        <h3 style="margin-top:12px">兩顆 AA 三號「鹼性」電池</h3>
+        <p>H4n 用的是 <b>兩顆 AA 三號電池</b>，而且必須是<b>鹼性電池</b>——包裝上寫 <b>alkaline</b> 的那種。</p>
+        <p>鹼性電池才有辦法驅動比較吃電的電子產品。這不是挑剔，是必要條件：電力不夠時，phantom power 一開就可能出狀況。</p>
+        <ul>
+          <li>出機前換新電池，並且<b>一定要帶備用電池</b>。</li>
+          <li>看到 Low Battery 立刻停錄更換，不要賭那一個 take。</li>
+          <li>如果外接麥克風本身可以裝電池，<b>建議直接替麥克風裝電池供電</b>，免得過度消耗錄音機電量。</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="split" style="margin-top:20px">
+      <article class="card pad tone-red bg-alert">
+        <span class="badge red">最重要的一個開關</span>
+        <h3 style="margin-top:12px">STAMINA：不是建議，是強迫不能開</h3>
+        <p>電池蓋附近有一個開關叫 <b>STAMINA</b>，它是省電開關。老師的說法很直接：<b>這不是建議，是強迫不能開。</b></p>
+        <ul>
+          <li><b>Phantom power 會啟動不了。</b>你之後要接 shotgun 麥克風時，就開不了 48V。</li>
+          <li><b>能錄的格式會變得很小。</b>那種格式對電影電視來講根本不需要，也不能用。</li>
+        </ul>
+        <p style="margin-top:12px">為了省一點電，讓你之後所有的工作都不能做，這是一件很恐怖的事。<b>確認它在 OFF，再蓋回電池蓋。</b></p>
+      </article>
+
+      <article class="card pad">
+        <span class="badge">SD 卡</span>
+        <h3 style="margin-top:12px">H4n 很老，卡不能亂買</h3>
+        <p>H4n 是十幾年前的機器（2021 年示範時已經約 12、13 年）。它的讀卡邏輯跟現在的卡片規格差很多。</p>
+        <div class="svgbox" style="margin-top:8px">
+          <svg viewBox="0 0 420 130" role="img" aria-label="H4n 可用的 SD 卡規格">
+            <g>
+              <path d="M20 22 h64 l16 16 v70 h-80 z" fill="#f0bd45" stroke="#101114" stroke-width="1.6"/>
+              <text x="60" y="70" font-size="17" font-weight="900" text-anchor="middle" fill="#101114">SD</text>
+              <text x="60" y="126" font-size="12" font-weight="900" text-anchor="middle" fill="#2f765f">✓ 最合適</text>
+            </g>
+            <g>
+              <path d="M160 22 h64 l16 16 v70 h-80 z" fill="#f0bd45" stroke="#101114" stroke-width="1.6"/>
+              <text x="200" y="70" font-size="14" font-weight="900" text-anchor="middle" fill="#101114">SDHC</text>
+              <text x="200" y="126" font-size="12" font-weight="900" text-anchor="middle" fill="#2f765f">✓ 可以用</text>
+            </g>
+            <g>
+              <path d="M300 22 h64 l16 16 v70 h-80 z" fill="#ded8cc" stroke="#101114" stroke-width="1.6"/>
+              <text x="340" y="70" font-size="14" font-weight="900" text-anchor="middle" fill="#8a8274">SDXC</text>
+              <line x1="300" y1="108" x2="380" y2="22" stroke="#d3382b" stroke-width="4"/>
+              <text x="340" y="126" font-size="12" font-weight="900" text-anchor="middle" fill="#d3382b">✗ 讀不到</text>
+            </g>
+          </svg>
+        </div>
+        <ul style="margin-top:14px">
+          <li><b>SDXC 不能用。</b>H4n 完全讀不到。</li>
+          <li><b>SD 或 SDHC 才行</b>，而且 SDHC 裡的 class 等級還是有差，遇到高速卡（例如 class 10）讀不到是常見的事。</li>
+          <li>簡單講：<b>越原始的 SD 卡，對 H4n 越合適。</b>（官方手冊規格：SD 16MB–2GB、SDHC 4GB–32GB。）</li>
+          <li>卡插在<b>機身側邊</b>的插槽，關機時再插拔。</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 開機設定 ============ -->
+<section id="setup">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 2 · Setup</span>
+      <h2>開機後，只要做三件事就能開工</h2>
+      <p>從左側邊緣推開電源。進 MENU（右側那顆），用滾輪上下找選項、往下壓選擇。基礎設定其實只有這三條路徑。</p>
+    </div>
+
+    <div class="trio">
+      <article class="card pad tone-blue">
+        <span class="badge blue">設定 1</span>
+        <h3 style="margin-top:12px">把卡格式化</h3>
+        <div class="mpath">
+          <span class="chip">MENU</span><span class="arrow">›</span>
+          <span class="chip">SD CARD</span><span class="arrow">›</span>
+          <span class="chip out">FORMAT</span>
+        </div>
+        <p>目的是<b>讓卡片變成 H4n 讀得懂的格式</b>。新卡、別台機器用過的卡、或是卡片行為怪怪的時候，都先格式化一次。</p>
+        <p style="margin-top:10px;color:var(--signal);font-weight:700">格式化會清空卡片，動手前先確認舊檔案已經備份。</p>
+      </article>
+
+      <article class="card pad tone-blue">
+        <span class="badge blue">設定 2</span>
+        <h3 style="margin-top:12px">把錄音格式拉到最高</h3>
+        <div class="mpath">
+          <span class="chip">MENU</span><span class="arrow">›</span>
+          <span class="chip">REC</span><span class="arrow">›</span>
+          <span class="chip">REC FORMAT</span><span class="arrow">›</span>
+          <span class="chip out">WAV 48kHz/24bit</span>
+        </div>
+        <p>進去選<b>第一個</b>就對了。老師堅持錄音一定要在 48 kHz / 24 bit 以上，而 <b>48 kHz / 24 bit 剛好就是 H4n 的最高規格</b>，所以直接選滿。</p>
+      </article>
+
+      <article class="card pad tone-blue">
+        <span class="badge blue">設定 3</span>
+        <h3 style="margin-top:12px">選這次要錄哪一路</h3>
+        <div class="mpath">
+          <span class="chip">INPUT 鍵</span><span class="arrow">›</span>
+          <span class="chip out">MIC</span><span class="arrow">或</span><span class="chip out">1 · 2</span>
+        </div>
+        <p>機身正面左邊那排 INPUT 鍵。按 <b>MIC</b> 就是用機頂那兩支內建麥克風；按 <b>1、2</b> 就是走底部的 INPUT 1 / INPUT 2 外接麥克風。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 選輸入 ============ -->
+<section id="source">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 3 · Input source</span>
+      <h2>內建 XY 還是外接 1／2？</h2>
+      <p>這是整台機器最容易按錯的地方：按錯了，你會對著螢幕納悶「為什麼麥克風沒聲音」，其實機器正在認真地錄別的東西。</p>
+    </div>
+
+    <div class="svgbox" style="background:#fffdf7">
+      <svg viewBox="0 0 700 250" role="img" aria-label="INPUT MIC 與 INPUT 1/2 的訊號流比較">
+        <!-- MIC -->
+        <text x="20" y="26" font-size="15" font-weight="900" fill="#245a80">按 MIC ── 用機頂內建 XY 麥克風</text>
+        <circle cx="52" cy="70" r="17" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+        <circle cx="52" cy="70" r="8" fill="#3a3e44"/>
+        <circle cx="88" cy="70" r="17" fill="#9a9ea5" stroke="#101114" stroke-width="1.5"/>
+        <circle cx="88" cy="70" r="8" fill="#3a3e44"/>
+        <text x="70" y="106" font-size="12" font-weight="700" text-anchor="middle" fill="#4e463d">內建 XY</text>
+        <path d="M118 70 H236" stroke="#245a80" stroke-width="3" marker-end="url(#a2)"/>
+        <rect x="246" y="46" width="104" height="48" rx="8" fill="#245a80"/>
+        <text x="298" y="76" font-size="14" font-weight="900" text-anchor="middle" fill="#fff">H4n</text>
+        <path d="M360 70 H452" stroke="#245a80" stroke-width="3" marker-end="url(#a2)"/>
+        <rect x="462" y="42" width="216" height="56" rx="8" fill="#eef3f7" stroke="#245a80" stroke-width="1.5"/>
+        <text x="570" y="66" font-size="13" font-weight="900" text-anchor="middle" fill="#245a80">環境音、空景、近距離訪談</text>
+        <text x="570" y="86" font-size="12" text-anchor="middle" fill="#4e463d">隨身帶出去錄素材最方便</text>
+
+        <line x1="20" y1="130" x2="680" y2="130" stroke="#e6dac4" stroke-width="1.5"/>
+
+        <!-- 1/2 -->
+        <text x="20" y="162" font-size="15" font-weight="900" fill="#d3382b">按 1、2 ── 用底部 INPUT 1 / INPUT 2 外接麥克風</text>
+        <g>
+          <rect x="30" y="186" width="12" height="34" rx="3" fill="#3a3e44"/>
+          <rect x="34" y="176" width="4" height="12" fill="#8b8f95"/>
+          <text x="36" y="238" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">Shotgun</text>
+        </g>
+        <g>
+          <circle cx="96" cy="196" r="8" fill="#3a3e44"/>
+          <path d="M96 204 v18" stroke="#8b8f95" stroke-width="3"/>
+          <text x="96" y="238" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">Mini mic</text>
+        </g>
+        <path d="M128 196 H236" stroke="#d3382b" stroke-width="3" marker-end="url(#a3)"/>
+        <rect x="246" y="172" width="104" height="48" rx="8" fill="#d3382b"/>
+        <text x="298" y="194" font-size="12" font-weight="900" text-anchor="middle" fill="#fff">INPUT 1</text>
+        <text x="298" y="211" font-size="12" font-weight="900" text-anchor="middle" fill="#fff">INPUT 2</text>
+        <path d="M360 196 H452" stroke="#d3382b" stroke-width="3" marker-end="url(#a3)"/>
+        <rect x="462" y="168" width="216" height="56" rx="8" fill="#fdf0ec" stroke="#d3382b" stroke-width="1.5"/>
+        <text x="570" y="192" font-size="13" font-weight="900" text-anchor="middle" fill="#d3382b">現場對白：兩支麥克風分軌</text>
+        <text x="570" y="212" font-size="12" text-anchor="middle" fill="#4e463d">兩路各自調電平，後期才好處理</text>
+        <defs>
+          <marker id="a2" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#245a80"/></marker>
+          <marker id="a3" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#d3382b"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="tablewrap" style="margin-top:20px">
+      <table class="matrix">
+        <thead>
+          <tr><th>你要錄什麼</th><th>按哪個 INPUT</th><th>麥克風</th><th>現場提醒</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>環境音、空景、room tone</b></td>
+            <td>MIC</td>
+            <td>機頂內建 XY</td>
+            <td>影視系同學最常拿它出去錄環境音。手不要摩擦機身，戶外一定要上防風罩。</td>
+          </tr>
+          <tr>
+            <td><b>近距離訪談、一個人講話</b></td>
+            <td>MIC</td>
+            <td>機頂內建 XY</td>
+            <td>錄音機要靠近受訪者，不要放在桌子中間。也適合錄一個人彈吉他這種簡單素材。</td>
+          </tr>
+          <tr>
+            <td><b>現場對白（正式拍攝）</b></td>
+            <td>1 · 2</td>
+            <td>Shotgun 接 INPUT 1、無線／mini mic 接 INPUT 2</td>
+            <td>兩路分開錄、分開調電平。這是本課程的主要流程。</td>
+          </tr>
+          <tr>
+            <td><b>微型 3.5mm 外接麥克風</b></td>
+            <td>MIC 系統</td>
+            <td>機背 3.5mm 孔</td>
+            <td>要用的話，必須在 MENU 內把 <b>plug-in power</b> 開啟，否則沒有聲音。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ INPUT 選單 ============ -->
+<section id="input-menu">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 4 · Input menu</span>
+      <h2>MENU → INPUT 裡的三個開關</h2>
+      <p>接了外接麥克風之後，回到 MENU 進 INPUT。這裡面有三個東西會直接決定你錄回來的檔案長什麼樣子。</p>
+    </div>
+
+    <div class="stack">
+      <article class="card pad tone-red">
+        <span class="badge red">開關 1</span>
+        <h3 style="margin-top:12px">PHANTOM POWER：shotgun 要，但用完請關掉</h3>
+        <div class="mpath">
+          <span class="chip">MENU</span><span class="arrow">›</span>
+          <span class="chip">INPUT</span><span class="arrow">›</span>
+          <span class="chip">PHANTOM</span><span class="arrow">›</span>
+          <span class="chip out">+48V</span>
+        </div>
+        <div class="split" style="margin-top:6px">
+          <div>
+            <p><b>什麼東西要 phantom power？</b>電容式麥克風。像 shotgun 麥克風就要，所以接 shotgun 的時候 phantom power 要打開，通常選 <b>48V</b>。</p>
+            <p>但麥克風如果<b>本身能裝電池</b>，老師建議直接替麥克風裝電池供電，免得過度消耗錄音機的電量。</p>
+          </div>
+          <div class="card pad bg-alert" style="border:1px solid var(--line-soft);box-shadow:none">
+            <h4>為什麼不用時要關掉？</h4>
+            <ul>
+              <li><b>一來浪費電。</b>它終究是一個電源，一直開著就是一直吃電池。</li>
+              <li><b>二來有可能傷到麥克風。</b>不需要供電的麥克風被灌電，是有風險的。</li>
+            </ul>
+            <p style="margin-top:10px"><b>隨時可以關的時候就關掉。</b></p>
+          </div>
+        </div>
+      </article>
+
+      <div class="split">
+        <article class="card pad">
+          <span class="badge">開關 2</span>
+          <h3 style="margin-top:12px">1/2 LINK：關掉</h3>
+          <div class="mpath">
+            <span class="chip">MENU</span><span class="arrow">›</span>
+            <span class="chip">INPUT</span><span class="arrow">›</span>
+            <span class="chip">1/2 LINK</span><span class="arrow">›</span>
+            <span class="chip out" style="background:#d3382b">OFF</span>
+          </div>
+          <div class="svgbox">
+            <svg viewBox="0 0 380 190" role="img" aria-label="1/2 LINK 開啟與關閉的差別">
+              <text x="94" y="20" font-size="13" font-weight="900" text-anchor="middle" fill="#d3382b">ON：兩軌連動</text>
+              <rect x="44" y="34" width="24" height="110" rx="5" fill="#efe8d8" stroke="#101114"/>
+              <rect x="120" y="34" width="24" height="110" rx="5" fill="#efe8d8" stroke="#101114"/>
+              <rect x="38" y="72" width="36" height="13" rx="3" fill="#d3382b"/>
+              <rect x="114" y="72" width="36" height="13" rx="3" fill="#d3382b"/>
+              <path d="M74 78 H114" stroke="#d3382b" stroke-width="3" stroke-dasharray="4 3"/>
+              <text x="56" y="162" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">INPUT 1</text>
+              <text x="132" y="162" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">INPUT 2</text>
+              <text x="94" y="180" font-size="11" text-anchor="middle" fill="#d3382b">1 加 5 格，2 也被加 5 格</text>
+
+              <line x1="190" y1="20" x2="190" y2="176" stroke="#e6dac4" stroke-width="1.5"/>
+
+              <text x="286" y="20" font-size="13" font-weight="900" text-anchor="middle" fill="#2f765f">OFF：各調各的 ✓</text>
+              <rect x="236" y="34" width="24" height="110" rx="5" fill="#efe8d8" stroke="#101114"/>
+              <rect x="312" y="34" width="24" height="110" rx="5" fill="#efe8d8" stroke="#101114"/>
+              <rect x="230" y="58" width="36" height="13" rx="3" fill="#2f765f"/>
+              <rect x="306" y="98" width="36" height="13" rx="3" fill="#245a80"/>
+              <text x="248" y="162" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">Shotgun</text>
+              <text x="324" y="162" font-size="11" font-weight="700" text-anchor="middle" fill="#4e463d">Mini mic</text>
+              <text x="286" y="180" font-size="11" text-anchor="middle" fill="#2f765f">各自有各自該有的音量</text>
+            </svg>
+          </div>
+          <p style="margin-top:14px">1/2 LINK 會讓第一軌跟第二軌的<b>調整幅度連動</b>：你把第一軌加了五個單位，第二軌會同時被加五個單位。</p>
+          <p><b>這樣很不好。</b>Shotgun 應該有 shotgun 自己的音量，mini mic 應該有 mini mic 自己的音量，兩支麥克風離聲源的距離跟靈敏度本來就不一樣。</p>
+        </article>
+
+        <article class="card pad">
+          <span class="badge">開關 3</span>
+          <h3 style="margin-top:12px">MONO MIX：關掉</h3>
+          <div class="mpath">
+            <span class="chip">MENU</span><span class="arrow">›</span>
+            <span class="chip">INPUT</span><span class="arrow">›</span>
+            <span class="chip">MONO MIX</span><span class="arrow">›</span>
+            <span class="chip out" style="background:#d3382b">OFF</span>
+          </div>
+          <div class="svgbox">
+            <svg viewBox="0 0 380 190" role="img" aria-label="MONO MIX 會把兩軌混成一軌">
+              <text x="94" y="20" font-size="13" font-weight="900" text-anchor="middle" fill="#d3382b">ON：混成一個聲音</text>
+              <rect x="24" y="40" width="60" height="24" rx="5" fill="#d3382b"/>
+              <text x="54" y="57" font-size="11" font-weight="900" text-anchor="middle" fill="#fff">Shotgun</text>
+              <rect x="24" y="80" width="60" height="24" rx="5" fill="#245a80"/>
+              <text x="54" y="97" font-size="11" font-weight="900" text-anchor="middle" fill="#fff">Mini mic</text>
+              <path d="M88 52 Q116 52 118 72" fill="none" stroke="#8a8274" stroke-width="2.5"/>
+              <path d="M88 92 Q116 92 118 72" fill="none" stroke="#8a8274" stroke-width="2.5"/>
+              <path d="M120 72 H144" stroke="#8a8274" stroke-width="2.5" marker-end="url(#a4)"/>
+              <rect x="150" y="58" width="24" height="28" rx="5" fill="#7a5a3a"/>
+              <text x="94" y="134" font-size="12" font-weight="900" text-anchor="middle" fill="#7a5a3a">🍚 蛋炒飯</text>
+              <text x="94" y="154" font-size="11" text-anchor="middle" fill="#4e463d">蛋跟飯炒在一起</text>
+              <text x="94" y="172" font-size="11" text-anchor="middle" fill="#d3382b">就很難很難再分開</text>
+
+              <line x1="196" y1="20" x2="196" y2="176" stroke="#e6dac4" stroke-width="1.5"/>
+
+              <text x="290" y="20" font-size="13" font-weight="900" text-anchor="middle" fill="#2f765f">OFF：兩軌分開 ✓</text>
+              <rect x="226" y="40" width="60" height="24" rx="5" fill="#d3382b"/>
+              <text x="256" y="57" font-size="11" font-weight="900" text-anchor="middle" fill="#fff">Shotgun</text>
+              <rect x="226" y="80" width="60" height="24" rx="5" fill="#245a80"/>
+              <text x="256" y="97" font-size="11" font-weight="900" text-anchor="middle" fill="#fff">Mini mic</text>
+              <path d="M290 52 H326" stroke="#d3382b" stroke-width="2.5" marker-end="url(#a3b)"/>
+              <path d="M290 92 H326" stroke="#245a80" stroke-width="2.5" marker-end="url(#a5)"/>
+              <rect x="332" y="40" width="20" height="24" rx="4" fill="#d3382b" opacity=".25" stroke="#d3382b"/>
+              <rect x="332" y="80" width="20" height="24" rx="4" fill="#245a80" opacity=".25" stroke="#245a80"/>
+              <text x="290" y="140" font-size="11" text-anchor="middle" fill="#2f765f">後期可以分別處理</text>
+              <text x="290" y="158" font-size="11" text-anchor="middle" fill="#4e463d">要哪一支就用哪一支</text>
+              <defs>
+                <marker id="a4" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#8a8274"/></marker>
+                <marker id="a3b" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#d3382b"/></marker>
+                <marker id="a5" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#245a80"/></marker>
+              </defs>
+            </svg>
+          </div>
+          <p style="margin-top:14px">MONO MIX 會把第一軌跟第二軌的聲音<b>加在一起，變成同一個聲音</b>。這樣一來，shotgun 跟 mini mic 就分不開了。</p>
+          <p>老師的比喻：<b>就像蛋炒飯，蛋跟飯已經炒在一起了，就很難很難再分開。</b></p>
+        </article>
+      </div>
+
+      <article class="card pad tone-green bg-ok">
+        <span class="badge green">唯一的例外</span>
+        <h3 style="margin-top:12px">只有一支外接麥克風時，MONO MIX 可以開</h3>
+        <p>一般狀況都是 <b>stereo</b>：左右分別聽到來自左方麥克風與右方麥克風蒐集到的聲音。所以雙麥現場，MONO MIX 一律 OFF。</p>
+        <p>但如果你<b>只接了一支外接麥克風</b>，戴上耳機會變成只有一邊有聲音。這時候想讓兩耳都聽到一樣的聲音，可以到 <b>MENU → INPUT → MONO MIX 開啟為 ON</b>。這是舊教材裡的補充用法，只適用於單支麥克風的情況。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 聽到 ≠ 錄到 ============ -->
+<section id="monitor">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 5 · The key concept</span>
+      <h2>聽到的，跟錄到的，是兩件事</h2>
+      <p>這是整堂課最重要的觀念。耳機音量調到 0，你什麼都聽不到，但機器可能正在很大聲地錄音。兩個旋鈕在機身的兩側，也代表兩件完全不同的事。</p>
+    </div>
+
+    <div class="svgbox" style="background:#fffdf7">
+      <svg viewBox="0 0 720 300" role="img" aria-label="VOLUME 與 REC LEVEL 的差別">
+        <!-- recorder -->
+        <rect x="296" y="70" width="128" height="170" rx="16" fill="#2f3237" stroke="#101114" stroke-width="1.5"/>
+        <rect x="312" y="90" width="96" height="58" rx="5" fill="#2a2410"/>
+        <rect x="320" y="104" width="80" height="7" rx="2" fill="#f4c452"/>
+        <rect x="320" y="118" width="62" height="7" rx="2" fill="#f4c452"/>
+        <text x="360" y="142" font-size="9" fill="#c9a24a" font-family="monospace" text-anchor="middle">STE-000.WAV</text>
+        <circle cx="360" cy="196" r="20" fill="#1a1c20" stroke="#d3382b" stroke-width="2"/>
+        <circle cx="360" cy="196" r="8" fill="#d3382b"/>
+        <text x="360" y="264" font-size="13" font-weight="900" text-anchor="middle" fill="#101114">Zoom H4n</text>
+
+        <!-- left: volume -->
+        <rect x="276" y="112" width="22" height="42" rx="5" fill="#d8dade" stroke="#101114"/>
+        <text x="287" y="130" font-size="11" font-weight="900" text-anchor="middle" fill="#2f765f">+</text>
+        <text x="287" y="148" font-size="11" font-weight="900" text-anchor="middle" fill="#2f765f">−</text>
+        <path d="M270 133 H180" stroke="#2f765f" stroke-width="3" marker-end="url(#g1)"/>
+        <path d="M120 118 v30 h14 l20 16 v-62 l-20 16 z" fill="#2f765f"/>
+        <path d="M162 116 a26 26 0 0 1 0 34" fill="none" stroke="#2f765f" stroke-width="3"/>
+        <text x="140" y="196" font-size="14" font-weight="900" text-anchor="middle" fill="#2f765f">你「聽到」多大聲</text>
+        <rect x="24" y="212" width="234" height="66" rx="8" fill="#f0f7f2" stroke="#2f765f" stroke-width="1.5"/>
+        <text x="141" y="234" font-size="13" font-weight="900" text-anchor="middle" fill="#2f765f">左側 VOLUME（耳機音量）</text>
+        <text x="141" y="254" font-size="12" text-anchor="middle" fill="#4e463d">只要不傷耳朵，你想聽多大都可以</text>
+        <text x="141" y="271" font-size="12" text-anchor="middle" fill="#4e463d">它完全不會改變錄進去的檔案</text>
+        <text x="141" y="42" font-size="15" font-weight="900" text-anchor="middle" fill="#2f765f">監聽端</text>
+
+        <!-- right: rec level -->
+        <rect x="422" y="112" width="22" height="42" rx="5" fill="#d8dade" stroke="#101114"/>
+        <text x="433" y="130" font-size="11" font-weight="900" text-anchor="middle" fill="#d3382b">+</text>
+        <text x="433" y="148" font-size="11" font-weight="900" text-anchor="middle" fill="#d3382b">−</text>
+        <path d="M450 133 H540" stroke="#d3382b" stroke-width="3" marker-end="url(#g2)"/>
+        <path d="M548 110 h56 l14 14 v42 h-70 z" fill="#d3382b"/>
+        <text x="583" y="152" font-size="12" font-weight="900" text-anchor="middle" fill="#fff">SD</text>
+        <text x="583" y="196" font-size="14" font-weight="900" text-anchor="middle" fill="#d3382b">你「錄到」多大聲</text>
+        <rect x="462" y="212" width="234" height="66" rx="8" fill="#fdf0ec" stroke="#d3382b" stroke-width="1.5"/>
+        <text x="579" y="234" font-size="13" font-weight="900" text-anchor="middle" fill="#d3382b">右側 REC LEVEL（錄音電平）</text>
+        <text x="579" y="254" font-size="12" text-anchor="middle" fill="#4e463d">往上升錄得越大，往下降錄得越小</text>
+        <text x="579" y="271" font-size="12" text-anchor="middle" fill="#4e463d">這才是真正寫進檔案裡的東西</text>
+        <text x="579" y="42" font-size="15" font-weight="900" text-anchor="middle" fill="#d3382b">錄音端</text>
+
+        <text x="360" y="42" font-size="30" font-weight="900" text-anchor="middle" fill="#101114">≠</text>
+        <defs>
+          <marker id="g1" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#2f765f"/></marker>
+          <marker id="g2" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#d3382b"/></marker>
+        </defs>
+      </svg>
+    </div>
+    <div class="figcap">耳機音量調到 0，你什麼都聽不到；但只要 REC LEVEL 開著，錄音還是很大聲。反過來也一樣。</div>
+
+    <div class="split" style="margin-top:24px">
+      <article class="card pad tone-green">
+        <h3>目標：對話錄到 −12 dB 左右</h3>
+        <p>先讓演員用<b>正式的音量</b>講台詞，boom 或 lav 也放在正式位置，再開始調 REC LEVEL。</p>
+        <div class="svgbox" style="margin-top:8px">
+          <svg viewBox="0 0 460 120" role="img" aria-label="錄音電平表，目標在 -12 dB">
+            <rect x="20" y="34" width="420" height="30" rx="5" fill="#efe8d8" stroke="#101114" stroke-width="1.5"/>
+            <rect x="22" y="36" width="276" height="26" rx="4" fill="#2f765f"/>
+            <rect x="298" y="36" width="76" height="26" fill="#f0bd45"/>
+            <rect x="374" y="36" width="64" height="26" rx="4" fill="#d3382b"/>
+            <rect x="22" y="36" width="276" height="26" rx="4" fill="#1f5a49"/>
+            <line x1="298" y1="24" x2="298" y2="74" stroke="#101114" stroke-width="2.5"/>
+            <text x="298" y="18" font-size="14" font-weight="900" text-anchor="middle" fill="#101114">−12</text>
+            <text x="22" y="86" font-size="11" fill="#6b6153">−48</text>
+            <text x="220" y="86" font-size="11" fill="#6b6153">−24</text>
+            <text x="374" y="86" font-size="11" fill="#6b6153">−6</text>
+            <text x="432" y="86" font-size="11" fill="#6b6153">0</text>
+            <text x="160" y="108" font-size="12" font-weight="900" text-anchor="middle" fill="#d3382b">太小 → 後期救不動</text>
+            <text x="400" y="108" font-size="12" font-weight="900" text-anchor="middle" fill="#d3382b">爆掉</text>
+            <text x="298" y="108" font-size="12" font-weight="900" text-anchor="middle" fill="#2f765f">對話目標</text>
+          </svg>
+        </div>
+        <ul style="margin-top:14px">
+          <li>希望你每一路都有 <b>−12 dB</b> 的音量，<b>尤其是對話</b>。</li>
+          <li>H4n 不是非常專業的錄音機，<b>錄太小是給自己找麻煩</b>，寧可稍微錄大一點點。</li>
+          <li>但也不要一直撞到 0 dB，爆音是救不回來的。</li>
+        </ul>
+      </article>
+
+      <article class="card pad">
+        <h3>調電平的順序</h3>
+        <ol class="steps" style="counter-reset:s">
+          <li><b>戴上耳機</b><span>耳機插在左側耳機孔，先用左側 VOLUME 調到你聽得清楚的音量。</span></li>
+          <li><b>輕按一次 REC 進 standby</b><span>這時候還沒開始錄，但耳機已經聽得到聲音了，可以邊聽邊調。</span></li>
+          <li><b>按 INPUT [1] 選要調的那一路</b><span>先確認你正在調的是哪一支麥克風。</span></li>
+          <li><b>用右側 REC LEVEL ＋／− 推到 −12</b><span>往上升錄音越大聲，往下降越小聲。看螢幕電平表，同時用耳朵聽。</span></li>
+          <li><b>換 INPUT [2] 再調一次</b><span>1/2 LINK 已經關掉了，所以兩路必須分別調。</span></li>
+          <li><b>聽到爆音、風聲、衣服摩擦？</b><span>先修麥克風位置與器材，不要靠調電平硬壓。</span></li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 錄音與回放 ============ -->
+<section id="record">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Step 6 · Record</span>
+      <h2>錄音鍵要按兩次</h2>
+      <p>H4n 的錄音鍵是兩段式的。很多人第一次用會以為已經在錄了，其實還停在預備狀態；也有人以為還在測試，結果整段都錄了進去。</p>
+    </div>
+
+    <div class="svgbox" style="background:#fffdf7">
+      <svg viewBox="0 0 760 190" role="img" aria-label="H4n 錄音流程：待機、預備、錄音、停止、回放">
+        <g>
+          <rect x="10" y="44" width="112" height="76" rx="10" fill="#fff" stroke="#101114" stroke-width="1.5"/>
+          <circle cx="66" cy="72" r="13" fill="#e4e0d6" stroke="#8a8274"/>
+          <text x="66" y="102" font-size="12" font-weight="900" text-anchor="middle" fill="#101114">待機</text>
+          <text x="66" y="140" font-size="11" text-anchor="middle" fill="#6b6153">燈是暗的</text>
+        </g>
+        <path d="M128 82 H168" stroke="#101114" stroke-width="2.5" marker-end="url(#b1)"/>
+        <text x="148" y="70" font-size="11" font-weight="900" text-anchor="middle" fill="#d3382b">輕按 REC</text>
+
+        <g>
+          <rect x="176" y="44" width="128" height="76" rx="10" fill="#fdf0ec" stroke="#d3382b" stroke-width="1.5"/>
+          <circle cx="240" cy="72" r="13" fill="#d3382b" opacity=".45" stroke="#d3382b" stroke-width="2"/>
+          <text x="240" y="102" font-size="12" font-weight="900" text-anchor="middle" fill="#d3382b">預備 standby</text>
+          <text x="240" y="140" font-size="11" text-anchor="middle" fill="#6b6153">紅燈閃爍</text>
+          <text x="240" y="156" font-size="11" text-anchor="middle" fill="#2f765f">耳機已經聽得到 → 調電平</text>
+        </g>
+        <path d="M310 82 H350" stroke="#101114" stroke-width="2.5" marker-end="url(#b1)"/>
+        <text x="330" y="70" font-size="11" font-weight="900" text-anchor="middle" fill="#d3382b">再按 REC</text>
+
+        <g>
+          <rect x="358" y="44" width="128" height="76" rx="10" fill="#d3382b" stroke="#101114" stroke-width="1.5"/>
+          <circle cx="422" cy="72" r="13" fill="#fff"/>
+          <text x="422" y="102" font-size="12" font-weight="900" text-anchor="middle" fill="#fff">正式錄音</text>
+          <text x="422" y="140" font-size="11" text-anchor="middle" fill="#6b6153">紅燈恆亮、時間在跑</text>
+          <text x="422" y="156" font-size="11" font-weight="700" text-anchor="middle" fill="#101114">螢幕顯示檔號 STE-000</text>
+        </g>
+        <path d="M492 82 H532" stroke="#101114" stroke-width="2.5" marker-end="url(#b1)"/>
+        <text x="512" y="70" font-size="11" font-weight="900" text-anchor="middle" fill="#101114">按 ■ 停止</text>
+
+        <g>
+          <rect x="540" y="44" width="112" height="76" rx="10" fill="#fff" stroke="#101114" stroke-width="1.5"/>
+          <rect x="586" y="62" width="20" height="20" fill="#101114"/>
+          <text x="596" y="102" font-size="12" font-weight="900" text-anchor="middle" fill="#101114">停止</text>
+          <text x="596" y="140" font-size="11" text-anchor="middle" fill="#6b6153">檔案寫入卡片</text>
+        </g>
+        <path d="M658 82 H690" stroke="#2f765f" stroke-width="2.5" marker-end="url(#b2)"/>
+
+        <g>
+          <rect x="696" y="44" width="56" height="76" rx="10" fill="#f0f7f2" stroke="#2f765f" stroke-width="1.5"/>
+          <path d="M716 64 l18 12 l-18 12 z" fill="#2f765f"/>
+          <text x="724" y="102" font-size="12" font-weight="900" text-anchor="middle" fill="#2f765f">PLAY</text>
+          <text x="724" y="140" font-size="11" text-anchor="middle" fill="#6b6153">回放確認</text>
+        </g>
+        <defs>
+          <marker id="b1" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#101114"/></marker>
+          <marker id="b2" markerWidth="9" markerHeight="9" refX="5" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#2f765f"/></marker>
+        </defs>
+      </svg>
+    </div>
+
+    <div class="trio" style="margin-top:24px">
+      <article class="card pad tone-red">
+        <h3>第一下：預備</h3>
+        <p>輕按一次錄音鍵，<b>它只是在測試</b>——standby。紅燈會閃爍，代表預備中。</p>
+        <p>這個狀態很好用：<b>耳機已經聽得到聲音了</b>，你可以放心在這裡把 REC LEVEL 調好，還沒有任何東西被寫進卡片。</p>
+      </article>
+      <article class="card pad tone-red">
+        <h3>第二下：真的開始錄</h3>
+        <p>再按一次錄音鍵，才是正式錄音。確認紅燈<b>恆亮</b>、螢幕上的<b>時間開始跑</b>。</p>
+        <p>螢幕上方會顯示<b>檔號</b>，例如 <b>STE-000</b>。錄完停止，下一次進 standby 就會變成 <b>STE-001</b>，依序往下。</p>
+      </article>
+      <article class="card pad tone-green">
+        <h3>停止之後，一定要回放</h3>
+        <p>按方塊狀的<b>停止鍵</b>結束錄音，然後<b>按 PLAY 回放</b>，用耳機確認這一段真的錄進去了。</p>
+        <p>回放時聽：對白清不清楚、有沒有爆音、有沒有風聲、有沒有衣服摩擦。有問題就趁現場還在的時候重錄。</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 速查卡 ============ -->
+<section id="recipes">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Quick reference</span>
+      <h2>兩張速查卡：現場照著念</h2>
+      <p>整理自課堂講義。左邊是只用內建麥克風（錄環境音、訪談）；右邊是接外接麥克風（正式拍攝對白）。手機開著這一段，一步一步做。</p>
+    </div>
+
+    <div class="split">
+      <article class="card pad tone-blue">
+        <span class="badge blue">速查卡 A</span>
+        <h3 style="margin-top:12px">使用內建麥克風</h3>
+        <p style="color:var(--muted);font-size:15px">錄環境音、空景、近距離訪談、簡單樂器素材。</p>
+        <ol class="recipe" style="margin-top:14px">
+          <li>電源開機。</li>
+          <li>輸入音源改為 <b>mic</b>。</li>
+          <li>SD CARD 格式化　<code>menu → SD CARD → FORMAT</code></li>
+          <li>設定錄音格式　<code>menu → rec → rec format</code>　→ <b>wav 48kHz 24bit</b></li>
+          <li>輕按『錄音鈕』一次，<b>紅色燈閃爍，代表預備中</b>。</li>
+          <li>耳機插入耳機孔。</li>
+          <li>利用<b>耳機音量調整鈕</b>，尋找適合的聆聽音量。</li>
+          <li>利用<b>錄音音量調整鈕</b>，調整錄音音量（對話約 −12 dB）。</li>
+          <li>再按一次『錄音鈕』，<b>正式錄音</b>。</li>
+          <li>按<b>停止鍵（方塊狀）</b>，結束錄音。</li>
+          <li>按 PLAY 回放確認 → 完成。</li>
+        </ol>
+      </article>
+
+      <article class="card pad tone-red">
+        <span class="badge red">速查卡 B</span>
+        <h3 style="margin-top:12px">使用外接麥克風</h3>
+        <p style="color:var(--muted);font-size:15px">正式拍攝現場對白。H4n 最多可同時外接兩支麥克風。</p>
+        <ol class="recipe" style="margin-top:14px">
+          <li>電源開機。</li>
+          <li>H4n <b>最多可同時外接兩支麥克風</b>（INPUT 1、INPUT 2）。</li>
+          <li>確認麥克風是不是<b>需要電源的電容式麥克風</b>，以及麥克風本身能不能裝電池。<b>可以裝電池的，建議直接裝電池供電</b>，以免過度消耗錄音機電量。</li>
+          <li>若為不能裝電池的電容式麥克風　<code>menu → input → phantom</code>　→ 將 <b>48V</b> 打勾。</li>
+          <li>輸入音源改為 <b>1、2</b>。</li>
+          <li>確認 <code>1/2 LINK = OFF</code>、<code>MONO MIX = OFF</code>（只接一支麥克風時才考慮開 MONO MIX）。</li>
+          <li>SD CARD 格式化　<code>menu → SD CARD → FORMAT</code></li>
+          <li>設定錄音格式　<code>menu → rec → rec format</code>　→ <b>wav 48kHz 24bit</b></li>
+          <li>輕按『錄音鈕』一次，紅色燈閃爍，代表預備中。</li>
+          <li>耳機插入耳機孔。</li>
+          <li>利用耳機音量調整鈕，尋找適合的聆聽音量。</li>
+          <li>利用錄音音量調整鈕，<b>兩路分別</b>調整錄音音量。</li>
+          <li>再按一次『錄音鈕』，正式錄音。</li>
+          <li>按停止鍵（方塊狀）結束 → PLAY 回放確認 → 完成。</li>
+        </ol>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 檢查表 ============ -->
+<section id="checklist">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">Student handout</span>
+      <h2>出機前後檢查表</h2>
+      <p>每次借機都照著念一遍。念完再開錄，你就不會在回家路上才發現整場沒錄到。</p>
+    </div>
+
+    <div class="trio">
+      <article class="card pad">
+        <span class="badge">出機前</span>
+        <h3 style="margin-top:12px">器材與電源</h3>
+        <ul class="check">
+          <li>兩顆 AA <b>鹼性</b>電池已裝，電池壓在拉帶上方。</li>
+          <li>備用電池已帶。</li>
+          <li><b>STAMINA 開關確認在 OFF。</b></li>
+          <li>SD／SDHC 卡已插入側邊卡槽（不是 SDXC）。</li>
+          <li>耳機、防風罩、XLR 線、腳架／手持架已帶。</li>
+          <li>外接麥克風如果能裝電池，已裝好電池。</li>
+        </ul>
+      </article>
+      <article class="card pad">
+        <span class="badge">開錄前</span>
+        <h3 style="margin-top:12px">設定與電平</h3>
+        <ul class="check">
+          <li>SD 卡已在機器內 FORMAT。</li>
+          <li>錄音格式 = <b>WAV 48kHz / 24bit</b>。</li>
+          <li>INPUT 已選對（MIC 或 1、2）。</li>
+          <li>需要的話 PHANTOM 已開 48V；不需要就關掉。</li>
+          <li><b>1/2 LINK = OFF、MONO MIX = OFF。</b></li>
+          <li>戴耳機、輕按 REC 進 standby，兩路都聽得到。</li>
+          <li>對話電平推到 <b>−12 dB</b> 左右，沒有撞到 0。</li>
+        </ul>
+      </article>
+      <article class="card pad">
+        <span class="badge">錄音中與收工</span>
+        <h3 style="margin-top:12px">確認與交檔</h3>
+        <ul class="check">
+          <li>紅燈恆亮、螢幕時間正在跑。</li>
+          <li>記下檔號（STE-000、STE-001⋯）對應哪一個鏡次。</li>
+          <li>重要 take 錄完馬上回放確認。</li>
+          <li>另外錄一段空場環境音給後期。</li>
+          <li>收工前確認檔案清單真的有新檔。</li>
+          <li>檔案複製到電腦後，再格式化或清卡。</li>
+          <li>關機，電池與 SD 卡依器材規範收納。</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 影片 ============ -->
+<section id="video">
+  <div class="shell">
+    <div class="sec-head">
+      <span class="kicker">2021 playlist</span>
+      <h2>初階同步錄音教學影片</h2>
+      <p>陳嘉暐老師 2021 年錄製的同步錄音基礎教學，播放清單「義守初階同步錄音」共 <b>5 部影片</b>，可以從第一部連續看完。其中<b>第三集</b>就是這一頁的 H4n 示範，看完再回來照流程檢查自己的機器。</p>
+    </div>
+
+    <div class="split-wide">
+      <div class="card pad">
+        <div class="video">
+          <iframe id="ytPlayer"
+            src="https://www.youtube.com/embed/IHqFZS_50nk?list=PLgWzikMRffE_jK8ATC7umfFpfafy2jvW5&amp;rel=0"
+            title="義守初階同步錄音 播放清單（2021）"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+        </div>
+        <div class="figcap">播放清單「義守初階同步錄音」共 5 部影片，播完一部會自動接著播下一部。也可以用播放器左上角的清單按鈕切換集數。</div>
+      </div>
+
+      <div class="stack">
+        <article class="card pad">
+          <span class="badge red">播放清單 · 5 部影片</span>
+          <h3 style="margin-top:12px">點一下切換集數</h3>
+          <ol class="plist">
+            <li><button type="button" class="ep-btn" data-v="YMIG80hg_a0">
+              <span class="ep">1</span>
+              <span class="ep-name">初階同步錄音1</span>
+              <span class="dur">2:53</span>
+            </button></li>
+            <li><button type="button" class="ep-btn" data-v="mLLS1vNl2Kk">
+              <span class="ep">2</span>
+              <span class="ep-name">初階同步錄音2</span>
+              <span class="dur">6:46</span>
+            </button></li>
+            <li><button type="button" class="ep-btn" data-v="IHqFZS_50nk" aria-current="true">
+              <span class="ep">3</span>
+              <span class="ep-name">初階同步錄音3<span class="tag">本頁對應：H4n 組裝與設定</span></span>
+              <span class="dur">7:36</span>
+            </button></li>
+            <li><button type="button" class="ep-btn" data-v="nxbRjUNlYhk">
+              <span class="ep">4</span>
+              <span class="ep-name">初階同步錄音4</span>
+              <span class="dur">10:02</span>
+            </button></li>
+            <li><button type="button" class="ep-btn" data-v="5OVclmd-V9g">
+              <span class="ep">5</span>
+              <span class="ep-name">初階同步錄音5</span>
+              <span class="dur">3:25</span>
+            </button></li>
+          </ol>
+          <p style="margin-top:14px;font-size:14px"><a href="https://www.youtube.com/playlist?list=PLgWzikMRffE_jK8ATC7umfFpfafy2jvW5" target="_blank" rel="noopener" style="font-weight:900">在 YouTube 開啟完整播放清單 →</a></p>
+        </article>
+
+        <article class="card pad tone-green bg-ok">
+          <h3>看第三集時，特別注意這幾句</h3>
+          <ul>
+            <li>「這不是建議，是<b>強迫不能開</b>」——講的是 STAMINA。</li>
+            <li>「<b>蛋跟飯已經炒在一起了</b>，就很難很難再分開」——講的是 MONO MIX。</li>
+            <li>「<b>聽到跟錄到是兩件不同的事情</b>」——VOLUME 對 REC LEVEL。</li>
+            <li>「你錄太小<b>是給自己找麻煩</b>」——對話推到 −12 dB。</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+
+<footer class="shell">
+  <p>課程：義守大學 電影與電視學系 影視二《影視錄音實務》｜授課教師：陳嘉暐老師</p>
+  <p>內容依據：課堂示範逐字稿（初階同步錄音 第三集，2021）、課程講義《Zoom H4n 操作說明》、Zoom Corporation《H4n Operation Manual》。</p>
+  <p>手冊：<a href="https://zoomcorp.com/media/documents/H4n-manual.pdf">H4n Operation Manual (PDF)</a>｜第三集影片：<a href="https://youtu.be/IHqFZS_50nk">youtu.be/IHqFZS_50nk</a>｜播放清單：<a href="https://www.youtube.com/playlist?list=PLgWzikMRffE_jK8ATC7umfFpfafy2jvW5">初階同步錄音教學</a>｜<a href="h4essential.html">切換到 H4essential 新機頁</a></p>
+</footer>
+
+
+<script>
+(function(){
+  var pl = 'PLgWzikMRffE_jK8ATC7umfFpfafy2jvW5';
+  var frame = document.getElementById('ytPlayer');
+  var btns = document.querySelectorAll('.plist .ep-btn');
+  if(!frame || !btns.length) return;
+  btns.forEach(function(b){
+    b.addEventListener('click', function(){
+      btns.forEach(function(o){ o.removeAttribute('aria-current'); });
+      b.setAttribute('aria-current','true');
+      frame.src = 'https://www.youtube.com/embed/' + b.dataset.v +
+                  '?list=' + pl + '&rel=0&autoplay=1';
+    });
+  });
+})();
+</script>
+</body>
+</html>
