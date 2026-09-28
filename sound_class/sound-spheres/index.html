@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101d19">
+  <meta name="description" content="從五個內在念頭，到六層真實聲景。一頁完成、為手機設計的聲音球體聆聽體驗。">
+  <title>聲音球體 — 一圈，一個世界</title>
+  <link rel="stylesheet" href="experience.css?v=12">
+</head>
+<body>
+<div class="experience" id="experience">
+  <header class="topbar">
+    <div class="identity"><span class="brand-symbol" aria-hidden="true">◎</span><div><strong>聲音球體</strong><small>Sound Spheres · 概念原作者 David Sonnenschein</small></div></div>
+    <button id="helpButton" class="round-button" aria-label="關於課程與操作說明">?</button>
+  </header>
+
+  <main class="stage" id="stage" aria-label="聆聽簡報">
+    <div class="sphere-zone" id="sphereZone">
+      <div class="sphere-art" id="sphereArt">
+        <svg id="sphere" viewBox="0 0 320 320" role="img" aria-label="聲音球體：中心 I THINK 亮起，其餘層次尚未開啟">
+          <defs>
+            <radialGradient id="haze"><stop offset="0" stop-color="#ddc28e" stop-opacity=".15"/><stop offset=".75" stop-color="#8da58a" stop-opacity=".035"/><stop offset="1" stop-color="#8da58a" stop-opacity="0"/></radialGradient>
+            <linearGradient id="ringLight" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5e6bd"/><stop offset=".5" stop-color="#cbb77f"/><stop offset="1" stop-color="#839c79"/></linearGradient>
+            <filter id="glow"><feGaussianBlur stdDeviation="3"/></filter>
+          </defs>
+          <circle cx="160" cy="160" r="155" fill="url(#haze)"/>
+          <path d="M160 13V27M160 293V307M13 160H27M293 160H307" stroke="#b3b798" stroke-opacity=".25" stroke-width=".7"/>
+          <g id="sphereRings"></g>
+          <text x="160" y="9" text-anchor="middle" class="svg-caption">WITHIN · BEYOND</text>
+          <text x="160" y="316" text-anchor="middle" class="svg-caption" id="sphereCaption">由內向外，慢慢聽。</text>
+        </svg>
+        <div class="orb-center" aria-hidden="true"><small id="centerEnglish">I THINK</small><strong id="centerWord">紛擾</strong></div>
+      </div>
+    </div>
+
+    <section class="slide-panel" aria-labelledby="slideTitle">
+      <div class="slide-kicker"><span id="slideEnglish">01 / I THINK</span><span id="sceneShort">阿里山・林間慢行</span></div>
+      <h1 id="slideTitle">先聽見，腦內的自己。</h1>
+      <p class="slide-description" id="slideDescription">五個念頭搶著說話。逐一安放，讓安靜慢慢回來。</p>
+      <div class="stage-interaction">
+        <div id="thoughtControls" class="thought-controls" aria-label="逐一關閉五個內在聲音"></div>
+        <div id="quietPanel" class="quiet-panel" hidden><span>五個念頭都已安放。</span><button id="replayMind">重新聽見它們 ↺</button></div>
+        <div id="listeningCue" class="listening-cue" hidden><span class="cue-line" aria-hidden="true"></span><p id="cueText"></p></div>
+        <label id="wholeOptions" class="whole-options" hidden><input id="includeMind" type="checkbox" checked><span>包含內在聲音<small>也可以留白中心，只聽身體與世界。</small></span></label>
+        <div id="blendPanel" class="blend-panel" hidden>
+          <label for="blendFocus">此刻的主角 <output id="blendFocusName">I DON'T KNOW</output></label>
+          <input id="blendFocus" class="blend-range" type="range" min="1" max="5" step="1" value="5" aria-label="選擇比例最大的層次">
+          <small>用滑鼠或手指滑過球體，由外而內、由內而外。經過的那一圈亮起，比例最大；中心 I THINK 保持關閉。</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite" aria-hidden="true">
+    <div class="loading-card">
+      <span class="loading-spinner" aria-hidden="true"></span>
+      <strong id="loadingTitle">正在載入聲音</strong>
+      <span id="loadingDetail">請稍等，音檔準備好就會開始播放。</span>
+    </div>
+  </div>
+
+  <section class="control-deck" aria-label="體驗控制">
+    <div class="status-row"><span id="status" role="status" aria-live="polite">戴上耳機，按下開始。</span><span class="signal" aria-hidden="true"><i id="signalFill"></i></span><span id="pageCount">01 / 08</span></div>
+    <nav class="progress" id="progress" aria-label="聆聽進度"></nav>
+    <div class="transport">
+      <button id="previous" class="previous" aria-label="上一層" disabled>←</button>
+      <button id="play" class="play-button"><span id="playIcon" aria-hidden="true">▶</span><span id="playLabel">開始體驗</span></button>
+      <button id="next" class="next-button" disabled><span id="nextLabel">從呼吸出發</span><span aria-hidden="true">→</span></button>
+    </div>
+    <div class="utility-bar">
+      <button id="sceneButton"><span aria-hidden="true">⌖</span> 換個地方</button>
+      <button id="settingsButton"><span aria-hidden="true">☷</span> <span id="volumeLabel">音量 70%</span></button>
+      <button id="notesButton"><span aria-hidden="true">✎</span> 聲音筆記</button>
+    </div>
+  </section>
+  <footer><span>義守大學電影與電視學系陳嘉暐老師製作</span><a href="resources.html">Resources ↗</a></footer>
+</div>
+
+<dialog id="sceneDialog" class="sheet" aria-labelledby="sceneDialogTitle">
+  <div class="sheet-head"><div><small>CHOOSE A SOUNDSCAPE</small><h2 id="sceneDialogTitle">想在哪裡，慢慢聽？</h2></div><button data-close aria-label="關閉場景選單">×</button></div>
+  <div id="sceneList" class="scene-list"></div>
+  <p class="sheet-note">目前開放「阿里山・林間慢行」。其餘四個聲景仍在建構中，完成後會陸續開放。</p>
+</dialog>
+<dialog id="settingsDialog" class="sheet" aria-labelledby="settingsTitle">
+  <div class="sheet-head"><div><small>YOUR LISTENING PACE</small><h2 id="settingsTitle">照自己的步調。</h2></div><button data-close aria-label="關閉聆聽設定">×</button></div>
+  <label class="volume-control" for="volume">音量 <output id="volumeOutput">70%</output></label><input id="volume" class="volume" type="range" min="0" max="100" value="70">
+  <p class="sheet-note">從舒適的音量開始。五段碎念靠交疊呈現忙亂，不需要開大音量。</p>
+  <button id="realMode" class="setting-button" aria-pressed="false">聆聽真實環境 <span>關閉網站聲音，不使用麥克風</span></button>
+  <button id="autoGuide" class="setting-button" aria-pressed="false">六分鐘自動引導 <span>從呼吸開始，每分鐘前進一圈</span></button>
+  <p id="settingsHint" class="sheet-note">先安放五個念頭，便能開啟這兩種練習。</p>
+</dialog>
+<dialog id="notesDialog" class="sheet" aria-labelledby="notesTitle">
+  <div class="sheet-head"><div><small>LEAVE A TRACE</small><h2 id="notesTitle">把此刻，留下來。</h2></div><button data-close aria-label="關閉聲音筆記">×</button></div>
+  <label id="noteLabel" for="notes"></label><textarea id="notes" placeholder="我聽見……它像「沙——」「叩、叩」。"></textarea>
+  <div class="note-actions"><span id="saveStatus">只存在此瀏覽器。</span><button id="download">匯出筆記 ↓</button></div>
+</dialog>
+<dialog id="helpDialog" class="sheet" aria-labelledby="helpTitle">
+  <div class="sheet-head"><div><small>A SMALL PRACTICE IN ATTENTION</small><h2 id="helpTitle">一圈，一個世界。</h2></div><button data-close aria-label="關閉課程說明">×</button></div>
+  <ol class="help-steps"><li>按下開始，聽見五個 AI 內在念頭。逐一關掉，或一鍵全部安放。</li><li>從呼吸出發，按「下一層」。目前這圈亮起，也只播放這一層。</li><li>到達最外圈，再按「全部亮起」，讓六層一起出現。可選擇保留中心的安靜。</li><li>最後一頁「交融聆聽」讓五個外在層次同時發聲，預設由 I DON'T KNOW 帶頭並閃爍。滑過球體，換一圈當主角；中心 I THINK 全程關閉。</li></ol>
+  <p>也可以在球體上左右滑動，或用鍵盤方向鍵換頁。已經走過的圈可直接點選。整個練習不需要捲動主畫面。</p>
+  <p>Sound Spheres 概念原作者：<strong>David Sonnenschein</strong>。這六層描述你與聲音的關係，不只代表距離。I SEE 以文字情境想像看見聲源；I DON'T KNOW 若被你認出，也可歸入 I KNOW。</p>
+  <p>念頭不必真的消失；這是把注意力帶回當下的練習。語音為 AI 生成，外在聲景為免費授權實錄的剪輯重構。<a href="resources.html">完整音訊來源與授權 ↗</a></p>
+</dialog>
+<!-- ?v=N is shared by every asset below and by experience.css: bump it on ANY code or style change. -->
+<script src="scene-data.js?v=12"></script>
+<script src="inner-voices.js?v=12"></script>
+<script src="audio-engine.js?v=12"></script>
+<script src="app.js?v=12"></script>
+</body>
+</html>

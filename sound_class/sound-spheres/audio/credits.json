@@ -1,0 +1,469 @@
+{
+  "version": 3,
+  "retrieved_on": "2026-09-07",
+  "sources": [
+    {
+      "name": "post-office",
+      "id": 211143,
+      "author": "akx",
+      "title": "Post Office Ambience",
+      "url": "https://freesound.org/people/akx/sounds/211143/",
+      "license": [
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/211/211143_297-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "郵局室內交談",
+      "license_name": "CC BY 4.0",
+      "edited_files": [
+        {
+          "file": "audio/post-office.mp3",
+          "excerpt_start_seconds": 15,
+          "duration_seconds": 39.6,
+          "lufs": -18.46,
+          "true_peak_dbtp": -2.23
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "stamp",
+      "author": "frank_the_noise",
+      "id": 160879,
+      "title": "stamp post office mail.wav",
+      "url": "https://freesound.org/people/frank_the_noise/sounds/160879/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/160/160879_1481750-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "郵局蓋章",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/stamp.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 29.6,
+          "lufs": -20.66,
+          "true_peak_dbtp": -1.94
+        },
+        {
+          "file": "audio/post-detail.mp3",
+          "excerpt_start_seconds": 48,
+          "duration_seconds": 21.6,
+          "lufs": -19.08,
+          "true_peak_dbtp": -2.04
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "taipei",
+      "author": "ilmari_freesound",
+      "id": 609867,
+      "title": "2021-11-29-taipei-ambience-day-okm-II-zoom-h5-008.wav",
+      "url": "https://freesound.org/people/ilmari_freesound/sounds/609867/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/609/609867_12458758-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "台北街頭雙耳錄音",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/taipei.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 39.6,
+          "lufs": -18.44,
+          "true_peak_dbtp": -2.18
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "crowd",
+      "author": "Bansemer",
+      "id": 160493,
+      "title": "Large crowd applause.wav",
+      "url": "https://freesound.org/people/Bansemer/sounds/160493/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/160/160493_341440-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "演唱會掌聲與歡呼",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/crowd.mp3",
+          "excerpt_start_seconds": 3,
+          "duration_seconds": 34.6,
+          "lufs": -18.26,
+          "true_peak_dbtp": -9.73
+        },
+        {
+          "file": "audio/crowd-detail.mp3",
+          "excerpt_start_seconds": 51,
+          "duration_seconds": 24.6,
+          "lufs": -18.26,
+          "true_peak_dbtp": -9.09
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "orchestra",
+      "author": "cellokratzer",
+      "id": 502939,
+      "title": "Orchestra_tuning.wav",
+      "url": "https://freesound.org/people/cellokratzer/sounds/502939/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/502/502939_4882074-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "音樂廳樂團調音",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/orchestra.mp3",
+          "excerpt_start_seconds": 16,
+          "duration_seconds": 31.6,
+          "lufs": -18.26,
+          "true_peak_dbtp": -3.87
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "forest-steps",
+      "author": "nathanmanaker",
+      "id": 486953,
+      "title": "forest footsteps",
+      "url": "https://freesound.org/people/nathanmanaker/sounds/486953/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/486/486953_6657415-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "林間腳步",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/forest-steps.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 11.8,
+          "lufs": -19.34,
+          "true_peak_dbtp": -1.12
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "forest-birds",
+      "author": "BayTsai",
+      "id": 860231,
+      "title": "260623_055825_Taiwan Chiayi Alishan Ogasawara Lookout - June Early Morning - Forest Birds & Dawn Ambience_台灣嘉義阿里山小笠原觀景台6月_清晨",
+      "url": "https://freesound.org/people/BayTsai/sounds/860231/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/860/860231_17078888-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "阿里山清晨鳥蟲聲",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/forest-birds.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 39.4,
+          "lufs": -18.61,
+          "true_peak_dbtp": -2.19
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "forest-stream",
+      "author": "BayTsai",
+      "id": 860229,
+      "title": "260622_162153_Taiwan Alishan 28th Giant Tree - Distant River Stream - Water Ambience_台灣阿里山28號巨木_溪流-遠",
+      "url": "https://freesound.org/people/BayTsai/sounds/860229/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/860/860229_17078888-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "阿里山巨木旁的遠處溪流",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/forest-stream.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 36.9,
+          "lufs": -18.23,
+          "true_peak_dbtp": -2.24
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "forest-unknown",
+      "author": "BayTsai",
+      "id": 860232,
+      "title": "260623_055932_Taiwan Chiayi--Alishan Ogasawara Lookout Trail - June Woods - Mysterious AnimalBird Call_台灣嘉義阿里山 往小笠原觀景台步道6月_林間_特殊叫聲",
+      "url": "https://freesound.org/people/BayTsai/sounds/860232/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/860/860232_17078888-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "阿里山林間特殊叫聲",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/forest-unknown.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 36.4,
+          "lufs": -17.96,
+          "true_peak_dbtp": -2.16
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "paper",
+      "author": "Spaghetto87",
+      "id": 731482,
+      "title": "paper_Rustling_01",
+      "url": "https://freesound.org/people/Spaghetto87/sounds/731482/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/731/731482_10194618-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "紙張摩擦",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/paper.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 12.4,
+          "lufs": -18.9,
+          "true_peak_dbtp": -1.8
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "cloth",
+      "author": "khenshom",
+      "id": 481081,
+      "title": "Foley - Jeans - Rustling - Fabric movement sound.wav",
+      "url": "https://freesound.org/people/khenshom/sounds/481081/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/481/481081_6652872-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "衣料摩擦",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/cloth.mp3",
+          "excerpt_start_seconds": 2,
+          "duration_seconds": 14.6,
+          "lufs": -18.22,
+          "true_peak_dbtp": -2.23
+        },
+        {
+          "file": "audio/hall-detail.mp3",
+          "excerpt_start_seconds": 18,
+          "duration_seconds": 8.6,
+          "lufs": -18.62,
+          "true_peak_dbtp": -2.23
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "breath-soft",
+      "author": "dynamique",
+      "id": 554735,
+      "title": "quiet respiration woman.wav",
+      "url": "https://freesound.org/people/dynamique/sounds/554735/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/554/554735_456862-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "安靜的呼吸",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/breath.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 15.6,
+          "lufs": -18.28,
+          "true_peak_dbtp": -3.41
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "audience",
+      "author": "jayfrosting",
+      "id": 333415,
+      "title": "Murmur 2.wav",
+      "url": "https://freesound.org/people/jayfrosting/sounds/333415/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/333/333415_5884138-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "觀眾席交談",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/audience.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 10.0,
+          "lufs": -18.26,
+          "true_peak_dbtp": -4.13
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    },
+    {
+      "name": "cicadas",
+      "author": "BayTsai",
+      "id": 860235,
+      "title": "260623_124149_Taiwan Alishan Forest in June - Dense Cicada Chorus - Summer Insect Ambience_台灣阿里山6月_全部都是蟬聲",
+      "url": "https://freesound.org/people/BayTsai/sounds/860235/",
+      "license": [
+        "http://creativecommons.org/publicdomain/zero/1.0/"
+      ],
+      "audio": [
+        "https://cdn.freesound.org/previews/860/860235_17078888-hq.mp3"
+      ],
+      "downloaded": true,
+      "label": "阿里山夏季蟬聲",
+      "license_name": "CC0 1.0",
+      "edited_files": [
+        {
+          "file": "audio/cicadas.mp3",
+          "excerpt_start_seconds": 0,
+          "duration_seconds": 29.6,
+          "lufs": -18.23,
+          "true_peak_dbtp": -3.88
+        }
+      ],
+      "modifications": "Selected excerpt, high-pass at 45 Hz, 0.4-second equal-power loop crossfade, two-pass loudness processing (target -18 LUFS, -2 dBTP), stereo 44.1 kHz / 192 kbps MP3. Playback may change gain and stereo balance. No generated replacement audio."
+    }
+  ],
+  "generated_inner_voices": [
+    {
+      "id": "deadline",
+      "title": "待辦太多",
+      "voice": "Puck",
+      "text": "作業還沒交，報告也還沒寫。等一下是不是又要開會？時間怎麼又不夠了，先做哪一件啊？",
+      "style": "Read only the exact Traditional Chinese transcript in natural Taiwan Mandarin. Perform a private inner monologue: quick, restless, slightly anxious, conversational muttering, close and dry. Clearly intelligible rather than breathy whispering. Do not shout, sing, add words, or include music or sound effects. Use varied pacing with small hesitations, like everyday worries circling in the mind.",
+      "model": "gemini-3.1-flash-tts-preview",
+      "file": "audio/think-deadline.mp3",
+      "type": "AI-generated speech",
+      "generated_on": "2026-09-07",
+      "duration_seconds": 7.63,
+      "lufs": -21.75,
+      "true_peak_dbtp": -3.44,
+      "processing": "100 Hz high-pass, 10 kHz low-pass, loudness normalization target -20 LUFS / -3 dBTP, 0.55-second end padding, 25 ms fade-in, mono 44.1 kHz / 160 kbps MP3"
+    },
+    {
+      "id": "social",
+      "title": "別人怎麼想",
+      "voice": "Kore",
+      "text": "剛剛那句話是不是說錯了？他怎麼還沒回訊息？是不是在生我的氣？早知道就不要那樣講了。",
+      "style": "Read only the exact Traditional Chinese transcript in natural Taiwan Mandarin. Perform a private inner monologue: quick, restless, slightly anxious, conversational muttering, close and dry. Clearly intelligible rather than breathy whispering. Do not shout, sing, add words, or include music or sound effects. Use varied pacing with small hesitations, like everyday worries circling in the mind.",
+      "model": "gemini-3.1-flash-tts-preview",
+      "file": "audio/think-social.mp3",
+      "type": "AI-generated speech",
+      "generated_on": "2026-09-07",
+      "duration_seconds": 9.47,
+      "lufs": -20.16,
+      "true_peak_dbtp": -5.3,
+      "processing": "100 Hz high-pass, 10 kHz low-pass, loudness normalization target -20 LUFS / -3 dBTP, 0.55-second end padding, 25 ms fade-in, mono 44.1 kHz / 160 kbps MP3"
+    },
+    {
+      "id": "perfect",
+      "title": "還不夠好",
+      "voice": "Fenrir",
+      "text": "別人都已經做完了，我怎麼還卡在這裡？如果做得不好怎麼辦？再改一下，再改一下，還是不夠好。",
+      "style": "Read only the exact Traditional Chinese transcript in natural Taiwan Mandarin. Perform a private inner monologue: quick, restless, slightly anxious, conversational muttering, close and dry. Clearly intelligible rather than breathy whispering. Do not shout, sing, add words, or include music or sound effects. Use varied pacing with small hesitations, like everyday worries circling in the mind.",
+      "model": "gemini-3.1-flash-tts-preview",
+      "file": "audio/think-perfect.mp3",
+      "type": "AI-generated speech",
+      "generated_on": "2026-09-07",
+      "duration_seconds": 10.87,
+      "lufs": -21.9,
+      "true_peak_dbtp": -3.45,
+      "processing": "100 Hz high-pass, 10 kHz low-pass, loudness normalization target -20 LUFS / -3 dBTP, 0.55-second end padding, 25 ms fade-in, mono 44.1 kHz / 160 kbps MP3"
+    },
+    {
+      "id": "daily",
+      "title": "日常小混亂",
+      "voice": "Laomedeia",
+      "text": "鑰匙放哪裡？手機是不是快沒電了？等一下要買什麼？晚餐吃什麼？欸，我剛剛到底要做什麼？",
+      "style": "Read only the exact Traditional Chinese transcript in natural Taiwan Mandarin. Perform a private inner monologue: quick, restless, slightly anxious, conversational muttering, close and dry. Clearly intelligible rather than breathy whispering. Do not shout, sing, add words, or include music or sound effects. Use varied pacing with small hesitations, like everyday worries circling in the mind.",
+      "model": "gemini-2.5-flash-preview-tts",
+      "file": "audio/think-daily.mp3",
+      "type": "AI-generated speech",
+      "generated_on": "2026-09-07",
+      "duration_seconds": 8.282,
+      "lufs": -21.0,
+      "true_peak_dbtp": -3.39,
+      "processing": "100 Hz high-pass, 10 kHz low-pass, loudness normalization target -20 LUFS / -3 dBTP, 0.55-second end padding, 25 ms fade-in, mono 44.1 kHz / 160 kbps MP3"
+    },
+    {
+      "id": "future",
+      "title": "明天怎麼辦",
+      "voice": "Achird",
+      "text": "明天會順利嗎？萬一出錯怎麼辦？下個月的計畫呢？要不要先想一個備案？還是再想一個？",
+      "style": "Read only the exact Traditional Chinese transcript in natural Taiwan Mandarin. Perform a private inner monologue: quick, restless, slightly anxious, conversational muttering, close and dry. Clearly intelligible rather than breathy whispering. Do not shout, sing, add words, or include music or sound effects. Use varied pacing with small hesitations, like everyday worries circling in the mind.",
+      "model": "gemini-2.5-flash-preview-tts",
+      "file": "audio/think-future.mp3",
+      "type": "AI-generated speech",
+      "generated_on": "2026-09-07",
+      "duration_seconds": 7.881,
+      "lufs": -19.82,
+      "true_peak_dbtp": -3.39,
+      "processing": "100 Hz high-pass, 10 kHz low-pass, loudness normalization target -20 LUFS / -3 dBTP, 0.55-second end padding, 25 ms fade-in, mono 44.1 kHz / 160 kbps MP3"
+    }
+  ],
+  "generated_audio_note": "Only I THINK uses AI-generated speech. All external soundscapes use the licensed field/foley recordings listed in sources."
+}
