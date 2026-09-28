@@ -1,6 +1,6 @@
-"""Run against a running local server: python3 tests/test_ui.py URL.
+"""Run pure-static browser checks: python3 tests/test_ui.py.
 
-Google API routes are mocked. This test never calls Google or reads credentials.
+Static files are loaded in an isolated Pages-origin browser. Google API routes are mocked; this test never calls Google or reads real credentials.
 """
 import base64
 import io
@@ -35,27 +35,60 @@ def run(url):
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(viewport={'width': 1440, 'height': 1000}, accept_downloads=True)
         page.on('pageerror', lambda error: errors.append(str(error)))
-        page.route('**/api/health', lambda route: route.fulfill(json={'ready': True, 'service': 'keychain-wrapper'}))
-        def speech(route):
-            payload = route.request.post_data_json
+        base = 'https://weisfx0705.github.io/chiawei/TTS/'
+        root = Path(__file__).resolve().parents[1]
+        def static_files(route):
+            name = route.request.url.split('/')[-1].split('?')[0]
+            name = name or 'index.html'
+            if name not in {'index.html', 'studio.js', 'tts-core.js', 'gemini-client.js'}:
+                route.abort(); return
+            route.fulfill(body=(root / name).read_bytes(), content_type='text/html' if name.endswith('.html') else 'text/javascript')
+        page.route(base + '**', static_files)
+        local_requests = []
+        page.on('request', lambda request: local_requests.append(request.url) if '/api/' in request.url or '127.0.0.1' in request.url or 'localhost' in request.url else None)
+        fake_key = 'test-only-not-a-valid-api-key'
+        def google_api(route):
+            assert route.request.headers.get('x-goog-api-key') == fake_key
+            assert 'key=' not in route.request.url
+            if '/voices?' in route.request.url:
+                assert route.request.method == 'GET'
+                route.fulfill(json={'voices': [{'id': 'voice_ui_example', 'display_name': '台灣華語測試', 'language_code': 'zh-TW', 'type': 'prompted'}], 'next_page_token': ''})
+                return
+            body = route.request.post_data_json
+            if 'models/gemini-3.8-flash:generateContent' in route.request.url:
+                route.fulfill(json={'candidates': [{'content': {'parts': [{'text': 'Speaker 1: [calm] 你好。\nSpeaker 2: [cheerful] 你好！'}]}}]})
+                return
+            if '/interactions' in route.request.url:
+                turns = []
+                for part in body['input'][0]['content']:
+                    metadata = next((item for item in part.get('annotations', []) if item['type'] == 'speech_metadata'), {})
+                    turns.append({'text': part['text'], 'style': metadata.get('style', ''), **({'speaker': metadata['speaker']} if 'speaker' in metadata else {})})
+                speech = body['generation_config']['speech_config']
+                speakers = speech if isinstance(speech, list) else speech['speakers']
+                payload = {'model': body['model'], 'turns': turns, 'speakers': speakers}
+            else:
+                payload = {'model': 'gemini-3.1-flash-tts-preview', 'turns': [{'text': body['contents'][0]['parts'][0]['text']}], 'speakers': []}
             calls.append(payload)
             if state['fail']:
-                route.fulfill(status=400, json={'error': '測試：請求格式錯誤。'})
+                route.fulfill(status=400, json={'error': {'message': 'Do not echo provider messages: ' + fake_key}})
             elif state['hold'] and payload['turns'][0]['text'] == '第二句。':
                 state['held'].append(route)
             else:
                 value = 3000 if payload['turns'][0]['text'] == '第三句。' else 1000
-                route.fulfill(json={'audio': {'data': wav_fixture(value), 'mime_type': 'audio/wav'}})
-        page.route('**/api/tts', speech)
-        page.route('**/api/voices', lambda route: route.fulfill(json={'voices': [
-            {'id': 'voice_ui_example', 'display_name': '台灣華語測試', 'language_code': 'zh-TW', 'type': 'prompted'}], 'next_page_token': ''}))
-        page.route('**/api/chat', lambda route: route.fulfill(json={'text': 'Speaker 1: [calm] 你好。\nSpeaker 2: [cheerful] 你好！'}))
-        page.goto(url)
+                route.fulfill(json={'steps': [{'type': 'model_output', 'content': [{'type': 'audio', 'data': wav_fixture(value), 'mime_type': 'audio/wav'}]}]})
+        page.route('https://generativelanguage.googleapis.com/v1beta/**', google_api)
+        page.goto(base + 'index.html')
         page.wait_for_load_state('networkidle')
-        wait_for_js(page, "() => document.getElementById('connectionLabel').textContent.includes('可用')")
+        assert page.locator('#apiKeyInput').input_value() == ''
+        page.locator('#generateBtn').click()
+        assert not calls
+        page.locator('#apiKeyInput').fill(fake_key)
+        assert page.locator('#apiKeyInput').get_attribute('type') == 'password'
+        assert page.locator('#connectionLabel').inner_text() == 'API key 已輸入'
+        assert page.locator('#bridgePort').count() == 0
         assert page.locator('#modelSelect').input_value() == 'gemini-3.8-flash-tts'
         assert page.locator('#toneInput').input_value() == ''
-        assert page.locator('#apiKeyInput').count() == 0
+        assert page.locator('#apiKeyInput').count() == 1
         assert not page.evaluate('document.documentElement.scrollWidth > innerWidth')
         page.screenshot(path=str(output / 'desktop-single.png'), full_page=True)
 
@@ -77,6 +110,7 @@ def run(url):
         page.locator('#generateBtn').click()
         wait_for_js(page, "() => document.getElementById('generationStatus').textContent.startsWith('生成失敗')")
         assert page.locator('#singleText').is_enabled()
+        assert fake_key not in page.locator('#toastContainer').inner_text()
         state['fail'] = False
 
         # Long input is generated in bounded chunks without losing characters.
@@ -185,9 +219,14 @@ def run(url):
         assert page.locator('#chatPanel').is_visible()
         assert not page.evaluate('document.documentElement.scrollWidth > innerWidth')
         page.screenshot(path=str(output / 'mobile-dialogue.png'), full_page=True)
+        assert not local_requests, 'Unexpected local-service request'
+        assert page.evaluate("() => localStorage.getItem('gemini_api_key') === null")
+        page.reload()
+        page.wait_for_load_state('networkidle')
+        assert page.locator('#apiKeyInput').input_value() == ''
         assert not errors, errors
         browser.close()
-    print('UI passed: single, long text, dialogue, voice library, assistant, SRT identity, resume, cancellation, download, mobile.')
+    print('Static UI passed: user API key, direct Google requests, single, dialogue, SRT, voice library, assistant, download, mobile; no local backend requests.')
 
 if __name__ == '__main__':
-    run(sys.argv[1] if len(sys.argv) > 1 else 'http://127.0.0.1:8765')
+    run('https://weisfx0705.github.io/chiawei/TTS/index.html')

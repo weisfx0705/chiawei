@@ -771,8 +771,8 @@ body {
 .main.with-chat { grid-template-columns: minmax(0, 1fr) 400px; }
 .tts-panel, .content-area, .single-panel, .editor-view, .srt-panel { min-height: 0; }
 .api-bar { flex-wrap: wrap; justify-content: flex-end; }
-.api-bar input[type="number"] { width: 88px; font-size: 12px; padding: 7px 8px; }
-.bridge-port { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.api-bar input { max-width: 100%; }
+.key-entry { display: flex; align-items: center; gap: 4px; max-width: 100%; }
 .connection-label { font-size: 12px; color: var(--text-secondary); }
 .model-guide { padding: 9px 20px; background: var(--surface); color: var(--text-secondary); font-size: 12px; line-height: 1.6; border-bottom: 1px solid var(--border); }
 .model-guide a, .tts-help a { color: var(--primary); }
@@ -791,7 +791,7 @@ body {
 .voice-select-row { flex-wrap: wrap; }
 .single-panel > textarea { min-height: 100px; }
 .tone-input-wrapper textarea { flex: none; }
-#connectionHelp { display: block; }
+.api-help { font-size: 12px; color: var(--text-secondary); }
 @media (max-width: 1100px) { .main.with-chat { grid-template-columns: minmax(0, 1fr) 330px; } .header { flex-wrap: wrap; gap: 10px; } }
 @media (max-width: 900px) { .main.with-chat { grid-template-columns: 1fr; } .chat-panel:not(.hidden) { display: flex; max-height: 420px; } .main.with-chat { height: auto; } .main.with-chat .tts-panel { min-height: 640px; } .main { height: auto; min-height: calc(100dvh - 130px); } .tts-panel { min-height: 640px; } }
 @media (max-width: 600px) { .header { padding: 12px; } .api-bar { justify-content: flex-start; width: 100%; } .tabs .tab { padding: 12px; font-size: 13px; } .bottom-bar { flex-wrap: wrap; } .audio-player-wrapper { flex-basis: 100%; } .single-panel { padding: 12px; } .srt-entry { flex-wrap: wrap; } .srt-entry-tc { flex-basis: 60%; } .srt-entry-text { flex-basis: 100%; } .speaker-config { flex-wrap: wrap; } #srtToneInput { min-width: 0 !important; width: 100%; } .generation-status { max-width: 170px; } }
@@ -811,15 +811,15 @@ body {
       <option value="gemini-3.8-flash-lite-tts">Gemini 3.8 Flash-Lite · 快速／大量配音</option>
       <option value="gemini-3.1-flash-tts-preview">Gemini 3.1 Preview · 相容模式</option>
     </select>
-    <div class="api-status" id="apiStatus" title="本機服務尚未連線"></div>
-    <span class="connection-label" id="connectionLabel" role="status">檢查本機服務…</span>
-    <label class="bridge-port hidden" id="bridgePortLabel">本機埠 <input id="bridgePort" type="number" min="1" max="65535" value="8765" aria-label="本機服務連接埠" onchange="saveBridgePort()"></label>
-    <button class="icon-btn" onclick="checkConnection()" aria-label="重新檢查本機連線" title="重新檢查本機連線">
-      <span class="material-icons-round">refresh</span>
-    </button>
+    <div class="api-status" id="apiStatus" title="尚未輸入 API key"></div>
+    <span class="connection-label" id="connectionLabel" role="status">尚未輸入 API key</span>
+    <div class="key-entry">
+      <input type="password" id="apiKeyInput" aria-label="Google API key" placeholder="輸入自己的 Google API key…" autocomplete="off" spellcheck="false" oninput="updateApiKeyStatus()">
+      <button class="icon-btn" onclick="toggleApiKeyVisibility()" aria-label="顯示或隱藏 API key" title="顯示或隱藏 API key"><span class="material-icons-round" id="apiKeyToggleIcon">visibility</span></button>
+    </div>
   </div>
 </div>
-<div class="model-guide"><span id="modelGuide"></span> <a href="https://ai.google.dev/gemini-api/docs/speech-generation" target="_blank" rel="noopener">Google 使用建議 ↗</a><span id="connectionHelp"></span></div>
+<div class="model-guide"><span id="modelGuide"></span> <a href="https://ai.google.dev/gemini-api/docs/speech-generation" target="_blank" rel="noopener">Google 使用建議 ↗</a><br><span class="api-help">填入自己的 API key 即可生成語音；金鑰只在本頁使用，重新整理後清除。 <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">取得 API key ↗</a></span></div>
 
 <!-- Main -->
 <div class="main">
@@ -1071,6 +1071,7 @@ body {
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer"></div>
 
+<script src="gemini-client.js"></script>
 <script src="tts-core.js"></script>
 <script src="studio.js"></script>
 

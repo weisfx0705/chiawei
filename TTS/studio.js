@@ -74,55 +74,26 @@ function updateGenderBadge(sel) {
 populateVoices();
 
 
-// ─── Local API service ───
+// ─── User-supplied Google API key (page memory only) ───
 const apiStatus = document.getElementById('apiStatus');
-let serviceReady = false;
-const hostedMode = !['127.0.0.1', 'localhost'].includes(location.hostname);
-document.getElementById('bridgePortLabel').classList.toggle('hidden', !hostedMode);
-try {
-  const savedPort = localStorage.getItem('tts_local_port');
-  const linkedPort = new URLSearchParams(location.hash.slice(1)).get('port');
-  const port = Number(linkedPort || savedPort || 8765);
-  if (Number.isInteger(port) && port > 0 && port <= 65535) document.getElementById('bridgePort').value = port;
-} catch (_) {}
-function saveBridgePort() {
-  serviceReady = false;
-  apiStatus.classList.remove('connected');
-  try { localStorage.setItem('tts_local_port', document.getElementById('bridgePort').value); } catch (_) {}
-  document.getElementById('connectionLabel').textContent = '請重新連接本機服務';
+const apiKeyInput = document.getElementById('apiKeyInput');
+// Discard old saved settings without reading any saved credential.
+try { localStorage.removeItem('gemini_api_key'); localStorage.removeItem('tts_local_port'); } catch (_) {}
+function updateApiKeyStatus() {
+  const present = Boolean(apiKeyInput.value.trim());
+  apiStatus.classList.toggle('connected', present);
+  apiStatus.title = present ? 'API key 已輸入；權限會於第一次請求確認' : '尚未輸入 API key';
+  document.getElementById('connectionLabel').textContent = present ? 'API key 已輸入' : '尚未輸入 API key';
 }
-function serviceUrl(path) {
-  if (!hostedMode) return path;
-  const port = Number(document.getElementById('bridgePort').value);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('請填入有效的本機連接埠。');
-  return `http://127.0.0.1:${port}${path}`;
+function toggleApiKeyVisibility() {
+  const hidden = apiKeyInput.type === 'password';
+  apiKeyInput.type = hidden ? 'text' : 'password';
+  document.getElementById('apiKeyToggleIcon').textContent = hidden ? 'visibility_off' : 'visibility';
 }
-// Remove the old browser copy without reading its value.
-try { localStorage.removeItem('gemini_api_key'); } catch (_) {}
-
-async function checkConnection() {
-  const label = document.getElementById('connectionLabel');
-  const help = document.getElementById('connectionHelp');
-  serviceReady = false;
-  try {
-    const response = await fetch(serviceUrl('/api/health'), { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) throw new Error();
-    const data = await response.json();
-    serviceReady = data.ready === true;
-    label.textContent = serviceReady ? '本機 Keychain 服務可用' : '尚未設定 Keychain wrapper';
-    help.textContent = serviceReady ? '' : '請先設定 ~/.local/bin/with-gemini-key，再重新檢查連線。';
-  } catch (_) {
-    label.textContent = '請啟動本機服務';
-    help.textContent = hostedMode
-      ? '先雙擊「啟動 TTS.command」，填入終端機顯示的本機埠，再按重新連線。瀏覽器詢問本機網路權限時請允許；也可使用終端機顯示的本機網址。'
-      : '在專案目錄執行 python3 server.py --open，或雙擊「啟動 TTS.command」。';
-  }
-  apiStatus.classList.toggle('connected', serviceReady);
-  apiStatus.title = label.textContent + '（憑證與模型權限於第一次請求確認）';
-}
-function requireService() {
-  if (!serviceReady) showToast('請先啟動本機服務並確認 Keychain wrapper', 'error');
-  return serviceReady;
+function requireApiKey() {
+  const present = Boolean(apiKeyInput.value.trim());
+  if (!present) showToast('請先輸入自己的 Google API key', 'error');
+  return present;
 }
 function updateModelGuide() {
   const model = document.getElementById('modelSelect').value;
@@ -135,30 +106,32 @@ function updateModelGuide() {
   document.getElementById('loadVoicesBtn').disabled = model.endsWith('preview');
   document.getElementById('moreVoicesBtn').disabled = model.endsWith('preview');
 }
-async function apiRequest(path, payload, signal) {
+async function apiRequest(operation, payload, signal) {
+  if (!requireApiKey()) throw new Error('請先輸入自己的 Google API key');
+  const request = GeminiClient.buildRequest(operation, payload);
   const controller = new AbortController();
   const abort = () => controller.abort();
   if (signal?.aborted) throw new DOMException('已取消', 'AbortError');
   signal?.addEventListener('abort', abort, { once: true });
   const timeout = setTimeout(abort, 205000);
   try {
-    const response = await fetch(serviceUrl(path), { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload), signal: controller.signal });
-    const data = await response.json();
-    if (!response.ok) {
-      const error = new Error(data.error || `請求失敗（HTTP ${response.status}）`);
-      error.httpStatus = response.status;
-      error.retryAfter = Number(data.retry_after) || 0;
-      throw error;
-    }
-    return data;
+    const response = await fetch(request.url, {
+      method: request.method,
+      headers: { ...(request.body ? { 'Content-Type': 'application/json' } : {}), 'x-goog-api-key': apiKeyInput.value.trim() },
+      ...(request.body ? { body: JSON.stringify(request.body) } : {}),
+      signal: controller.signal, credentials: 'omit', referrerPolicy: 'strict-origin-when-cross-origin'
+    });
+    if (!response.ok) throw GeminiClient.httpError(response.status, response.headers.get('Retry-After'));
+    return GeminiClient.normalizeResponse(operation, await response.json());
   } catch (error) {
-    if (error.name === 'AbortError' && !signal?.aborted) {
+    if (error.name === 'AbortError') {
+      if (signal?.aborted) throw error;
       const timeoutError = new Error('請求逾時，請縮短內容後重試。');
       timeoutError.httpStatus = 504;
       throw timeoutError;
     }
-    throw error;
+    if (error.httpStatus || error.message?.startsWith('Google ')) throw error;
+    throw new Error('無法完成 Google API 請求，請確認網路連線與輸入內容。');
   } finally {
     clearTimeout(timeout);
     signal?.removeEventListener('abort', abort);
@@ -174,7 +147,7 @@ function delay(ms, signal) {
 }
 async function requestSpeech(payload, signal) {
   for (let attempt = 0; attempt < 3; attempt++) {
-    try { return TtsCore.decodeAudio((await apiRequest('/api/tts', payload, signal)).audio); }
+    try { return TtsCore.decodeAudio((await apiRequest('tts', payload, signal)).audio); }
     catch (error) {
       if (error.name === 'AbortError' || ![429, 500, 502, 503].includes(error.httpStatus) || attempt === 2) throw error;
       const wait = Math.max(error.retryAfter * 1000, (error.httpStatus === 429 ? 15000 : 1500) * 2 ** attempt);
@@ -186,14 +159,14 @@ async function requestSpeech(payload, signal) {
 let libraryPage = '';
 let libraryLanguage = '';
 async function loadVoiceLibrary(more = false) {
-  if (!requireService()) return;
+  if (!requireApiKey()) return;
   const button = document.getElementById('loadVoicesBtn');
   const language = document.getElementById('voiceLanguage').value;
   if (language !== libraryLanguage) more = false;
   button.disabled = true;
   document.getElementById('moreVoicesBtn').disabled = true;
   try {
-    const data = await apiRequest('/api/voices', { language_code: language, page_token: more ? libraryPage : '' });
+    const data = await apiRequest('voices', { language_code: language, page_token: more ? libraryPage : '' });
     if (!more) document.querySelectorAll('optgroup[data-library]').forEach(group => group.remove());
     for (const id of ['voiceSelect', 'srtVoiceSelect']) {
       const select = document.getElementById(id);
@@ -221,10 +194,7 @@ function selectedVoice(id) {
   return custom || document.getElementById(id).value;
 }
 updateModelGuide();
-if (hostedMode) {
-  document.getElementById('connectionLabel').textContent = '請連接本機語音服務';
-  document.getElementById('connectionHelp').textContent = '線上版可編輯稿件；生成語音前，先啟動「啟動 TTS.command」並按右上角重新連線。';
-} else checkConnection();
+updateApiKeyStatus();
 document.getElementById('singleText').addEventListener('input', event => {
   document.getElementById('textCount').textContent = `${Array.from(event.target.value).length.toLocaleString()} 字`;
 });
@@ -504,7 +474,7 @@ function stopPreview() {
   previewButton = null;
 }
 async function previewVoice(selectId, button) {
-  if (!requireService()) return;
+  if (!requireApiKey()) return;
   if (previewButton === button) { stopPreview(); return; }
   stopPreview();
   const controller = new AbortController();
@@ -551,6 +521,7 @@ function clearAudio() {
 }
 function setGenerationBusy(busy) {
   document.getElementById('generateBtn').disabled = busy;
+  apiKeyInput.disabled = busy;
   document.getElementById('generateBtnText').textContent = busy ? '生成中…' : '生成語音';
   document.getElementById('cancelBtn').classList.toggle('hidden', !busy);
   // Freeze inputs so the active request cannot become stale while it is generating.
@@ -562,7 +533,7 @@ function cancelGeneration() {
   document.getElementById('generationStatus').textContent = '已取消後續生成；已送出的請求仍可能計費。';
 }
 async function generateSpeech() {
-  if (generationController || !requireService()) return;
+  if (generationController || !requireApiKey()) return;
   if (currentTab === 'srt') return generateSrtSpeech();
   let jobs;
   const model = document.getElementById('modelSelect').value;
@@ -698,7 +669,7 @@ async function sendChat() {
   const msg = input.value.trim();
   if (!msg) return;
 
-  if (!requireService()) return;
+  if (!requireApiKey()) return;
 
   input.value = '';
   input.style.height = 'auto';
@@ -715,7 +686,7 @@ async function sendChat() {
   sendBtn.disabled = true;
 
   try {
-    const data = await apiRequest('/api/chat', { instruction: mode.prompt, contents: chatHistory,
+    const data = await apiRequest('chat', { instruction: mode.prompt, contents: chatHistory,
       temperature: mode.temperature });
     const reply = data.text;
 
@@ -1120,7 +1091,7 @@ function srtSettings() {
 }
 function srtAudioKey(entry, settings) { return JSON.stringify([settings.model, settings.voice, settings.style, entry.text]); }
 async function runSrtBatch(entries) {
-  if (generationController || !requireService()) return;
+  if (generationController || !requireApiKey()) return;
   let settings;
   try { settings = srtSettings(); } catch (error) { showToast(error.message, 'error'); return; }
   const controller = new AbortController(); generationController = controller; srtGenerating = true;
