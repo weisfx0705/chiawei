@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A Little Closer · 義守樹洞 · Hốc cây tâm sự</title>
+  <meta name="description" content="Share in your own language. A welcoming space for I-Shou international students. 義守新生的心情與需求入口。Không gian chia sẻ cho sinh viên quốc tế Đại học I-Shou.">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"><link rel="stylesheet" href="styles.css">
+  <script src="config.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#share">Skip to sharing · 前往分享 · Đến phần chia sẻ</a>
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">❧</span><span>A little closer<span class="brand-sub">義守樹洞 · Hốc cây tâm sự</span></span></a>
+      <span class="school-label">I-SHOU UNIVERSITY<span>義守大學 · Đại học I-Shou</span></span>
+    </header>
+    <main class="main-grid">
+      <section class="sharing-column" id="share">
+        <div class="welcome">
+          <span class="eyebrow">A SOFT LANDING AT I-SHOU</span>
+          <h1>Tell the tree<span class="title-dot">.</span></h1>
+          <p class="welcome-local"><span lang="zh-Hant">把心事，輕輕放下。</span><span lang="vi">Gửi tâm sự vào hốc cây.</span></p>
+          <p class="language-invite"><span class="trio"><span>Your language. Your words. We’re here to listen.</span><span lang="zh-Hant">用你熟悉的語言，我們慢慢聽。</span><span lang="vi">Hãy dùng ngôn ngữ của bạn. Chúng tôi sẽ lắng nghe.</span></span></p>
+        </div>
+        <div class="message-card">
+          <div class="card-top"><span class="step-label"><span class="step-number" id="step-number">01</span><span class="trio" id="step-title"><span>Your little message</span><span lang="zh-Hant">留一點心事</span><span lang="vi">Lời nhắn của bạn</span></span></span><span class="private-label"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#lock"/></svg><span class="trio"><span>Not public</span><span lang="zh-Hant">不公開</span><span lang="vi">Không công khai</span></span></span></div>
+          <div id="step-share" class="step-panel">
+            <fieldset class="mood-field"><legend><span class="trio"><span>How are you feeling?</span><span lang="zh-Hant">此刻的心情？</span><span lang="vi">Bạn đang cảm thấy thế nào?</span></span></legend><div class="moods">
+              <label class="mood-choice"><input type="radio" name="mood" value="Good · 很好 · Tốt"><span class="mood-face" aria-hidden="true">☺</span><span class="trio"><span>Good</span><span lang="zh-Hant">很好</span><span lang="vi">Tốt</span></span></label>
+              <label class="mood-choice"><input type="radio" name="mood" value="Okay · 還好 · Bình thường"><span class="mood-face" aria-hidden="true">◡</span><span class="trio"><span>Okay</span><span lang="zh-Hant">還好</span><span lang="vi">Bình thường</span></span></label>
+              <label class="mood-choice"><input type="radio" name="mood" value="Homesick · 想家 · Nhớ nhà"><span class="mood-face" aria-hidden="true">⌂</span><span class="trio"><span>Homesick</span><span lang="zh-Hant">想家</span><span lang="vi">Nhớ nhà</span></span></label>
+              <label class="mood-choice"><input type="radio" name="mood" value="Worried · 擔心 · Lo lắng"><span class="mood-face" aria-hidden="true">☁</span><span class="trio"><span>Worried</span><span lang="zh-Hant">擔心</span><span lang="vi">Lo lắng</span></span></label>
+            </div></fieldset>
+            <div class="message-entry">
+              <div class="mode-list" role="tablist" aria-label="Message format · 分享方式 · Cách chia sẻ">
+                <button id="tab-write" role="tab" aria-selected="true" aria-controls="panel-write"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#pen"/></svg><span class="trio"><span>Write</span><span lang="zh-Hant">寫下來</span><span lang="vi">Viết</span></span></button>
+                <button id="tab-speak" role="tab" aria-selected="false" aria-controls="panel-speak" tabindex="-1"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#mic"/></svg><span class="trio"><span>Speak</span><span lang="zh-Hant">說出來</span><span lang="vi">Nói</span></span></button>
+              </div>
+              <div id="panel-write" role="tabpanel" aria-labelledby="tab-write">
+                <label class="sr-only" for="message">Message · 心事 · Lời nhắn</label>
+                <textarea id="message" maxlength="10000" placeholder="What has been on your mind since arriving?&#10;來到這裡，有什麼心情或需要幫忙的事？&#10;Từ khi đến đây, bạn có tâm sự hay cần giúp đỡ gì?"></textarea>
+                <div class="input-note"><span class="trio"><span>A few words is enough. Any language is welcome.</span><span lang="zh-Hant">幾句話就好，越南語、印尼語都可以。</span><span lang="vi">Vài dòng là đủ. Bạn có thể dùng bất kỳ ngôn ngữ nào.</span></span><span id="char-count">0 / 10,000</span></div>
+              </div>
+              <div id="panel-speak" role="tabpanel" aria-labelledby="tab-speak" hidden>
+                <div class="record-space" id="record-space"><div class="sound-line" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  <span class="trio"><span>Speak in the language that feels like home.</span><span lang="zh-Hant">用讓你自在的語言說話。</span><span lang="vi">Hãy nói bằng ngôn ngữ bạn thấy thoải mái.</span></span>
+                  <span class="record-time"><span id="record-time">0:00</span> <small>/ 3:00</small></span>
+                  <button type="button" id="record-button" class="record-button"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#mic"/></svg><span class="trio"><span>Record a message</span><span lang="zh-Hant">開始錄音</span><span lang="vi">Ghi lời nhắn</span></span></button>
+                </div>
+                <label class="upload-label"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#upload"/></svg><span class="trio"><span>Or upload audio · up to 10 MB</span><span lang="zh-Hant">或上傳錄音檔 · 最大 10 MB</span><span lang="vi">Hoặc tải âm thanh lên · tối đa 10 MB</span></span><input id="audio-file" type="file" accept="audio/*,.m4a,.mp4,.webm,.ogg"></label>
+              </div>
+              <div id="audio-preview" class="audio-preview" hidden><audio id="audio-player" controls aria-label="Your recording · 你的錄音 · Bản ghi âm"></audio><button id="remove-audio" type="button" class="icon-button" aria-label="Remove recording · 刪除錄音 · Xóa bản ghi">×</button></div>
+              <p id="both-note" class="attached-note" hidden><span class="trio"><span>Text and audio will be sent together.</span><span lang="zh-Hant">文字與錄音會一起送出。</span><span lang="vi">Văn bản và âm thanh sẽ được gửi cùng nhau.</span></span></p>
+            </div>
+            <div class="form-bottom"><span class="quiet-note"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#mail"/></svg><span class="trio"><span>Chia-Wei replies on weekends</span><span lang="zh-Hant">Chia-Wei 會在週末回覆</span><span lang="vi">Chia-Wei sẽ trả lời vào cuối tuần</span></span></span><button id="continue" class="primary-button" type="button"><span class="trio"><span>Continue</span><span lang="zh-Hant">下一步</span><span lang="vi">Tiếp tục</span></span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#arrow"/></svg></button></div>
+          </div>
+          <form id="identity-form" class="identity-form step-panel" hidden>
+            <h2 id="identity-heading" tabindex="-1"><span class="trio"><span>So I can know you, and write back.</span><span lang="zh-Hant">讓我認識你，也把回覆送到你手上。</span><span lang="vi">Để tôi biết bạn và có thể trả lời bạn.</span></span></h2>
+            <div class="identity-grid">
+              <label><span class="trio"><span>Your name *</span><span lang="zh-Hant">姓名 *</span><span lang="vi">Họ và tên *</span></span><input id="name" name="name" required maxlength="100" autocomplete="name"></label>
+              <label><span class="trio"><span>Nationality *</span><span lang="zh-Hant">國籍 *</span><span lang="vi">Quốc tịch *</span></span><select id="nationality" name="nationality" required><option value="">Choose · 請選擇 · Chọn</option><option value="Vietnam · 越南 · Việt Nam">Vietnam · 越南 · Việt Nam</option><option value="Indonesia · 印尼 · Indonesia">Indonesia · 印尼 · Indonesia</option><option value="other">Other · 其他 · Khác</option></select></label>
+              <label id="other-nationality-field" class="full-width" hidden><span class="trio"><span>Your nationality *</span><span lang="zh-Hant">請填寫國籍 *</span><span lang="vi">Nhập quốc tịch của bạn *</span></span><input id="other-nationality" maxlength="80" autocomplete="country-name"></label>
+              <label class="full-width"><span class="trio"><span>Email for your reply *</span><span lang="zh-Hant">接收回覆的 Email *</span><span lang="vi">Email để nhận phản hồi *</span></span><input id="email" name="email" type="email" required maxlength="254" autocomplete="email" inputmode="email"></label>
+              <label><span class="trio"><span>Student ID · optional</span><span lang="zh-Hant">學號 · 選填</span><span lang="vi">Mã số sinh viên · không bắt buộc</span></span><input id="studentId" name="studentId" maxlength="40"></label>
+              <label><span class="trio"><span>Preferred reply language</span><span lang="zh-Hant">希望回覆的語言</span><span lang="vi">Ngôn ngữ phản hồi</span></span><select id="language" name="language"><option value="Tiếng Việt">Tiếng Việt · 越南語</option><option value="Bahasa Indonesia">Bahasa Indonesia · 印尼語</option><option value="English">English · 英文</option><option value="中文">中文 · Chinese</option><option value="Other">Other · 其他 · Khác</option></select></label>
+            </div>
+            <div class="sharing-notice"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#shield"/></svg><span class="trio"><span>Your details and message are saved for student support. Chia-Wei reviews them; audio may be transcribed or translated with AI assistance. Other students cannot see your message.</span><span lang="zh-Hant">資料將保存為輔導紀錄，由 Chia-Wei 查看；錄音可能經 AI 協助轉寫或翻譯，不會公開給其他學生。</span><span lang="vi">Thông tin được lưu làm hồ sơ hỗ trợ, do Chia-Wei xem. Âm thanh có thể được chép lại hoặc dịch với sự hỗ trợ của AI. Sinh viên khác không xem được lời nhắn.</span></span></div>
+            <label class="consent-label"><input type="checkbox" id="consent" required><span class="trio"><span>I understand and agree to this use of my information.</span><span lang="zh-Hant">我了解並同意上述資料用途。</span><span lang="vi">Tôi hiểu và đồng ý với việc sử dụng thông tin như trên.</span></span></label>
+            <p id="connection-note" class="connection-note" hidden></p>
+            <div class="form-bottom"><button type="button" id="back" class="back-button"><span aria-hidden="true">←</span><span class="trio"><span>Back</span><span lang="zh-Hant">返回</span><span lang="vi">Quay lại</span></span></button><button id="send" type="submit" class="primary-button"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#leaf"/></svg><span class="trio"><span>Send to the tree</span><span lang="zh-Hant">把心事送出</span><span lang="vi">Gửi lời nhắn</span></span></button></div>
+          </form>
+          <div id="step-success" class="success-space step-panel" hidden><span class="success-icon" aria-hidden="true">✓</span><h2 id="success-heading" tabindex="-1"><span class="trio"><span>Thank you for trusting me.</span><span lang="zh-Hant">謝謝你，願意讓我認識你。</span><span lang="vi">Cảm ơn bạn đã tin tưởng tôi.</span></span></h2><span class="trio"><span>I’ll read your message and reply by email on the weekend.</span><span lang="zh-Hant">我會讀你的分享，並在週末以 Email 回覆。</span><span lang="vi">Tôi sẽ đọc lời nhắn và trả lời qua email vào cuối tuần.</span></span><div class="receipt"><span class="trio"><span>Your reference</span><span lang="zh-Hant">收件編號</span><span lang="vi">Mã tham chiếu</span></span><code id="receipt"></code></div><p id="success-email" class="success-email"></p><button id="another" type="button" class="secondary-button"><span class="trio"><span>Share another thought</span><span lang="zh-Hant">再分享一件事</span><span lang="vi">Chia sẻ thêm</span></span></button></div>
+          <div id="feedback" class="feedback" role="alert" hidden></div>
+        </div>
+        <p class="urgent-note"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#heart"/></svg><span class="trio"><span>Need help today? Please contact the International Affairs Office directly.</span><span lang="zh-Hant">今天就需要協助？請直接聯繫國際事務處。</span><span lang="vi">Cần hỗ trợ ngay hôm nay? Hãy liên hệ trực tiếp Phòng Hợp tác Quốc tế.</span></span></p>
+      </section>
+      <aside class="companion-column">
+        <div class="tree-scene"><img src="assets/tree.svg" alt="A welcoming tree with a little hollow · 有溫暖樹洞的大樹 · Cây với hốc nhỏ ấm áp"><div class="tree-caption"><span>rooted in care</span><span>在關心裡，慢慢扎根 · Bén rễ từ sự quan tâm</span></div></div>
+        <a href="https://weisfx0705.github.io/OICA/isu_qa/index.html" target="_blank" rel="noopener noreferrer" class="resource-card faq-card"><span class="resource-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#book"/></svg></span><span class="resource-copy"><span class="trio"><span>A little guidance</span><span lang="zh-Hant">生活上的小指南</span><span lang="vi">Một chút hướng dẫn</span></span><span class="resource-detail"><span class="trio"><span>International student FAQ</span><span lang="zh-Hant">國際生常見問題</span><span lang="vi">Câu hỏi thường gặp</span></span></span></span><svg class="icon arrow-out" aria-hidden="true"><use href="assets/icons.svg#external"/></svg></a>
+        <div class="resource-card community-card"><div class="community-top"><span class="resource-icon"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#chat"/></svg></span><span class="resource-copy"><span class="trio"><span>A little company</span><span lang="zh-Hant">一起生活的夥伴</span><span lang="vi">Có bạn đồng hành</span></span></span></div><div class="community-content"><a data-community href="https://line.me/ti/g2/OkLw7071VhAAEJP4AsO57MDP2BSlICvvnxL17w?utm_source=invitation&amp;utm_medium=QR_code&amp;utm_campaign=default" target="_blank" rel="noopener noreferrer" class="qr-link" aria-label="Open LINE community · 開啟 LINE 社群 · Mở cộng đồng LINE"><img src="assets/line-community.png" width="112" height="112" alt="LINE 社群邀請 QR Code · Mã QR cộng đồng LINE"></a><div><span class="trio"><span>Meet your student community.</span><span lang="zh-Hant">加入新生 LINE 社群。</span><span lang="vi">Tham gia cộng đồng sinh viên trên LINE.</span></span><a data-community class="text-link" href="https://line.me/ti/g2/OkLw7071VhAAEJP4AsO57MDP2BSlICvvnxL17w" target="_blank" rel="noopener noreferrer"><span class="trio"><span>Join on LINE</span><span lang="zh-Hant">加入社群</span><span lang="vi">Tham gia LINE</span></span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#external"/></svg></a></div></div><a id="line-group" class="text-link" target="_blank" rel="noopener noreferrer" hidden><span class="trio"><span>Chia-Wei’s LINE group</span><span lang="zh-Hant">Chia-Wei 的 LINE 群組</span><span lang="vi">Nhóm LINE của Chia-Wei</span></span><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#external"/></svg></a></div>
+        <div class="weekend-note"><span class="small-sun" aria-hidden="true">☀</span><span class="trio"><span>A real person, a thoughtful reply. Give me until the weekend.</span><span lang="zh-Hant">是真實的人，慢慢理解你。請給我一點時間，到週末。</span><span lang="vi">Một người thật, một phản hồi tận tâm. Hãy cho tôi thời gian đến cuối tuần.</span></span><span class="signature">Chia-Wei</span></div>
+      </aside>
+    </main>
+    <section class="philosophy"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#leaf"/></svg><p>Making the distance between us a little smaller.</p><span lang="zh-Hant">讓彼此的距離，小一點。</span><span lang="vi">Để khoảng cách giữa chúng ta nhỏ lại một chút.</span></section>
+    <footer class="site-footer"><span>Chia-Wei Chen · I-Shou University<span>義守大學 · Đại học I-Shou</span></span><span class="footer-note">A space to settle in<span>在這裡，慢慢安頓 · Dần cảm thấy thân quen</span></span></footer>
+  </div>
+</body>
+</html>
