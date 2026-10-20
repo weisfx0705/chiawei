@@ -111,7 +111,11 @@ const state = {
   },
   speaker: {
     selectedId: '',
-    devices: []
+    activeId: '',
+    devices: [],
+    deviceChangeTimer: null,
+    restoreTimer: null,
+    permissionNoticeArmed: false
   },
   deviceTest: {
     microphoneStream: null,
@@ -461,10 +465,46 @@ function setupMicrophoneSelection() {
   updateAudioRouteSupport();
 
   if (!navigator.mediaDevices?.enumerateDevices) return;
-  navigator.mediaDevices.addEventListener?.('devicechange', () => {
-    refreshAudioDevices().then(() => applySpeakerRoute({ quiet: true }));
-  });
+  navigator.mediaDevices.addEventListener?.('devicechange', scheduleAudioDeviceReconciliation);
   refreshAudioDevices().then(() => applySpeakerRoute({ quiet: true }));
+}
+
+function scheduleAudioDeviceReconciliation() {
+  if (state.speaker.deviceChangeTimer) window.clearTimeout(state.speaker.deviceChangeTimer);
+  if (state.speaker.restoreTimer) window.clearTimeout(state.speaker.restoreTimer);
+  state.speaker.deviceChangeTimer = window.setTimeout(() => {
+    state.speaker.deviceChangeTimer = null;
+    reconcileSpeakerAfterDeviceChange(0);
+  }, 700);
+}
+
+async function reconcileSpeakerAfterDeviceChange(attempt = 0) {
+  await refreshAudioDevices();
+  const desiredId = state.speaker.selectedId || '';
+  if (!desiredId) {
+    state.speaker.activeId = '';
+    updateSpeakerHelp();
+    return;
+  }
+  const available = state.speaker.devices.some((device) => device.deviceId === desiredId);
+  if (available) {
+    if (state.speaker.restoreTimer) window.clearTimeout(state.speaker.restoreTimer);
+    state.speaker.restoreTimer = null;
+    if (state.speaker.activeId !== desiredId) await applySpeakerRoute({ quiet: true });
+    else updateSpeakerHelp();
+    return;
+  }
+  if (attempt < 2) {
+    updateSpeakerHelp('裝置正在變動，暫時保留原本的喇叭選擇並等待重新連線。');
+    state.speaker.restoreTimer = window.setTimeout(
+      () => reconcileSpeakerAfterDeviceChange(attempt + 1),
+      attempt === 0 ? 900 : 1800
+    );
+    return;
+  }
+  await resetSpeakerRouteToDefault();
+  state.speaker.activeId = '';
+  updateSpeakerHelp('偏好的喇叭目前不在線，暫時使用系統輸出；裝置恢復後會自動重連。');
 }
 
 function updateAudioRouteSupport() {
@@ -479,6 +519,9 @@ function updateAudioRouteSupport() {
   el.speakerSelect.disabled = !secure || !canSetSink;
   el.chooseSpeakerButton.disabled = !secure || !canSetSink;
   el.testSpeakerButton.disabled = !secure || !canSetSink || isRealtimeEngaged();
+  if (canSetSink && !state.speaker.permissionNoticeArmed) {
+    el.chooseSpeakerButton.textContent = canChooseSink ? '選擇裝置' : '授權並掃描';
+  }
 
   if (!secure) {
     el.audioRouteBadge.dataset.level = 'blocked';
@@ -603,6 +646,9 @@ function handleMicrophoneSelection() {
 }
 
 async function handleSpeakerSelection() {
+  if (state.speaker.restoreTimer) window.clearTimeout(state.speaker.restoreTimer);
+  state.speaker.restoreTimer = null;
+  state.speaker.permissionNoticeArmed = false;
   state.speaker.selectedId = el.speakerSelect.value || '';
   safeLocalStorageSet(STORAGE_KEYS.speaker, state.speaker.selectedId);
   const applied = await applySpeakerRoute();
@@ -638,9 +684,32 @@ async function chooseSpeaker() {
       return;
     }
   }
+  const permissionState = await getMicrophonePermissionState();
+  if (permissionState === 'denied') {
+    el.speakerHelp.textContent = 'Chrome 已被禁止使用麥克風，因此無法列出完整喇叭清單；請先在網址列的網站設定中允許麥克風。';
+    showToast('請先在 Chrome 網站設定中允許麥克風，再掃描播放裝置。');
+    return;
+  }
+  if (permissionState !== 'granted' && !state.speaker.permissionNoticeArmed) {
+    state.speaker.permissionNoticeArmed = true;
+    el.chooseSpeakerButton.textContent = '確認授權';
+    el.speakerHelp.textContent = 'Chrome 需要先取得麥克風權限，才能列出完整喇叭清單。再次點擊才會開啟權限視窗。';
+    showToast('這一步會要求麥克風權限；確認後請再點一次。');
+    return;
+  }
+  state.speaker.permissionNoticeArmed = false;
   await refreshAudioDevices({ requestPermission: true });
   el.speakerSelect.focus();
   showToast('請從播放喇叭清單選擇裝置。');
+}
+
+async function getMicrophonePermissionState() {
+  try {
+    const permission = await navigator.permissions?.query?.({ name: 'microphone' });
+    return permission?.state || 'unknown';
+  } catch (error) {
+    return 'unknown';
+  }
 }
 
 async function applySpeakerRoute({ quiet = false } = {}) {
@@ -654,16 +723,15 @@ async function applySpeakerRoute({ quiet = false } = {}) {
     for (const context of [state.tts.audioContext, state.realtime.soundContext]) {
       if (context && typeof context.setSinkId === 'function') await context.setSinkId(sinkId);
     }
+    state.speaker.activeId = sinkId;
     updateSpeakerHelp();
     return true;
   } catch (error) {
     if (sinkId) {
-      state.speaker.selectedId = '';
-      el.speakerSelect.value = '';
-      safeLocalStorageSet(STORAGE_KEYS.speaker, '');
       await resetSpeakerRouteToDefault();
-      updateSpeakerHelp('原選擇目前不可用，已改回系統輸出。');
-      if (!quiet) showToast(`播放裝置無法使用，已改回系統輸出：${mediaRouteErrorLabel(error)}`);
+      state.speaker.activeId = '';
+      updateSpeakerHelp('偏好的喇叭暫時無法使用，已暫時改用系統輸出；選擇仍會保留並等待裝置恢復。');
+      if (!quiet) showToast(`播放裝置暫時無法使用，偏好已保留：${mediaRouteErrorLabel(error)}`);
       return false;
     }
     updateSpeakerHelp(`瀏覽器無法套用輸出：${mediaRouteErrorLabel(error)}`);
@@ -693,7 +761,13 @@ function updateSpeakerHelp(message = '') {
     return;
   }
   const name = el.speakerSelect.selectedOptions[0]?.textContent?.trim() || '系統目前輸出';
-  el.speakerHelp.textContent = `已要求播放至：${name}。Realtime、一般朗讀與提示音會共用這個輸出。`;
+  if (!state.speaker.selectedId) {
+    el.speakerHelp.textContent = '目前跟隨系統輸出；若系統把新連接的藍牙設為預設，TalkTwin 也會跟著切換。';
+  } else if (state.speaker.activeId === state.speaker.selectedId) {
+    el.speakerHelp.textContent = `已固定播放至：${name}。新增其他裝置時不會主動改選。`;
+  } else {
+    el.speakerHelp.textContent = `偏好裝置：${name}。目前尚未成功套用，裝置恢復時會自動重連。`;
+  }
 }
 
 async function toggleMicrophoneTest() {
@@ -2479,7 +2553,7 @@ async function startTTSAudioAnalysis() {
     state.tts.source = source;
   }
   if (typeof state.tts.audioContext.setSinkId === 'function') {
-    await state.tts.audioContext.setSinkId(state.speaker.selectedId || '').catch(() => {});
+    await state.tts.audioContext.setSinkId(state.speaker.activeId || '').catch(() => {});
   }
   await state.tts.audioContext.resume().catch(() => {});
   const analyser = state.tts.analyser;
@@ -2997,13 +3071,13 @@ function getRealtimeSoundContext() {
   if (!realtime.soundContext || realtime.soundContext.state === 'closed') {
     const canRoute = typeof AudioContextClass.prototype?.setSinkId === 'function';
     try {
-      realtime.soundContext = canRoute && state.speaker.selectedId
-        ? new AudioContextClass({ sinkId: state.speaker.selectedId })
+      realtime.soundContext = canRoute && state.speaker.activeId
+        ? new AudioContextClass({ sinkId: state.speaker.activeId })
         : new AudioContextClass();
     } catch (error) {
       realtime.soundContext = new AudioContextClass();
     }
-    if (canRoute) realtime.soundContext.setSinkId(state.speaker.selectedId || '').catch(() => {});
+    if (canRoute) realtime.soundContext.setSinkId(state.speaker.activeId || '').catch(() => {});
   }
   if (realtime.soundContext.state === 'suspended') {
     realtime.soundContext.resume().catch(() => {});
