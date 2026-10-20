@@ -7,7 +7,7 @@
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#f7f2ec" />
   <title>TalkTwin 即席口譯 — 雙向即時翻譯</title>
-  <link rel="stylesheet" href="styles.css?v=1.0.1" />
+  <link rel="stylesheet" href="styles.css?v=1.0.2" />
 </head>
 <body>
   <div class="page-glow page-glow-a" aria-hidden="true"></div>
@@ -401,17 +401,6 @@
           <small>👨／👩 是一般聽感的參考，OpenAI 官方並未標示聲音性別，建議實際試聽再決定。你指定的 Onyx／Onxy 目前不支援 Realtime；本專案預設以 Cedar 取代，再用 Prompt 固定自然台灣華語。</small>
         </label>
 
-        <div class="settings-field">
-          <label for="microphoneSelect">Realtime 輸入麥克風</label>
-          <div class="microphone-setting">
-            <select id="microphoneSelect" aria-describedby="microphoneHelp">
-              <option value="">系統預設麥克風</option>
-            </select>
-            <button id="refreshMicrophonesButton" type="button">重新掃描</button>
-          </div>
-          <small id="microphoneHelp">選擇會儲存在這個瀏覽器，並於下一次 Realtime 連線套用。</small>
-        </div>
-
         <label class="settings-field">
           <span>一般文字朗讀模型</span>
           <input id="ttsModelInput" type="text" value="gpt-4o-mini-tts" autocomplete="off" spellcheck="false" />
@@ -437,6 +426,62 @@
           <small id="ttsVoiceHelp">自動跟隨 Realtime 聲音；一般文字回答會透過 OpenAI Speech API 產生。</small>
         </label>
       </div>
+
+      <section class="audio-routing-section" aria-labelledby="audioRoutingTitle">
+        <div class="audio-routing-heading">
+          <div>
+            <p class="eyebrow">AUDIO ROUTING</p>
+            <h3 id="audioRoutingTitle">音訊輸入與輸出</h3>
+            <p>麥克風與喇叭可以分開搭配；選擇只保存在目前瀏覽器。</p>
+          </div>
+          <span class="audio-route-badge" id="audioRouteBadge" data-level="checking">檢查中</span>
+        </div>
+
+        <div class="audio-routing-grid">
+          <div class="audio-device-card input-device-card">
+            <div class="audio-device-label">
+              <span class="audio-device-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 15a4 4 0 0 0 4-4V7a4 4 0 0 0-8 0v4a4 4 0 0 0 4 4Zm-7-4a7 7 0 0 0 14 0M12 18v3m-4 0h8" /></svg>
+              </span>
+              <span><small>INPUT</small><strong>收音麥克風</strong></span>
+            </div>
+            <div class="audio-device-control">
+              <select id="microphoneSelect" aria-label="選擇收音麥克風" aria-describedby="microphoneHelp">
+                <option value="">系統預設麥克風</option>
+              </select>
+              <button id="refreshMicrophonesButton" type="button">重新掃描</button>
+            </div>
+            <small class="audio-device-help" id="microphoneHelp">重新掃描並允許權限後，會顯示完整裝置名稱。</small>
+            <div class="audio-test-row microphone-test-row">
+              <button class="audio-test-button" id="testMicrophoneButton" type="button" aria-pressed="false">測試麥克風</button>
+              <span class="microphone-meter" aria-hidden="true"><i id="microphoneLevelBar"></i></span>
+              <span class="audio-test-status" id="microphoneTestStatus">尚未測試</span>
+            </div>
+          </div>
+
+          <div class="audio-device-card output-device-card">
+            <div class="audio-device-label">
+              <span class="audio-device-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M5 9v6h4l5 4V5L9 9H5Zm12 1a3 3 0 0 1 0 4m2-7a7 7 0 0 1 0 10" /></svg>
+              </span>
+              <span><small>OUTPUT</small><strong>播放喇叭</strong></span>
+            </div>
+            <div class="audio-device-control">
+              <select id="speakerSelect" aria-label="選擇播放喇叭" aria-describedby="speakerHelp">
+                <option value="">系統目前輸出</option>
+              </select>
+              <button id="chooseSpeakerButton" type="button">選擇裝置</button>
+            </div>
+            <small class="audio-device-help" id="speakerHelp">支援的瀏覽器可分別指定 Realtime、朗讀與提示音的播放裝置。</small>
+            <div class="audio-test-row">
+              <button class="audio-test-button" id="testSpeakerButton" type="button">測試喇叭</button>
+              <span class="audio-test-status" id="speakerTestStatus">尚未測試</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="audio-route-status" id="audioRouteStatus">正在檢查這個瀏覽器的音訊路由能力。</p>
+      </section>
 
       <section class="avatar-settings-section" aria-labelledby="avatarSettingsTitle">
         <div class="avatar-settings-heading">
@@ -574,9 +619,10 @@
 
   <audio id="realtimeAudio" autoplay playsinline hidden></audio>
   <audio id="ttsAudio" playsinline hidden></audio>
+  <audio id="testAudio" playsinline hidden></audio>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="static-api.js?v=1.0.2" defer></script>
   <script src="orb.js?v=1.0.1" defer></script>
-  <script src="app.js?v=1.0.1" defer></script>
+  <script src="app.js?v=1.0.2" defer></script>
 </body>
 </html>

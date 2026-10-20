@@ -34,6 +34,7 @@ const STORAGE_KEYS = {
   autoSpeak: 'talktwin.autoSpeak.v1',
   layout: 'talktwin.layout.v1',
   microphone: 'talktwin.microphone.v1',
+  speaker: 'talktwin.speaker.v1',
   interpreter: 'talktwin.interpreter.v1'
 };
 
@@ -108,6 +109,18 @@ const state = {
     activeLabel: '',
     devices: []
   },
+  speaker: {
+    selectedId: '',
+    devices: []
+  },
+  deviceTest: {
+    microphoneStream: null,
+    microphoneContext: null,
+    microphoneAnalyser: null,
+    microphoneFrame: null,
+    microphoneTimer: null,
+    speakerContext: null
+  },
   realtime: {
     connecting: false,
     connected: false,
@@ -181,6 +194,7 @@ const el = {
   realtimeMuteButton: document.getElementById('realtimeMuteButton'),
   realtimeAudio: document.getElementById('realtimeAudio'),
   ttsAudio: document.getElementById('ttsAudio'),
+  testAudio: document.getElementById('testAudio'),
   chatLog: document.getElementById('chatLog'),
   messageForm: document.getElementById('messageForm'),
   messageInput: document.getElementById('messageInput'),
@@ -228,6 +242,16 @@ const el = {
   microphoneSelect: document.getElementById('microphoneSelect'),
   microphoneHelp: document.getElementById('microphoneHelp'),
   refreshMicrophonesButton: document.getElementById('refreshMicrophonesButton'),
+  testMicrophoneButton: document.getElementById('testMicrophoneButton'),
+  microphoneLevelBar: document.getElementById('microphoneLevelBar'),
+  microphoneTestStatus: document.getElementById('microphoneTestStatus'),
+  speakerSelect: document.getElementById('speakerSelect'),
+  speakerHelp: document.getElementById('speakerHelp'),
+  chooseSpeakerButton: document.getElementById('chooseSpeakerButton'),
+  testSpeakerButton: document.getElementById('testSpeakerButton'),
+  speakerTestStatus: document.getElementById('speakerTestStatus'),
+  audioRouteBadge: document.getElementById('audioRouteBadge'),
+  audioRouteStatus: document.getElementById('audioRouteStatus'),
   ttsModelInput: document.getElementById('ttsModelInput'),
   ttsVoiceSelect: document.getElementById('ttsVoiceSelect'),
   avatarFileInput: document.getElementById('avatarFileInput'),
@@ -361,7 +385,11 @@ function bindEvents() {
   el.settingsButton.addEventListener('click', openSettings);
   el.realtimeVoiceSelect.addEventListener('change', syncTTSVoiceWithRealtime);
   el.microphoneSelect.addEventListener('change', handleMicrophoneSelection);
-  el.refreshMicrophonesButton.addEventListener('click', () => refreshMicrophoneDevices({ requestPermission: true }));
+  el.refreshMicrophonesButton.addEventListener('click', () => refreshAudioDevices({ requestPermission: true }));
+  el.testMicrophoneButton.addEventListener('click', toggleMicrophoneTest);
+  el.speakerSelect.addEventListener('change', handleSpeakerSelection);
+  el.chooseSpeakerButton.addEventListener('click', chooseSpeaker);
+  el.testSpeakerButton.addEventListener('click', testSpeaker);
   el.settingsCloseButton.addEventListener('click', closeSettings);
   el.settingsForm.addEventListener('submit', saveOpenAISettings);
   el.clearApiKeyButton.addEventListener('click', clearSavedApiKey);
@@ -429,71 +457,353 @@ function loadPreferences() {
 
 function setupMicrophoneSelection() {
   state.microphone.selectedId = safeLocalStorageGet(STORAGE_KEYS.microphone) || '';
-  if (!navigator.mediaDevices?.enumerateDevices || !navigator.mediaDevices?.getUserMedia) {
-    el.microphoneSelect.disabled = true;
-    el.refreshMicrophonesButton.disabled = true;
-    el.microphoneHelp.textContent = '這個瀏覽器不支援麥克風裝置選擇。';
-    return;
-  }
+  state.speaker.selectedId = safeLocalStorageGet(STORAGE_KEYS.speaker) || '';
+  updateAudioRouteSupport();
+
+  if (!navigator.mediaDevices?.enumerateDevices) return;
   navigator.mediaDevices.addEventListener?.('devicechange', () => {
-    refreshMicrophoneDevices();
+    refreshAudioDevices().then(() => applySpeakerRoute({ quiet: true }));
   });
-  refreshMicrophoneDevices();
+  refreshAudioDevices().then(() => applySpeakerRoute({ quiet: true }));
 }
 
-async function refreshMicrophoneDevices({ requestPermission = false } = {}) {
-  if (!navigator.mediaDevices?.enumerateDevices || !navigator.mediaDevices?.getUserMedia) return;
-  if (requestPermission && isRealtimeEngaged()) {
-    showToast('請先結束目前的 Realtime 對話，再重新掃描麥克風。');
-    return;
+function updateAudioRouteSupport() {
+  const secure = window.isSecureContext;
+  const canCapture = Boolean(navigator.mediaDevices?.getUserMedia && navigator.mediaDevices?.enumerateDevices);
+  const canSetSink = typeof el.realtimeAudio?.setSinkId === 'function';
+  const canChooseSink = typeof navigator.mediaDevices?.selectAudioOutput === 'function';
+
+  el.microphoneSelect.disabled = !secure || !canCapture || isRealtimeEngaged();
+  el.refreshMicrophonesButton.disabled = !secure || !canCapture || isRealtimeEngaged();
+  el.testMicrophoneButton.disabled = !secure || !canCapture || isRealtimeEngaged();
+  el.speakerSelect.disabled = !secure || !canSetSink;
+  el.chooseSpeakerButton.disabled = !secure || !canSetSink;
+  el.testSpeakerButton.disabled = !secure || !canSetSink || isRealtimeEngaged();
+
+  if (!secure) {
+    el.audioRouteBadge.dataset.level = 'blocked';
+    el.audioRouteBadge.textContent = '需要 HTTPS';
+    el.audioRouteStatus.textContent = '音訊裝置選擇需要 HTTPS；GitHub Pages 正式網址會自動符合這項要求。';
+  } else if (!canCapture) {
+    el.audioRouteBadge.dataset.level = 'blocked';
+    el.audioRouteBadge.textContent = '無法選擇輸入';
+    el.audioRouteStatus.textContent = '這個瀏覽器無法列出或使用麥克風，請改用最新版桌面 Chrome 或 Edge。';
+  } else if (canSetSink) {
+    el.audioRouteBadge.dataset.level = 'good';
+    el.audioRouteBadge.textContent = '支援獨立搭配';
+    el.audioRouteStatus.textContent = canChooseSink
+      ? '瀏覽器支援獨立輸入與輸出；選擇播放裝置時會由瀏覽器要求你的授權。'
+      : '瀏覽器支援獨立輸入與輸出；重新掃描並允許麥克風後會顯示可用的播放裝置。';
+  } else {
+    el.audioRouteBadge.dataset.level = 'limited';
+    el.audioRouteBadge.textContent = '輸出由系統管理';
+    el.audioRouteStatus.textContent = '麥克風仍可選擇，但這個瀏覽器無法指定喇叭；播放會跟隨作業系統目前的輸出。';
+  }
+}
+
+async function refreshAudioDevices({ requestPermission = false } = {}) {
+  if (!navigator.mediaDevices?.enumerateDevices) return;
+
+  let shouldRequestPermission = requestPermission && Boolean(navigator.mediaDevices?.getUserMedia);
+  if (shouldRequestPermission && isRealtimeEngaged()) {
+    shouldRequestPermission = false;
+    showToast('口譯進行中已鎖定麥克風；仍會更新目前已授權的裝置。');
   }
 
   el.refreshMicrophonesButton.disabled = true;
   let probeStream = null;
   try {
-    if (requestPermission) {
+    if (shouldRequestPermission) {
       probeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     }
-    const devices = (await navigator.mediaDevices.enumerateDevices())
-      .filter((device) => device.kind === 'audioinput' && device.deviceId && device.deviceId !== 'default');
-    state.microphone.devices = devices;
-
-    const preferredId = state.microphone.selectedId || safeLocalStorageGet(STORAGE_KEYS.microphone) || '';
-    el.microphoneSelect.textContent = '';
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = '系統預設麥克風';
-    el.microphoneSelect.appendChild(defaultOption);
-    devices.forEach((device, index) => {
-      const option = document.createElement('option');
-      option.value = device.deviceId;
-      option.textContent = device.label || `麥克風 ${index + 1}`;
-      el.microphoneSelect.appendChild(option);
-    });
-
-    const preferredAvailable = preferredId
-      && devices.some((device) => device.deviceId === preferredId);
-    el.microphoneSelect.value = preferredAvailable ? preferredId : '';
-    state.microphone.selectedId = el.microphoneSelect.value;
-    safeLocalStorageSet(STORAGE_KEYS.microphone, state.microphone.selectedId);
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    populateMicrophoneDevices(devices.filter((device) => device.kind === 'audioinput'));
+    populateSpeakerDevices(devices.filter((device) => device.kind === 'audiooutput'));
     updateMicrophoneHelp();
+    updateSpeakerHelp();
+    if (shouldRequestPermission) showToast('音訊裝置已重新掃描。');
   } catch (error) {
-    console.warn('Could not list microphones.', error);
+    console.warn('Could not list audio devices.', error);
     if (requestPermission) {
       el.microphoneHelp.textContent = '無法讀取麥克風清單；請檢查瀏覽器的麥克風權限。';
       showToast(`麥克風掃描失敗：${microphoneErrorLabel(error)}`);
     }
   } finally {
     probeStream?.getTracks().forEach((track) => track.stop());
-    el.refreshMicrophonesButton.disabled = isRealtimeEngaged();
+    updateAudioRouteSupport();
   }
+}
+
+function refreshMicrophoneDevices(options = {}) {
+  return refreshAudioDevices(options);
+}
+
+function populateMicrophoneDevices(devices) {
+  const preferredId = state.microphone.selectedId || safeLocalStorageGet(STORAGE_KEYS.microphone) || '';
+  const filtered = uniqueMediaDevices(devices);
+  state.microphone.devices = filtered;
+  populateDeviceSelect(el.microphoneSelect, {
+    devices: filtered,
+    defaultLabel: '系統預設麥克風',
+    fallbackLabel: '上次選擇的麥克風',
+    preferredId,
+    genericLabel: '麥克風'
+  });
+  state.microphone.selectedId = el.microphoneSelect.value || '';
+}
+
+function populateSpeakerDevices(devices) {
+  const preferredId = state.speaker.selectedId || safeLocalStorageGet(STORAGE_KEYS.speaker) || '';
+  const filtered = uniqueMediaDevices(devices);
+  state.speaker.devices = filtered;
+  populateDeviceSelect(el.speakerSelect, {
+    devices: filtered,
+    defaultLabel: '系統目前輸出',
+    fallbackLabel: '上次選擇的播放裝置',
+    preferredId,
+    genericLabel: '播放裝置'
+  });
+  state.speaker.selectedId = el.speakerSelect.value || '';
+}
+
+function uniqueMediaDevices(devices) {
+  const seen = new Set();
+  return devices.filter((device) => {
+    if (!device.deviceId || device.deviceId === 'default' || seen.has(device.deviceId)) return false;
+    seen.add(device.deviceId);
+    return true;
+  });
+}
+
+function populateDeviceSelect(select, { devices, defaultLabel, fallbackLabel, preferredId, genericLabel }) {
+  select.textContent = '';
+  appendDeviceOption(select, '', defaultLabel);
+  devices.forEach((device, index) => {
+    appendDeviceOption(select, device.deviceId, device.label || `${genericLabel} ${index + 1}`);
+  });
+  if (preferredId && !devices.some((device) => device.deviceId === preferredId)) {
+    appendDeviceOption(select, preferredId, fallbackLabel);
+  }
+  select.value = preferredId || '';
+}
+
+function appendDeviceOption(select, value, label) {
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = label;
+  select.appendChild(option);
 }
 
 function handleMicrophoneSelection() {
   if (isRealtimeEngaged()) return;
+  stopMicrophoneTest();
   state.microphone.selectedId = el.microphoneSelect.value || '';
   safeLocalStorageSet(STORAGE_KEYS.microphone, state.microphone.selectedId);
   updateMicrophoneHelp();
+}
+
+async function handleSpeakerSelection() {
+  state.speaker.selectedId = el.speakerSelect.value || '';
+  safeLocalStorageSet(STORAGE_KEYS.speaker, state.speaker.selectedId);
+  const applied = await applySpeakerRoute();
+  if (applied) {
+    el.speakerTestStatus.textContent = '等待試聽確認';
+    showToast('播放裝置已套用；建議按「測試喇叭」確認。');
+  }
+}
+
+async function chooseSpeaker() {
+  if (typeof el.realtimeAudio?.setSinkId !== 'function') {
+    showToast('這個瀏覽器無法指定播放裝置，請從系統音效設定切換。');
+    return;
+  }
+  if (typeof navigator.mediaDevices?.selectAudioOutput === 'function') {
+    try {
+      const options = state.speaker.selectedId ? { deviceId: state.speaker.selectedId } : undefined;
+      const device = await navigator.mediaDevices.selectAudioOutput(options);
+      if (!device?.deviceId) return;
+      if (![...el.speakerSelect.options].some((option) => option.value === device.deviceId)) {
+        appendDeviceOption(el.speakerSelect, device.deviceId, device.label || '已授權的播放裝置');
+      }
+      el.speakerSelect.value = device.deviceId;
+      state.speaker.selectedId = device.deviceId;
+      safeLocalStorageSet(STORAGE_KEYS.speaker, state.speaker.selectedId);
+      await applySpeakerRoute();
+      updateSpeakerHelp();
+      el.speakerTestStatus.textContent = '等待試聽確認';
+      showToast('播放裝置已套用；請按「測試喇叭」實際確認。');
+      return;
+    } catch (error) {
+      if (error?.name !== 'NotAllowedError') showToast(`無法選擇播放裝置：${mediaRouteErrorLabel(error)}`);
+      return;
+    }
+  }
+  await refreshAudioDevices({ requestPermission: true });
+  el.speakerSelect.focus();
+  showToast('請從播放喇叭清單選擇裝置。');
+}
+
+async function applySpeakerRoute({ quiet = false } = {}) {
+  const sinkId = state.speaker.selectedId || '';
+  if (typeof el.realtimeAudio?.setSinkId !== 'function') {
+    updateSpeakerHelp();
+    return sinkId === '';
+  }
+  try {
+    for (const audio of [el.realtimeAudio, el.ttsAudio, el.testAudio]) await audio.setSinkId(sinkId);
+    for (const context of [state.tts.audioContext, state.realtime.soundContext]) {
+      if (context && typeof context.setSinkId === 'function') await context.setSinkId(sinkId);
+    }
+    updateSpeakerHelp();
+    return true;
+  } catch (error) {
+    if (sinkId) {
+      state.speaker.selectedId = '';
+      el.speakerSelect.value = '';
+      safeLocalStorageSet(STORAGE_KEYS.speaker, '');
+      await resetSpeakerRouteToDefault();
+      updateSpeakerHelp('原選擇目前不可用，已改回系統輸出。');
+      if (!quiet) showToast(`播放裝置無法使用，已改回系統輸出：${mediaRouteErrorLabel(error)}`);
+      return false;
+    }
+    updateSpeakerHelp(`瀏覽器無法套用輸出：${mediaRouteErrorLabel(error)}`);
+    if (!quiet) showToast(`無法套用播放裝置：${mediaRouteErrorLabel(error)}`);
+    return false;
+  }
+}
+
+async function resetSpeakerRouteToDefault() {
+  const tasks = [];
+  [el.realtimeAudio, el.ttsAudio, el.testAudio].forEach((audio) => {
+    if (typeof audio?.setSinkId === 'function') tasks.push(audio.setSinkId('').catch(() => {}));
+  });
+  [state.tts.audioContext, state.realtime.soundContext].forEach((context) => {
+    if (typeof context?.setSinkId === 'function') tasks.push(context.setSinkId('').catch(() => {}));
+  });
+  await Promise.all(tasks);
+}
+
+function updateSpeakerHelp(message = '') {
+  if (message) {
+    el.speakerHelp.textContent = message;
+    return;
+  }
+  if (typeof el.realtimeAudio?.setSinkId !== 'function') {
+    el.speakerHelp.textContent = '這個瀏覽器不支援獨立輸出；播放會跟隨系統目前的喇叭。';
+    return;
+  }
+  const name = el.speakerSelect.selectedOptions[0]?.textContent?.trim() || '系統目前輸出';
+  el.speakerHelp.textContent = `已要求播放至：${name}。Realtime、一般朗讀與提示音會共用這個輸出。`;
+}
+
+async function toggleMicrophoneTest() {
+  if (state.deviceTest.microphoneStream) {
+    stopMicrophoneTest('測試已停止');
+    return;
+  }
+  if (isRealtimeEngaged()) {
+    showToast('請先結束即席口譯，再測試麥克風。');
+    return;
+  }
+  el.testMicrophoneButton.disabled = true;
+  try {
+    const stream = await getRealtimeMicrophoneStream();
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    state.deviceTest.microphoneStream = stream;
+    el.testMicrophoneButton.textContent = '停止測試';
+    el.testMicrophoneButton.setAttribute('aria-pressed', 'true');
+    el.microphoneTestStatus.textContent = '請對著麥克風說話';
+    if (AudioContextClass) {
+      const context = new AudioContextClass();
+      const analyser = context.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.68;
+      context.createMediaStreamSource(stream).connect(analyser);
+      await context.resume().catch(() => {});
+      state.deviceTest.microphoneContext = context;
+      state.deviceTest.microphoneAnalyser = analyser;
+      const samples = new Uint8Array(analyser.fftSize);
+      const drawLevel = () => {
+        if (!state.deviceTest.microphoneAnalyser) return;
+        analyser.getByteTimeDomainData(samples);
+        let sum = 0;
+        samples.forEach((sample) => {
+          const normalized = (sample - 128) / 128;
+          sum += normalized * normalized;
+        });
+        const level = Math.max(2, Math.min(100, Math.sqrt(sum / samples.length) * 540));
+        el.microphoneLevelBar.style.width = `${level.toFixed(1)}%`;
+        state.deviceTest.microphoneFrame = requestAnimationFrame(drawLevel);
+      };
+      drawLevel();
+    }
+    state.deviceTest.microphoneTimer = window.setTimeout(() => stopMicrophoneTest('測試完成；請確認音量條有反應'), 5000);
+  } catch (error) {
+    stopMicrophoneTest(`測試失敗：${microphoneErrorLabel(error)}`);
+    showToast(`麥克風測試失敗：${microphoneErrorLabel(error)}`);
+  } finally {
+    el.testMicrophoneButton.disabled = false;
+  }
+}
+
+function stopMicrophoneTest(status = '尚未測試') {
+  if (state.deviceTest.microphoneTimer) window.clearTimeout(state.deviceTest.microphoneTimer);
+  if (state.deviceTest.microphoneFrame) cancelAnimationFrame(state.deviceTest.microphoneFrame);
+  state.deviceTest.microphoneStream?.getTracks().forEach((track) => track.stop());
+  state.deviceTest.microphoneContext?.close().catch(() => {});
+  state.deviceTest.microphoneStream = null;
+  state.deviceTest.microphoneContext = null;
+  state.deviceTest.microphoneAnalyser = null;
+  state.deviceTest.microphoneFrame = null;
+  state.deviceTest.microphoneTimer = null;
+  el.microphoneLevelBar.style.width = '0';
+  el.testMicrophoneButton.textContent = '測試麥克風';
+  el.testMicrophoneButton.setAttribute('aria-pressed', 'false');
+  el.microphoneTestStatus.textContent = status;
+}
+
+async function testSpeaker() {
+  if (typeof el.testAudio?.setSinkId !== 'function') {
+    showToast('這個瀏覽器無法指定測試音的播放裝置。');
+    return;
+  }
+  el.testSpeakerButton.disabled = true;
+  el.speakerTestStatus.textContent = '正在播放測試音…';
+  let context = null;
+  try {
+    const applied = await applySpeakerRoute();
+    if (!applied) throw new Error('選擇的播放裝置不可用');
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) throw new Error('瀏覽器不支援音訊測試');
+    context = new AudioContextClass();
+    state.deviceTest.speakerContext = context;
+    const destination = context.createMediaStreamDestination();
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(440, context.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(660, context.currentTime + .34);
+    gain.gain.setValueAtTime(.0001, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.14, context.currentTime + .03);
+    gain.gain.exponentialRampToValueAtTime(.0001, context.currentTime + .52);
+    oscillator.connect(gain).connect(destination);
+    el.testAudio.srcObject = destination.stream;
+    await el.testAudio.play();
+    oscillator.start();
+    oscillator.stop(context.currentTime + .54);
+    await wait(680);
+    el.speakerTestStatus.textContent = '請確認聲音來自預期裝置';
+    showToast('測試音已播放；請確認聲音從選擇的喇叭傳出。');
+  } catch (error) {
+    el.speakerTestStatus.textContent = `測試失敗：${mediaRouteErrorLabel(error)}`;
+    showToast(`喇叭測試失敗：${mediaRouteErrorLabel(error)}`);
+  } finally {
+    el.testAudio.pause();
+    el.testAudio.srcObject = null;
+    await context?.close().catch(() => {});
+    state.deviceTest.speakerContext = null;
+    updateAudioRouteSupport();
+  }
 }
 
 function updateMicrophoneHelp() {
@@ -544,6 +854,16 @@ function microphoneErrorLabel(error) {
     DevicesNotFoundError: '找不到可用的麥克風',
     NotReadableError: '麥克風正被其他應用程式佔用',
     OverconstrainedError: '選擇的麥克風不可用'
+  };
+  return labels[error?.name] || error?.message || '未知錯誤';
+}
+
+function mediaRouteErrorLabel(error) {
+  const labels = {
+    NotAllowedError: '尚未授權這個播放裝置',
+    NotFoundError: '找不到這個播放裝置',
+    AbortError: '播放裝置切換失敗',
+    InvalidStateError: '請直接點擊按鈕後再選擇裝置'
   };
   return labels[error?.name] || error?.message || '未知錯誤';
 }
@@ -736,7 +1056,8 @@ async function saveQuickRealtimeVoice() {
 
 function openSettings() {
   updateSettingsForm();
-  refreshMicrophoneDevices();
+  refreshAudioDevices();
+  updateAudioRouteSupport();
   if (!state.avatarDirty) updateAvatarForm();
   if (typeof el.settingsDialog.showModal === 'function') {
     if (!el.settingsDialog.open) el.settingsDialog.showModal();
@@ -747,6 +1068,7 @@ function openSettings() {
 }
 
 function closeSettings() {
+  stopMicrophoneTest();
   if (state.avatarDirty) updateAvatarForm();
   if (typeof el.settingsDialog.close === 'function' && el.settingsDialog.open) {
     el.settingsDialog.close();
@@ -2084,6 +2406,7 @@ async function speakText(rawText) {
       finishSpeaking(session);
       showToast('OpenAI TTS 音訊無法播放。');
     };
+    await applySpeakerRoute({ quiet: true });
     await startTTSAudioAnalysis();
     await el.ttsAudio.play();
     setCaption('SPEAKING', rawText);
@@ -2137,6 +2460,12 @@ async function startTTSAudioAnalysis() {
     startMouthAnimation();
     return;
   }
+  const mediaElementCanRoute = typeof el.ttsAudio?.setSinkId === 'function';
+  const audioContextCanRoute = typeof AudioContextClass.prototype?.setSinkId === 'function';
+  if (mediaElementCanRoute && !audioContextCanRoute) {
+    startMouthAnimation();
+    return;
+  }
   if (!state.tts.audioContext) {
     const context = new AudioContextClass();
     const analyser = context.createAnalyser();
@@ -2148,6 +2477,9 @@ async function startTTSAudioAnalysis() {
     state.tts.audioContext = context;
     state.tts.analyser = analyser;
     state.tts.source = source;
+  }
+  if (typeof state.tts.audioContext.setSinkId === 'function') {
+    await state.tts.audioContext.setSinkId(state.speaker.selectedId || '').catch(() => {});
   }
   await state.tts.audioContext.resume().catch(() => {});
   const analyser = state.tts.analyser;
@@ -2379,6 +2711,10 @@ function updateRealtimeUI() {
   el.realtimeMuteButton.textContent = realtime.muted ? '解除靜音' : '靜音';
   el.microphoneSelect.disabled = realtimeEngaged || !navigator.mediaDevices?.enumerateDevices;
   el.refreshMicrophonesButton.disabled = realtimeEngaged || !navigator.mediaDevices?.getUserMedia;
+  el.testMicrophoneButton.disabled = realtimeEngaged || !navigator.mediaDevices?.getUserMedia;
+  el.testSpeakerButton.disabled = realtimeEngaged || typeof el.testAudio?.setSinkId !== 'function';
+  el.speakerSelect.disabled = typeof el.realtimeAudio?.setSinkId !== 'function';
+  el.chooseSpeakerButton.disabled = typeof el.realtimeAudio?.setSinkId !== 'function';
   el.voiceSelect.disabled = realtimeEngaged;
   el.rateSlider.disabled = realtimeEngaged;
   const ttsConfigured = Boolean(
@@ -2405,6 +2741,7 @@ function updateRealtimeUI() {
       ? '可打字翻譯；現場口譯請按左側「開始即席口譯」'
       : '可打字翻譯；此瀏覽器未提供系統語音辨識';
   }
+  updateAudioRouteSupport();
 }
 
 async function toggleRealtimeSession() {
@@ -2468,10 +2805,11 @@ async function startRealtimeSession() {
       peer.addTrack(track, stream);
     });
 
-    peer.ontrack = (event) => {
+    peer.ontrack = async (event) => {
       const [remoteStream] = event.streams;
       if (!remoteStream) return;
       el.realtimeAudio.srcObject = remoteStream;
+      await applySpeakerRoute({ quiet: true });
       el.realtimeAudio.play().catch((error) => console.warn('Realtime audio autoplay:', error));
       startRealtimeAudioAnalysis(remoteStream);
     };
@@ -2657,7 +2995,15 @@ function getRealtimeSoundContext() {
 
   const realtime = state.realtime;
   if (!realtime.soundContext || realtime.soundContext.state === 'closed') {
-    realtime.soundContext = new AudioContextClass();
+    const canRoute = typeof AudioContextClass.prototype?.setSinkId === 'function';
+    try {
+      realtime.soundContext = canRoute && state.speaker.selectedId
+        ? new AudioContextClass({ sinkId: state.speaker.selectedId })
+        : new AudioContextClass();
+    } catch (error) {
+      realtime.soundContext = new AudioContextClass();
+    }
+    if (canRoute) realtime.soundContext.setSinkId(state.speaker.selectedId || '').catch(() => {});
   }
   if (realtime.soundContext.state === 'suspended') {
     realtime.soundContext.resume().catch(() => {});
