@@ -2,6 +2,8 @@
 
 純 HTML／CSS／JavaScript 的語音工作台。使用者自行輸入 Google API key，瀏覽器直接呼叫 Google，適合 GitHub Pages。支援單人朗讀、雙人對話、SRT 配音及對話稿助手。
 
+[開啟網站](https://weisfx0705.github.io/chiawei/TTS/) · [本機入口](index.html) · [回主專案](../README.md)
+
 ## 使用
 
 開啟 [TTS Studio](https://weisfx0705.github.io/chiawei/TTS/index.html)，填入自己的 [Google API key](https://aistudio.google.com/apikey)，選擇模型與語音，再生成、播放或下載 WAV。
@@ -9,6 +11,8 @@
 API key 只保留在目前頁面的輸入欄位，使用 `x-goog-api-key` 請求標頭送至 Google；不寫入 URL、localStorage、檔案或日誌。重新整理頁面後需重新輸入。舊版儲存的金鑰會直接刪除，不讀取內容。Google 專案的模型權限與配額仍依各使用者的設定。
 
 ## 模型
+
+以下是目前介面與程式設定的模型；實際可用性依 Google 帳號權限與服務狀態而定。
 
 | 模型 | 用途 |
 | --- | --- |
@@ -40,6 +44,16 @@ SRT 音訊依字幕物件保存，刪除或合併不會錯配。再次生成會�
 - `gemini-client.js`：Google 3.8／3.1 請求格式、API URL、回應解析與固定錯誤訊息。
 - `tts-core.js`：WAV／PCM、長文分段、時間碼與字幕音訊合併。
 - `tests/`：協定、音訊及純靜態瀏覽器測試。
+
+## 本機預覽
+
+在 `TTS/` 資料夾內執行：
+
+```sh
+python3 -m http.server 8000 --bind 127.0.0.1
+```
+
+開啟 `http://127.0.0.1:8000/`，按 Ctrl+C 停止。預覽介面不會自動生成語音；實際生成與對話稿助手需要連網，並使用自己的 Google API 額度。
 
 ## 部署
 

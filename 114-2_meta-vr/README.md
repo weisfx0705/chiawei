@@ -1,51 +1,42 @@
-# 元宇宙 VR 影片製作 — 課程成果報告網站
+# 元宇宙 VR 影片製作｜課程成果報告
 
-義守大學 電影與電視學系 ｜ X+AI 特色課程 114 學年第 2 學期
-授課教師：張國甫、陳嘉暐
+義守大學電影與電視學系 114 學年度第 2 學期 X+AI 特色課程，授課教師為張國甫、陳嘉暐。以 LED 虛擬棚、生成式 AI 與 VR 360 沉浸式影像三個模組，整理課堂實作、學生作品與教學紀錄。
 
-**線上網址（GitHub Pages）**：https://weisfx0705.github.io/chiawei/114-2_meta-vr/
+[網站入口](https://weisfx0705.github.io/chiawei/114-2_meta-vr/) · [主專案說明](../README.md)
 
-這是一個**純靜態網站**，沒有任何後端或建置流程，可直接部署。
-站內全部使用相對路徑，因此可放在網域根目錄或任何子目錄（如上方的 `/chiawei/114-2_meta-vr/`）皆能正常運作。
+## 內容與操作
 
-## 目錄結構
-
-```
-114-2_meta-vr/
-├── index.html              # 主頁（單頁式，含所有區段）
-├── assets/
-│   ├── css/style.css       # 樣式
-│   ├── js/main.js          # 互動（導覽、捲動揭露、相簿燈箱、YouTube 延遲載入）
-│   ├── js/photos-manifest.js # 自動產生的照片清單（依日期）
-│   └── img/hero-studio.jpg # 主視覺
-├── teaching/               # 兩個互動教學頁（全景原理、VR 剪輯思維）
-├── docs/                   # 講義下載（Insta360 Titan、DaVinci 筆記）
-├── assets/img/logos/       # 工具商標（Google、Gemini、Runway、Photoshop）
-└── photos/<日期>/full|thumb/ # 課堂照片（已由 HEIC 轉為網頁 JPG，含縮圖）
-```
+- 課程簡介、LED 虛擬製作、AI 工具與四組學生作品。
+- VR 360 拍攝、全景後期、VR180 剪輯與頭顯測試紀錄。
+- 課堂相簿可點圖放大，使用左右方向鍵換圖、Esc 關閉。
+- 教學影片、Pose Game 示範與課程成果影片；VR180 成果連到 YouTube 官方播放器觀看。
+- [全景影像原理](teaching/vr-panorama.html)、[VR 剪輯與專案設定](teaching/vr-editing.html)兩個互動教學頁。
+- [Insta360 Titan 講義](docs/Insta360-Titan-講義.pdf)與 [DaVinci Resolve 沉浸式後期研究筆記](docs/DaVinci_Resolve_21_Immersive_研究筆記.docx)。
 
 ## 本機預覽
 
-```bash
+從儲存庫根目錄執行：
+
+```sh
 cd 114-2_meta-vr
-python3 -m http.server 8000
-# 開啟 http://localhost:8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-> 直接用瀏覽器開 `index.html`（file://）會因瀏覽器安全限制而無法載入照片清單，
-> 請務必透過上面的本機伺服器，或部署到網站空間後再瀏覽。
+開啟 `http://127.0.0.1:8000/`，按 Ctrl+C 停止。網站為純靜態 HTML、CSS、JavaScript，不需要安裝套件或啟動後端；以 HTTP 預覽可保持與正式網站相同的載入方式。
 
-## 部署（擇一）
+## 檔案與維護
 
-- **GitHub Pages**：將本資料夾內容推到 repo，啟用 Pages 即可。
-- **Netlify / Cloudflare Pages**：拖拉本資料夾上傳，發佈目錄設為根目錄。
-- **學校網站空間**：以 FTP 上傳整個資料夾即可。
+| 位置 | 用途 |
+| --- | --- |
+| `index.html` | 課程內容、作品、影片與下載連結 |
+| `assets/css/style.css` | 網頁樣式與響應式版面 |
+| `assets/js/main.js` | 導覽、影片延遲載入、精選相簿與燈箱 |
+| `assets/js/photos-manifest.js` | 照片清單資料 |
+| `assets/img/` | 主視覺與工具標誌 |
+| `photos/` | 依日期保存的課堂照片與縮圖 |
+| `teaching/` | 互動教學頁 |
+| `docs/` | PDF 講義與 DOCX 筆記 |
 
-## 待補與注意事項
+新增精選照片時，需同步確認 `main.js` 的 `CURATED` 清單，以及對應日期下的 `full/`、`thumb/` 檔案。發布時保留整個資料夾的相對位置，可隨主專案部署至 GitHub Pages。
 
-1. **學生問卷**：頁尾預留位置，問卷回收後可再新增一個「學習回饋」區段。
-2. **YouTube 影片可見度**：七部影片目前為「不公開（Unlisted）」，縮圖與嵌入皆可正常播放。
-   若有任何一部被設為「私人（Private）」，網頁將無法播放，請於 YouTube 後台改為「不公開」。
-3. **大型講義**：原始的 `VR_義守114-2.pptx`（90 MB）因檔案過大未納入，
-   如需提供下載，可自行放入 `docs/` 並在 `index.html` 講義區新增連結。
-4. 系所官網連結已設定於頁尾：https://filmtv.isu.edu.tw/
+YouTube 影片、縮圖與外部字型需要連網；影片能否播放仍取決於來源的可見度與嵌入設定。課堂照片、學生作品及講義的使用權利依各自來源與授權辦理。

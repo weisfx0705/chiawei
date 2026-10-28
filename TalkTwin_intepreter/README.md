@@ -6,6 +6,8 @@
 
 ## 功能
 
+[開啟網站](https://weisfx0705.github.io/chiawei/TalkTwin_intepreter/) · [本機入口](index.html) · [回主專案](../README.md)
+
 - 18 種語言任選兩種組成配對（中文繁／簡、英、日、韓、越、印尼、泰、馬來、菲、印地、法、德、西、葡、義、俄、阿拉伯）
 - 提示詞由語言配對**自動產生**：翻譯方向、口音規則、場域稱謂一次到位
 - OpenAI Realtime API WebRTC 低延遲語音，逐句雙向
@@ -18,19 +20,21 @@
 
 ## 部署到 GitHub Pages
 
-1. 把這個資料夾的內容推到 GitHub repo。
-2. repo 的 **Settings → Pages → Build and deployment**，Source 選 **Deploy from a branch**，分支選 `main`、資料夾選 `/ (root)`。
-3. 等一兩分鐘，網址會是 `https://<帳號>.github.io/<repo>/`。
+本專案以 `TalkTwin_intepreter/` 子資料夾收錄在 `weisfx0705/chiawei`，隨主網站發布。入口為 `TalkTwin_intepreter/index.html`，不需要安裝套件、執行建置或啟動 Python 應用程式後端。
 
-`.nojekyll` 已經放好，Jekyll 不會處理這些檔案。整包只有約 400 KB。
+若搬到其他靜態主機，請保留本資料夾內的 HTML、CSS、JavaScript、`assets/` 與 `.nojekyll`，維持相對路徑。
 
-> Realtime 需要麥克風權限，瀏覽器只在 **HTTPS** 或 `localhost` 才會給。GitHub Pages 是 HTTPS，沒有問題。
+> 即時口譯需要麥克風權限與安全來源，請透過 HTTPS 或本機 `localhost`／`127.0.0.1` 使用。
 
 ### 本機預覽
 
-```bash
-python3 -m http.server 8000
+在 `TalkTwin_intepreter/` 資料夾內執行：
+
+```sh
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
+
+開啟 `http://127.0.0.1:8000/`，按 Ctrl+C 停止。瀏覽介面不會自動連接 OpenAI；實際翻譯需要連網及使用者自己的 OpenAI API 額度。
 
 ## 使用者怎麼開始
 
@@ -84,12 +88,4 @@ python3 -m http.server 8000
 `app.js` 的 `fetchWithTimeout` 會把這些請求轉進去並拿到真正的 `Response`，
 因此上層邏輯完全沒有改動。
 
-## 與本機版的差異
-
-| | 本機版（Python） | 靜態版 |
-| --- | --- | --- |
-| API Key | 存在 `config.local.json`，前端只看得到末四碼 | 存在瀏覽器 `localStorage` |
-| 提示詞組裝 | `server.py` | `static-api.js` |
-| 角色圖片 | 存到硬碟 `assets/library/` | 存到 IndexedDB |
-| 五官切圖生成 | 有（需要 Pillow） | 無 —— 目前三種能量體風格都不使用 |
-| 麥克風、WebRTC、能量體渲染 | 相同 | 相同 |
+本資料夾只包含靜態版，沒有 `server.py`。修改翻譯預設與 API 請求時查看 `static-api.js`；調整畫面與現場互動時查看 `index.html`、`styles.css` 與 `app.js`。
