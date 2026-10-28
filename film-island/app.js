@@ -1400,7 +1400,6 @@ function openOuter() {
 // 瀏覽器裡有沒有存這一屆的紀錄
 const hasData = p => !!p && (p.done.size || p.boya || p.cross || p.checks.size || p.work);
 function savedText(p) { const parts = [`${p.done.size} 門課`]; if (p.boya) parts.push(`博雅 ${p.boya}`); if (p.cross) parts.push(`跨域 ${p.cross}`); return parts.join('・'); }
-const savedBadge = y => hasData(S.P[y]) ? `<span class="saved">💾 已存 ${savedText(S.P[y])}</span>` : '';
 function updateSaveChip() {
   const el = $('#saveChip'), p = CO && realPR();
   el.classList.toggle('show', hasData(p));
@@ -1547,7 +1546,7 @@ async function tour() {
 /* ───────────── 入學年度 ───────────── */
 function renderIntro() {
   $('#cohortCards').innerHTML = [112, 113, 114, 115].map(y => { const c = COH[y];
-    return `<button class="cohort" data-cohort="${y}"><div class="film"></div>${S.cohort == y ? '<span class="last">上次選擇</span>' : ''}<div class="num">${y}<small>學年度</small></div><div class="ad">${c.entry} 年入學</div><p>${esc(c.tagline)}</p>${savedBadge(y)}</button>`; }).join('');
+    return `<button class="cohort" data-cohort="${y}"><div class="film"></div><div class="num">${y}<small>學年度</small></div><div class="ad">${c.entry} 年入學</div></button>`; }).join('');
 }
 $('#cohortCards').addEventListener('click', e => { const b = e.target.closest('[data-cohort]'); if (b) chooseCohort(b.dataset.cohort); });
 let choosingCohort = false;
