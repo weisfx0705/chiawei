@@ -1303,8 +1303,7 @@ function renderRoute(rid) {
     <h3>📚 博雅建議（需 ${plan.boyaNeed} 學分）</h3><p style="font-size:12.5px;margin:0">${esc(t.boya || '—')}</p>
     <h3>⛴ 外系／跨域建議（至多採計 ${plan.crossMax} 學分）</h3><p style="font-size:12.5px;margin:0">${esc(t.cross || '—')}</p>
     ${t.extra.length ? `<h3>${esc(t.extraTitle)}</h3><ul style="font-size:12.5px;line-height:1.7;padding-left:18px;margin:0">${t.extra.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
-    ${t.supplement ? '<p class="note" style="background:#fff4d6;border-radius:8px;padding:6px 8px">🎨 系上養成研究沒有獨立的美術組章節；這條路線與每年的成果，是本地圖依課程計畫補充的建議。</p>' : ''}
-    <p class="note">必修依 ${CO.year} 學年度四年課程計畫；推薦選修與階段成果依系上 ${CO.year} 學年度《電影職務四年課程養成研究》。選修是職能組合建議，不必全部修完，也不代表每學期必定開課。</p>`);
+    <p class="note">${rid === 'art' ? `課程依 ${CO.year} 學年度四年課程計畫。` : `必修依 ${CO.year} 學年度四年課程計畫；推薦選修與階段成果依系上 ${CO.year} 學年度《電影職務四年課程養成研究》。`}選修是職能組合建議，不必全部修完，也不代表每學期必定開課。</p>`);
 }
 drawer.addEventListener('click', e => {
   if (e.target.closest('[data-x]')) return closeDrawer();
