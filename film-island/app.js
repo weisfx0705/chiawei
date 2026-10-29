@@ -303,7 +303,7 @@ controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
 controls.addEventListener('start', () => { fly = null; follow = false; });
 function addLights(sc, shadow, span = 38) {
   // 天空之城：天光偏暖、雲海反光偏淡紫，再加一道冷色輪廓光把島緣與角色勾出來
-  sc.add(new THREE.HemisphereLight(0xfff3e2, 0xb7b2e2, .78));
+  const hemi = new THREE.HemisphereLight(0xfff3e2, 0xb7b2e2, .78); sc.add(hemi);
   const rim = new THREE.DirectionalLight(0xbcd6ff, .32); rim.position.set(26, 16, -34); sc.add(rim);
   const sun = new THREE.DirectionalLight(0xffe0b0, .98);
   sun.position.set(-28, 46, 22);
@@ -311,7 +311,7 @@ function addLights(sc, shadow, span = 38) {
     sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
     const c = sun.shadow.camera; c.left = c.bottom = -span; c.right = c.top = span; c.near = 1; c.far = 160; sun.shadow.bias = -.0008;
   }
-  sc.add(sun); return sun;
+  sc.add(sun); sc.userData.lights = { hemi, rim, sun }; return sun;
 }
 addLights(scene, true);
 
@@ -639,6 +639,34 @@ const SKY = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.Shad
       gl_FragColor = vec4(c, 1.); }`,
 }));
 SKY.renderOrder = -1; scene.add(SKY);
+
+// 四季只調整既有燈光、天空與霧色，不增加模型或下載素材。
+const seasonPalettes = [
+  ['#fff3e2', '#b7b2e2', '#ffe0b0', .98, .78, '#5f9ee6', '#b9dcf6', '#fde3d3', '#9ebbe6', '#e4e2f2'],
+  ['#fff2ea', '#cab9cb', '#ffe1ce', 1.02, .82, '#83b5dd', '#d5e8ed', '#ffe3df', '#b9cfdf', '#eee1e8'],
+  ['#f5fcff', '#a9c9d5', '#fff1cc', 1.18, .86, '#408fdb', '#a3dbf5', '#e2f4f4', '#83bce0', '#d9eef4'],
+  ['#ffe7ce', '#b9a4bc', '#ffc082', 1.08, .76, '#899bc6', '#e2c9bc', '#ffd2a1', '#bbacc8', '#eddbc9'],
+  ['#e8f4ff', '#b2bfd9', '#d6e8ff', .88, .88, '#7394bf', '#c5d9eb', '#edf3ff', '#a7bedb', '#dce6f2'],
+].map(([hemi, ground, sun, intensity, ambient, top, mid, hor, low, fog]) => ({
+  hemi: new THREE.Color(hemi), ground: new THREE.Color(ground), sun: new THREE.Color(sun),
+  intensity, ambient, sky: { top: new THREE.Color(top), mid: new THREE.Color(mid), hor: new THREE.Color(hor), low: new THREE.Color(low) }, fog: new THREE.Color(fog),
+}));
+let seasonTarget = seasonPalettes[0];
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+function setSeason(y) { seasonTarget = seasonPalettes[y] || seasonPalettes[0]; }
+function blendSeasonColor(color, target, amount) {
+  color.lerp(target, amount);
+  if (Math.abs(color.r - target.r) + Math.abs(color.g - target.g) + Math.abs(color.b - target.b) < .001) color.copy(target);
+}
+function updateSeason(dt) {
+  const a = reducedMotion.matches ? 1 : 1 - Math.exp(-dt * 4), p = seasonTarget, l = scene.userData.lights;
+  blendSeasonColor(l.hemi.color, p.hemi, a); blendSeasonColor(l.hemi.groundColor, p.ground, a); blendSeasonColor(l.sun.color, p.sun, a);
+  l.sun.intensity += (p.intensity - l.sun.intensity) * a;
+  l.hemi.intensity += (p.ambient - l.hemi.intensity) * a;
+  for (const k of ['top', 'mid', 'hor', 'low']) blendSeasonColor(SKY.material.uniforms[k].value, p.sky[k], a);
+  blendSeasonColor(scene.fog.color, p.fog, a);
+}
+
 
 const dotTex = (() => {
   const cv = document.createElement('canvas'); cv.width = cv.height = 64;
@@ -1885,10 +1913,11 @@ function afterChange() { updateSaveChip(); refreshSea(); renderHero(); renderSid
 /* ───────────── 年級篩選、職務路線 ───────────── */
 const yearsEl = $('#years');
 function renderYears() {
-  yearsEl.innerHTML = `<button data-year="0" class="${S.year ? '' : 'on'}" style="background:#fff">全部</button>` +
-    [1, 2, 3, 4].map(y => `<button data-year="${y}" class="${S.year === y ? 'on' : ''}" style="background:${Y[y].tile}" title="${Y[y].season}＝${Y[y].name}">${Y[y].em}<span class="yn"> ${Y[y].name}</span></button>`).join('');
+  setSeason(S.year);
+  yearsEl.innerHTML = `<button data-year="0" aria-pressed="${!S.year}" class="${S.year ? '' : 'on'}" style="background:#fff">全部</button>` +
+    [1, 2, 3, 4].map(y => `<button data-year="${y}" aria-label="${Y[y].name}・${Y[y].season}" aria-pressed="${S.year === y}" class="${S.year === y ? 'on' : ''}" style="background:${Y[y].tile}" title="${Y[y].season}＝${Y[y].name}">${Y[y].em}<span class="yn"> ${Y[y].name}</span></button>`).join('');
 }
-yearsEl.addEventListener('click', e => { const b = e.target.closest('[data-year]'); if (!b) return; S.year = +b.dataset.year; AU.play('click'); renderYears(); refreshWorld(); refreshIslandLabels(); drawRoute(); });
+yearsEl.addEventListener('click', e => { const b = e.target.closest('[data-year]'); if (!b) return; S.year = +b.dataset.year; yearCard(S.year, null, 2300); AU.play('click'); renderYears(); refreshWorld(); refreshIslandLabels(); drawRoute(); });
 const routePick = $('#routePick');
 function renderRoutePick() {
   routePick.innerHTML = `<h3>選一個電影職務，看它四年怎麼修（${CO.year} 學年度）</h3><p class="note" style="margin:-4px 0 8px">路線會包含每個人都要修的必修，再加上這個職務推薦的選修。</p><div class="rgrid">` +
@@ -1926,12 +1955,14 @@ function stopTour() { if (tourRun) tourRun.stop = true; }
 function banner(t, s) { $('#bannerT').textContent = t; $('#bannerS').textContent = s || ''; const b = $('#banner'); b.classList.add('show'); clearTimeout(banner.t); banner.t = setTimeout(() => b.classList.remove('show'), 1900); }
 function setPlayBtn() { $('#playBtn').innerHTML = tourRun ? '■ <span class="lbl">停止播放</span>' : '▶ <span class="lbl">播放四年成長</span>'; }
 // 換年級時的大字卡：四季顏色，一看就知道現在是大幾
-function yearCard(y, outcome) {
+function yearCard(y, outcome, duration = 2700 / SPEED) {
+  setSeason(y);
+  const info = Y[y] || { color: '#6b6157', tile: '#fffaf1', em: '🌈', name: '全部年級', season: '四季', label: '四年課程全覽' };
   const el = $('#yearCard');
-  el.style.setProperty('--yc', Y[y].color); el.style.setProperty('--yt', Y[y].tile);
-  el.innerHTML = `<div class="em">${Y[y].em}</div><div><b>${Y[y].name}</b><i>${Y[y].season}・${Y[y].label}</i>${outcome ? `<span>🏁 這一年要交出：${esc(outcome)}</span>` : ''}</div>`;
+  el.style.setProperty('--yc', info.color); el.style.setProperty('--yt', info.tile);
+  el.innerHTML = `<div class="em">${info.em}</div><div><b>${info.name}</b><i>${info.season}・${info.label}</i>${outcome ? `<span>🏁 這一年要交出：${esc(outcome)}</span>` : ''}</div>`;
   el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
-  clearTimeout(yearCard.t); yearCard.t = setTimeout(() => el.classList.remove('show'), 2700 / SPEED);
+  clearTimeout(yearCard.t); yearCard.t = setTimeout(() => el.classList.remove('show'), duration);
 }
 const PHASE = { up: '上學期・必修', down: '下學期・必修', ele: '職務選修', boya: '通識博雅', cross: '跨院／跨系選修', gate: '畢業門檻' };
 function setHud(st, i, n) {
@@ -2177,7 +2208,10 @@ $('#zoomOut').addEventListener('click', () => zoomMap(1.28));
 $('#homeView').addEventListener('click', () => { follow = false; flyHome(); AU.play('click'); });
 let heroSpin = 0;
 const clock = new THREE.Clock();
+let lastFrameTime = null;
 function frame(now) {
+  const dt = lastFrameTime === null ? 0 : Math.min((now - lastFrameTime) / 1000, 1);
+  lastFrameTime = now;
   const t = clock.getElapsedTime();
   skyFrame(t);
   if (WORLD) WORLD.children.forEach(g => { if (g.userData.grow) { const k = Math.min(1, Math.max(0, (now - g.userData.grow) / 650)); const e = 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2); g.scale.y = Math.max(.01, k ? e : .01); if (k >= 1) { g.scale.y = 1; delete g.userData.grow; } } });
@@ -2201,6 +2235,7 @@ function frame(now) {
     const delta = goal.sub(controls.target).multiplyScalar(.05);
     controls.target.add(delta); camera.position.add(delta);
   }
+  updateSeason(dt);
   controls.update();
   renderer.render(scene, camera);
   updateLabels();
