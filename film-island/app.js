@@ -6,7 +6,7 @@ const F = window.FILM, COH = window.FILM_COHORTS;
 const ROLE = {}; F.ROLES.forEach(r => ROLE[r.id] = r);
 const ISL = {}; F.ISLANDS.forEach(i => ISL[i.id] = i);
 const Y = F.YEARS;
-const SLOT_NAME = { head: '頭上', eyes: '眼睛', ears: '耳朵', neck: '胸前', handR: '右手', handL: '左手', back: '背上', belt: '腰間', body: '身上', feet: '腳上', wrist: '手腕', prop: '身旁', pet: '隨身夥伴' };
+const SLOT_NAME = { head: '頭上', eyes: '眼睛', ears: '耳朵', neck: '胸前', handR: '右手', handL: '左手', back: '背上', belt: '腰間', body: '身上', feet: '腳上', wrist: '手腕', prop: '身旁', pet: '隨身夥伴', aura: '傳說光環' };
 const CAT_TAG = { gen: '通識核心', col: '院必修', cole: '院選修', req: '系必修', ele: '系選修' };
 const CREDIT = `<p class="credit">開發人員：<a href="${F.meta.deptUrl}" target="_blank" rel="noopener">義守大學電影與電視學系</a> <a href="${F.meta.developer.url}" target="_blank" rel="noopener">${F.meta.developer.name}</a></p>`;
 const $ = s => document.querySelector(s);
@@ -185,6 +185,7 @@ const AU = (() => {
     shimmer: t => [84, 88, 91, 96].forEach((m, k) => tone(mf(m), t + k * .045, .2, { type: 'sine', gain: .045, r: .15 })),
     alarm: t => { [0, .22, .44].forEach(d => { tone(988, t + d, .1, { gain: .07 }); tone(740, t + d + .1, .1, { gain: .07 }); }); },
     grow: t => [60, 64, 67, 72, 76].forEach((m, k) => tone(mf(m), t + k * .08, .18, { type: 'triangle', gain: .09 })),
+    legend: t => { [72, 76, 79, 84, 88, 91].forEach((m, k) => tone(mf(m), t + k * .07, .5, { type: 'sine', gain: .05, r: .4 })); tone(mf(60), t, 1.4, { type: 'triangle', gain: .12, r: .9 }); noise(t + .4, .8, { gain: .03, hp: 6000 }); },
     grad: t => { [60, 64, 67, 72, 67, 72].forEach((m, k) => tone(mf(m), t + k * .13, .14, { gain: .08 })); [72, 76, 79, 84].forEach(m => tone(mf(m), t + .8, 1.2, { gain: .04, r: .7 })); tone(mf(48), t + .8, 1.2, { type: 'triangle', gain: .15, r: .7 }); },
   };
   function play(name) {
@@ -288,9 +289,9 @@ BOOT.update(87, '正在建立角色', '地圖資源已下載完成。');
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0xd6ecee, 90, 190);
+scene.fog = new THREE.Fog(0xe4e2f2, 70, 330);
 const camera = new THREE.PerspectiveCamera(38, 1, .1, 500);
-const HOME = { t: new THREE.Vector3(0, 0, 4), p: new THREE.Vector3(0, 46, 53) };
+const HOME = { t: new THREE.Vector3(0, 0, 3), p: new THREE.Vector3(0, 31, 61) };
 camera.position.copy(HOME.p);
 const controls = new THREE.OrbitControls(camera, mapSurface);
 controls.target.copy(HOME.t);
@@ -301,8 +302,10 @@ controls.touches.ONE = THREE.TOUCH.PAN;
 controls.touches.TWO = THREE.TOUCH.DOLLY_PAN;
 controls.addEventListener('start', () => { fly = null; follow = false; });
 function addLights(sc, shadow, span = 38) {
-  sc.add(new THREE.HemisphereLight(0xfff1dc, 0x7aa9b8, .75));
-  const sun = new THREE.DirectionalLight(0xffe2b8, .95);
+  // 天空之城：天光偏暖、雲海反光偏淡紫，再加一道冷色輪廓光把島緣與角色勾出來
+  sc.add(new THREE.HemisphereLight(0xfff3e2, 0xb7b2e2, .78));
+  const rim = new THREE.DirectionalLight(0xbcd6ff, .32); rim.position.set(26, 16, -34); sc.add(rim);
+  const sun = new THREE.DirectionalLight(0xffe0b0, .98);
   sun.position.set(-28, 46, 22);
   if (shadow) {
     sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
@@ -342,6 +345,63 @@ function mix(a, b, t) { return '#' + new THREE.Color(a).lerp(new THREE.Color(b),
 function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 
 /* ───────────── 裝備模型（各自以掛點為原點） ───────────── */
+// 收音桿防風罩的毛：把細分的二十面體每個點隨機往外推，做出毛茸茸的輪廓
+let furGeo = null;
+const FUR_GEO = () => {
+  if (furGeo) return furGeo;
+  furGeo = new THREE.IcosahedronGeometry(1, 3); const p = furGeo.attributes.position, v = new THREE.Vector3();
+  for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p, i); const k = 1 + hash3(v.x * 9, v.y * 9, v.z * 9) * .32; p.setXYZ(i, v.x * k, v.y * k, v.z * k); }
+  furGeo.computeVertexNormals(); return furGeo;
+};
+// 傳說道具「四季金膠卷」：大四畢業展演完成後才出現。一圈發光底片環繞全身，
+// 四格一季（大一櫻粉、大二夏綠、大三楓橘、大四冬藍），頭後還有一枚緩緩轉動的金色片盤光環。
+let filmTex = null;
+function filmStripTexture() {
+  if (filmTex) return filmTex;
+  const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 128;
+  const g = cv.getContext('2d'), N = 16, fw = 1024 / N;
+  g.fillStyle = '#1d1714'; g.fillRect(0, 0, 1024, 128);
+  for (let i = 0; i < N; i++) {
+    const x = i * fw, y = 1 + (i / 4 | 0), base = Y[y].color;
+    for (let h = 0; h < 4; h++) { g.fillStyle = '#f7e6c4'; g.fillRect(x + 4 + h * fw / 4, 7, fw / 4 - 8, 12); g.fillRect(x + 4 + h * fw / 4, 109, fw / 4 - 8, 12); }
+    const gr = g.createLinearGradient(0, 28, 0, 100); gr.addColorStop(0, '#fff8e6'); gr.addColorStop(1, base);
+    g.fillStyle = gr; g.fillRect(x + 5, 28, fw - 10, 72);
+    g.fillStyle = 'rgba(255,255,255,.9)'; g.beginPath(); g.arc(x + fw * .7, 46, 7, 0, Math.PI * 2); g.fill();
+    g.fillStyle = 'rgba(43,38,34,.35)'; g.beginPath(); g.moveTo(x + 5, 100); g.quadraticCurveTo(x + fw * .35, 58 + (i % 3) * 6, x + fw - 5, 86); g.lineTo(x + fw - 5, 100); g.fill();
+  }
+  filmTex = new THREE.CanvasTexture(cv); filmTex.wrapS = THREE.RepeatWrapping; filmTex.anisotropy = 4;
+  return filmTex;
+}
+let haloTex = null;
+const haloSprite = () => {
+  if (!haloTex) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+    const g = cv.getContext('2d'), rg = g.createRadialGradient(64, 64, 4, 64, 64, 64);
+    rg.addColorStop(0, 'rgba(255,240,180,.95)'); rg.addColorStop(.4, 'rgba(255,214,110,.45)'); rg.addColorStop(1, 'rgba(255,200,90,0)');
+    g.fillStyle = rg; g.fillRect(0, 0, 128, 128); haloTex = new THREE.CanvasTexture(cv);
+  }
+  return new THREE.Sprite(new THREE.SpriteMaterial({ map: haloTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+};
+function filmHalo() {
+  const gm = gold(), r = .66;
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .22, 64, 1, true), new THREE.MeshBasicMaterial({ map: filmStripTexture(), side: THREE.DoubleSide, transparent: true, opacity: .95 }));
+  band.userData.noLine = true;
+  const rimA = mesh(new THREE.TorusGeometry(r, .014, 6, 64), gm, 0, .115, 0), rimB = mesh(new THREE.TorusGeometry(r, .014, 6, 64), gm, 0, -.115, 0);
+  rimA.rotation.x = rimB.rotation.x = Math.PI / 2;
+  const sparks = Array.from({ length: 7 }, (_, i) => { const a = i / 7 * Math.PI * 2, o = mesh(new THREE.OctahedronGeometry(.035), glow('#fff3a0'), Math.sin(a) * (r + .1), (i % 3 - 1) * .2, Math.cos(a) * (r + .1)); o.userData.ph = i; return o; });
+  const spin = G(band, rimA, rimB, ...sparks);
+  const orbit = G(spin); orbit.position.y = .82; orbit.rotation.set(.22, 0, -.12);
+  spin.userData.tick = t => { spin.rotation.y = t * .9; sparks.forEach(o => o.scale.setScalar(.6 + .6 * Math.abs(Math.sin(t * 3 + o.userData.ph)))); };
+  // 頭後的金色片盤
+  const holes = [0, 1, 2, 3, 4].map(i => { const a = i / 5 * Math.PI * 2; return R(Cy(.055, .055, .03, glow('#fff1c0'), Math.sin(a) * .15, Math.cos(a) * .15, 0, 12), Math.PI / 2, 0, 0); });
+  const reel = G(R(Cy(.27, .27, .025, gm, 0, 0, 0, 28), Math.PI / 2, 0, 0), R(To(.285, .022, gm, 0, 0, 0), 0, 0, 0), ...holes, R(Cy(.045, .045, .05, glow('#fff3a0'), 0, 0, 0, 12), Math.PI / 2, 0, 0));
+  reel.position.set(0, 1.5, -.52); reel.scale.setScalar(1.75);
+  reel.userData.tick = t => reel.rotation.z = t * .6;
+  const glowS = haloSprite(); glowS.scale.setScalar(1.9); glowS.position.set(0, 1.5, -.6); glowS.userData.noLine = true;
+  glowS.userData.tick = t => glowS.material.opacity = .65 + Math.sin(t * 2) * .2;
+  const g = G(orbit, reel, glowS); g.userData.noLine = true;
+  return g;
+}
 const SKIN = '#F2C9A0', HAIR = '#3A2A22';
 const GM = {
   beret: () => G(Sc(R(Sp(.31, '#2b2730', .04, .05, -.03, 14), 0, 0, .28), 1, .36, 1), Cy(.02, .02, .07, '#2b2730', .02, .14, -.02)),
@@ -354,7 +414,9 @@ const GM = {
   glasses: () => G(To(.075, .012, '#3a2a1e', -.11, 0, .03), To(.075, .012, '#3a2a1e', .11, 0, .03), B(.07, .012, .012, '#3a2a1e', 0, .01, .03)),
   sunglasses: () => G(B(.17, .1, .03, '#111', -.11, 0, .03), B(.17, .1, .03, '#111', .11, 0, .03), B(.07, .025, .02, '#111', 0, .03, .03), B(.05, .015, .005, '#fff', -.15, .025, .047)),
   vr: () => G(B(.48, .2, .17, '#2c2f36', 0, 0, .05), B(.42, .14, .01, glow('#5ff0ff'), 0, 0, .14), R(To(.34, .02, '#2c2f36', 0, 0, -.31), Math.PI / 2, 0, 0)),
-  headphones: c => G(To(.37, .03, '#333', 0, 0, 0, Math.PI), R(Cy(.11, .11, .08, c, -.37, -.02, 0), 0, 0, Math.PI / 2), R(Cy(.11, .11, .08, c, .37, -.02, 0), 0, 0, Math.PI / 2), R(Cy(.08, .08, .02, '#222', -.33, -.02, 0), 0, 0, Math.PI / 2), R(Cy(.08, .08, .02, '#222', .33, -.02, 0), 0, 0, Math.PI / 2)),
+  // 監聽耳機升級：軟墊頭帶＋雙層耳罩
+  headphones: c => G(To(.37, .03, '#333', 0, 0, 0, Math.PI), R(Sc(To(.36, .04, '#555', 0, .015, 0, Math.PI * .5), 1, 1, 1.2), 0, 0, Math.PI * .25),
+    ...[-1, 1].flatMap(sd => [R(Cy(.12, .12, .09, c, sd * .37, -.02, 0, 16), 0, 0, Math.PI / 2), R(To(.085, .035, '#222', sd * .33, -.02, 0), 0, Math.PI / 2, 0), R(Cy(.05, .05, .02, mat('#d8d8d8', { metalness: .6, roughness: .3 }), sd * .42, -.02, 0, 12), 0, 0, Math.PI / 2)])),
   headset: () => G(To(.36, .018, '#333', 0, 0, 0, Math.PI), R(Cy(.09, .09, .06, '#333', .36, -.02, 0), 0, 0, Math.PI / 2), R(Cy(.09, .09, .06, '#333', -.36, -.02, 0), 0, 0, Math.PI / 2), rod([.35, -.08, .04], [.12, -.16, .32], .012, '#333'), Sp(.035, '#222', .11, -.16, .33)),
   studentId: () => G(rod([-.11, .02, .1], [0, -.2, .17], .01, '#3D6DB5'), rod([.11, .02, .1], [0, -.2, .17], .01, '#3D6DB5'), B(.13, .17, .012, '#fff', 0, -.29, .17), B(.13, .04, .014, '#3D6DB5', 0, -.22, .17)),
   pass: () => G(rod([-.11, .02, .1], [0, -.2, .17], .01, '#E4572E'), rod([.11, .02, .1], [0, -.2, .17], .01, '#E4572E'), B(.14, .18, .012, '#F3C623', 0, -.3, .17), B(.12, .035, .014, '#1d1b22', 0, -.33, .17)),
@@ -371,12 +433,29 @@ const GM = {
   vest: () => G(B(.535, .48, .325, '#F28C28', 0, 0, 0), B(.54, .045, .33, mat('#e9eef2', { emissive: '#9aa8b5', emissiveIntensity: .3 }), 0, -.1, 0), B(.54, .045, .33, mat('#e9eef2', { emissive: '#9aa8b5', emissiveIntensity: .3 }), 0, .08, 0)),
   popcorn: () => G(Cy(.1, .075, .2, '#d94040', 0, .08, 0, 10), Cy(.102, .1, .05, '#fff', 0, .14, 0, 10), ...[[0, .21, 0], [.05, .2, .03], [-.05, .2, -.02], [.02, .22, -.05], [-.03, .21, .05]].map(p => Sp(.045, '#FFF1B8', ...p, 6))),
   camHand: () => G(B(.14, .14, .26, '#2b2d33', 0, .08, .05), R(Cy(.05, .062, .1, '#111', 0, .09, .23), Math.PI / 2, 0, 0), R(Cy(.042, .042, .01, glow('#7cc8ff'), 0, .09, .28), Math.PI / 2, 0, 0), B(.03, .03, .16, '#2b2d33', 0, .17, .03), Sp(.015, glow('#ff3b3b'), .05, .13, .17, 6)),
+  // 場記板升級：上下斜紋＋一排色條
   clapper: () => { const top = G(B(.29, .055, .03, '#fafafa', .145, 0, 0), ...[.04, .12, .2, .27].map(x => R(B(.03, .056, .032, '#1d1d1d', x, 0, 0), 0, 0, .5))); top.position.set(-.145, .255, .02); top.rotation.z = .3;
-    return G(B(.29, .21, .025, '#1d1d1d', 0, .12, .02), B(.26, .006, .027, '#fff', 0, .14, .02), B(.26, .006, .027, '#fff', 0, .08, .02), B(.006, .17, .027, '#fff', 0, .11, .02), B(.29, .04, .03, '#fafafa', 0, .23, .02), top); },
+    const bars = ['#E4572E', '#F3C623', '#3E9B57', '#2E86AB', '#7B61C9', '#D6457F'].map((c, i) => B(.042, .03, .028, c, -.105 + i * .042, .2, .021));
+    return G(B(.29, .21, .025, '#1d1d1d', 0, .12, .02), B(.26, .006, .027, '#fff', 0, .14, .02), B(.26, .006, .027, '#fff', 0, .08, .02), B(.006, .11, .027, '#fff', 0, .085, .02), ...bars, top); },
   megaphone: () => G(rod([0, 0, 0], [.2, .36, .0], .022, '#c33'), R(mesh(new THREE.ConeGeometry(.14, .32, 14, 1, true), mat('#f4f4f4', { side: THREE.DoubleSide }), .25, .38, 0), -Math.PI / 2, 0, 0), To(.14, .02, '#c33', .25, .38, .16)),
   walkie: () => G(B(.075, .17, .045, '#222', 0, .1, .02), Cy(.01, .01, .13, '#222', .02, .25, .02, 6), B(.05, .035, .005, glow('#9cff9c'), 0, .14, .046)),
-  camShoulder: () => G(B(.18, .23, .5, '#2b2d33', .07, .16, -.36), R(Cy(.075, .085, .18, '#111', .07, .17, -.03), Math.PI / 2, 0, 0), R(Cy(.065, .065, .01, glow('#7cc8ff'), .07, .17, .065), Math.PI / 2, 0, 0), B(.24, .2, .03, '#111', .07, .17, .09), R(Cy(.12, .12, .07, '#3b3e46', .07, .38, -.45), 0, 0, Math.PI / 2), B(.05, .05, .14, '#2b2d33', .07, .31, -.25)),
-  boom: () => G(rod([0, -.05, 0], [.35, .78, .8], .018, '#9aa0a8'), R(Cy(.075, .075, .32, '#8d8d8d', .37, .72, .86), Math.PI / 2, 0, 0), Sc(Sp(.08, '#9a9a9a', .37, .72, 1.02), 1, 1, .8)),
+  // 電影機升級：遮光斗、上方雙片匣、提把、側邊觀景器與跟焦輪
+  camShoulder: () => {
+    const dk = '#2b2d33', bk = '#16171b', metal = mat('#c9ccd3', { metalness: .55, roughness: .35 });
+    const reel = z => R(G(Cy(.135, .135, .07, dk, 0, 0, 0, 16), Cy(.05, .05, .075, metal, 0, 0, 0, 10), Cy(.1, .1, .074, bk, 0, 0, 0, 16)), 0, 0, Math.PI / 2);
+    const r1 = reel(), r2 = reel(); r1.position.set(.07, .42, -.25); r2.position.set(.07, .44, -.5);
+    return G(B(.18, .23, .5, dk, .07, .16, -.36), B(.19, .05, .42, bk, .07, .3, -.36), r1, r2,
+      R(Cy(.075, .085, .2, bk, .07, .17, -.02, 12), Math.PI / 2, 0, 0), R(Cy(.066, .066, .01, glow('#7cc8ff'), .07, .17, .085, 12), Math.PI / 2, 0, 0),
+      R(mesh(new THREE.CylinderGeometry(.17, .1, .13, 4, 1, true), mat(bk, { side: THREE.DoubleSide }), .07, .17, .16), Math.PI / 2, Math.PI / 4, 0),
+      R(Cy(.045, .045, .03, metal, -.03, .17, -.04, 14), 0, 0, Math.PI / 2), B(.05, .05, .2, bk, -.06, .25, -.5), R(Cy(.035, .045, .08, bk, -.06, .25, -.63, 10), Math.PI / 2, 0, 0),
+      rod([.07, .34, -.16], [.07, .34, -.5], .018, metal), Sp(.018, glow('#ff3b3b'), .165, .27, -.15, 6));
+  },
+  // 收音桿升級：毛茸茸的防風罩（死貓）＋握把與避震架
+  boom: () => {
+    const fur = FUR_GEO();
+    return G(rod([0, -.05, 0], [.35, .78, .8], .018, '#9aa0a8'), rod([.02, -.01, .05], [.08, .14, .19], .027, '#2b2b2b'),
+      R(To(.085, .012, '#2b2b2b', .33, .69, .78), .5, 0, 0), Sc(mesh(fur, '#a59a8e', .37, .72, .93), .1, .1, .22));
+  },
   brush: () => G(Cy(.012, .016, .2, '#2b2b2b', 0, .08, 0, 6), Cy(.02, .016, .04, '#c8c8c8', 0, .2, 0, 8), Sc(Sp(.04, '#EBA2B8', 0, .25, 0, 8), 1, 1.4, 1)),
   phone: () => G(B(.085, .16, .015, '#1d1d1d', 0, .11, .02), B(.07, .13, .002, glow('#ffb36b'), 0, .11, .029)),
   trophy: () => { const g = gold(); return G(B(.13, .05, .13, '#6b4a1d', 0, .02, 0), Cy(.022, .035, .09, g, 0, .09, 0, 8), Cy(.1, .045, .14, g, 0, .2, 0, 12), R(To(.045, .012, g, -.1, .21, 0), 0, Math.PI / 2, 0), R(To(.045, .012, g, .1, .21, 0), 0, Math.PI / 2, 0), Sp(.03, glow('#fff3a0'), 0, .3, 0, 6)); },
@@ -391,10 +470,18 @@ const GM = {
   briefcase: () => G(B(.3, .21, .08, '#2b2320', 0, -.14, 0), To(.045, .012, '#2b2320', 0, -.03, 0, Math.PI), B(.04, .025, .085, '#E8B923', 0, -.06, 0)),
   watch: () => G(B(.075, .03, .075, '#222'), Cy(.026, .026, .012, glow('#7fe3ff'), 0, .018, 0, 10)),
   chair: c => { const w = '#6b4a1d'; return G(rod([-.2, 0, -.15], [-.2, .45, .15], .018, w), rod([-.2, 0, .15], [-.2, .45, -.15], .018, w), rod([.2, 0, -.15], [.2, .45, .15], .018, w), rod([.2, 0, .15], [.2, .45, -.15], .018, w), B(.42, .03, .34, c, 0, .46, 0), B(.04, .03, .36, w, -.21, .62, 0), B(.04, .03, .36, w, .21, .62, 0), Cy(.015, .015, .5, w, -.21, .7, -.17, 6), Cy(.015, .015, .5, w, .21, .7, -.17, 6), B(.42, .17, .02, c, 0, .84, -.17), B(.3, .035, .022, '#fff', 0, .84, -.165)); },
-  drone: c => G(B(.2, .07, .2, '#eef2f6'), Sp(.04, glow('#5ff0ff'), 0, 0, .1, 8), rod([-.15, .02, -.15], [.15, .02, .15], .012, '#bbb'), rod([-.15, .02, .15], [.15, .02, -.15], .012, '#bbb'), ...[[-.15, -.15], [.15, .15], [-.15, .15], [.15, -.15]].map(([x, z]) => Cy(.075, .075, .01, '#333', x, .05, z, 10)), R(To(.22, .008, glow(c), 0, -.12, 0), Math.PI / 2, 0, 0)),
+  filmHalo,
+  // 無人機升級：四顆會轉的螺旋槳、雲台鏡頭
+  drone: c => {
+    const rotor = (x, z) => { const r = G(B(.16, .006, .025, '#333'), B(.025, .006, .16, '#333')); r.position.set(x, .055, z); r.userData.tick = t => r.rotation.y = t * 30; return r; };
+    return G(Sc(Sp(.11, '#eef2f6', 0, 0, 0, 12), 1.1, .45, 1.1), Sp(.045, '#2b2d33', 0, -.06, .05, 10), Sp(.022, glow('#5ff0ff'), 0, -.06, .09, 8),
+      rod([-.15, .02, -.15], [.15, .02, .15], .012, '#bbb'), rod([-.15, .02, .15], [.15, .02, -.15], .012, '#bbb'),
+      ...[[-.15, -.15], [.15, .15], [-.15, .15], [.15, -.15]].flatMap(([x, z]) => [Cy(.025, .025, .04, '#333', x, .03, z, 8), rotor(x, z)]),
+      Sp(.015, glow(c), .08, .01, .08, 6), Sp(.015, glow(c), -.08, .01, .08, 6), R(To(.22, .008, glow(c), 0, -.12, 0), Math.PI / 2, 0, 0));
+  },
 };
 const POSE = { megaphone: -1.3, camShoulder: -1.6, boom: -2.5, trophy: -2.7, brush: -.9, phone: -1.1, laptop: -1.0, briefcase: -.05, mask: -.75, clipboard: -.7, script: -.7, tablet: -.8, palette: -.75, storyboard: -.75, book: -.7, walkie: -.7, popcorn: -.6, clapper: -.75, camHand: -.8 };
-const ANCHOR = { head: [0, 1.7, 0], eyes: [0, 1.44, .31], ears: [0, 1.44, 0], neck: [0, 1.08, 0], back: [0, .85, -.17], belt: [0, .56, 0], body: [0, .8, 0], prop: [.9, 0, .05], pet: [-.72, 1.9, .15] };
+const ANCHOR = { aura: [0, 0, 0], head: [0, 1.7, 0], eyes: [0, 1.44, .31], ears: [0, 1.44, 0], neck: [0, 1.08, 0], back: [0, .85, -.17], belt: [0, .56, 0], body: [0, .8, 0], prop: [.9, 0, .05], pet: [-.72, 1.9, .15] };
 
 /* ───────────── 角色 ───────────── */
 function makeGlider() {
@@ -413,26 +500,79 @@ function makeGlider() {
   g.visible = false;
   return { g, strips };
 }
+// 角色用三階卡通光影（toon）＋細描邊，跟場景的低多邊形區隔開來，看起來像當代的 Q 版角色
+const TOON_GRAD = (() => {
+  const t = new THREE.DataTexture(new Uint8Array([120, 120, 120, 255, 195, 195, 195, 255, 255, 255, 255, 255]), 3, 1, THREE.RGBAFormat);
+  t.minFilter = t.magFilter = THREE.NearestFilter; t.generateMipmaps = false; t.needsUpdate = true; return t;
+})();
+const TMATS = new Map();
+const toon = c => { if (!TMATS.has(c)) TMATS.set(c, new THREE.MeshToonMaterial({ color: c, gradientMap: TOON_GRAD })); return TMATS.get(c); };
+const OUTLINE = (() => {
+  const m = new THREE.MeshBasicMaterial({ color: '#3b2b28', side: THREE.BackSide });
+  m.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <begin_vertex>', 'vec3 transformed = position + normal * .018;'); };
+  return m;
+})();
+// 背面外擴一層深色殼＝描邊；共用原本的幾何，不多佔記憶體
+function outline(root) {
+  const list = []; root.traverse(o => { if (o.isMesh && !o.userData.noLine && !o.userData.line && o.material !== OUTLINE) list.push(o); });
+  list.forEach(o => { const h = new THREE.Mesh(o.geometry, OUTLINE); h.userData.line = true; h.castShadow = false; o.add(h); });
+}
+const noLine = o => { o.userData.noLine = true; return o; };
 function buildCharacter() {
   const root = new THREE.Group();
-  const shirt = new THREE.MeshStandardMaterial({ color: '#F4F1EA', flatShading: true, roughness: .8 });
-  const shoe = new THREE.MeshStandardMaterial({ color: '#3b3b46', flatShading: true, roughness: .8 });
-  const stripeM = new THREE.MeshStandardMaterial({ color: '#E4572E', flatShading: true });
+  const tm = c => new THREE.MeshToonMaterial({ color: c, gradientMap: TOON_GRAD });
+  const shirt = tm('#F4F1EA'), trim = tm('#d9d3c7'), shoe = tm('#3b3b46');
+  const skin = toon(SKIN), hair = toon(HAIR), pants = toon('#3E5C8A'), sole = toon('#f3ead9'), stripeM = toon('#E4572E');
+  const T = (geo, m, x = 0, y = 0, z = 0) => { const o = new THREE.Mesh(geo, m); o.position.set(x, y, z); o.castShadow = true; o.receiveShadow = true; return o; };
+  const ball = (r, m, x, y, z, seg = 16) => T(new THREE.SphereGeometry(r, seg, Math.max(8, seg * .7 | 0)), m, x, y, z);
+  const tube = (rt, rb, h, m, x, y, z, seg = 14) => T(new THREE.CylinderGeometry(rt, rb, h, seg), m, x, y, z);
   const stripes = [];
-  const mkLeg = x => { const l = new THREE.Group(); l.position.set(x, .52, 0); const st = B(.185, .025, .2, stripeM, 0, -.47, .03); stripes.push(st);
-    l.add(B(.16, .42, .18, '#3E5C8A', 0, -.21, 0), B(.18, .1, .27, shoe, 0, -.47, .03), st); return l; };
+  const mkLeg = x => {
+    const l = new THREE.Group(); l.position.set(x, .52, 0);
+    const st = B(.215, .024, .2, stripeM, 0, -.435, .04); stripes.push(st);
+    l.add(ball(.085, pants, 0, -.02, 0, 12), tube(.083, .07, .36, pants, 0, -.2, 0), Sc(ball(.1, shoe, 0, -.44, .05, 16), 1.02, .72, 1.45), Sc(tube(.1, .1, .03, sole, 0, -.49, .05), 1.03, 1, 1.45), st);
+    return l;
+  };
   const legL = mkLeg(-.11), legR = mkLeg(.11);
-  root.add(legL, legR, B(.5, .56, .3, shirt, 0, .8, 0), Cy(.07, .08, .08, SKIN, 0, 1.11, 0, 8));
-  root.add(Sp(.33, SKIN, 0, 1.42, 0, 16), R(mesh(new THREE.SphereGeometry(.35, 16, 10, 0, Math.PI * 2, 0, Math.PI * .55), HAIR, 0, 1.43, -.01), -.32, 0, 0), B(.5, .28, .1, HAIR, 0, 1.36, -.25),
-    Sp(.042, '#1d1b22', -.11, 1.42, .3, 8), Sp(.042, '#1d1b22', .11, 1.42, .3, 8),
-    Sc(Sp(.05, '#f4a3a3', -.19, 1.34, .26, 8), 1, .6, .5), Sc(Sp(.05, '#f4a3a3', .19, 1.34, .26, 8), 1, .6, .5), B(.07, .018, .02, '#9b4a3a', 0, 1.3, .32));
-  const mkArm = (x, side) => { const a = new THREE.Group(); a.position.set(x, 1.04, 0); a.add(B(.12, .46, .13, shirt, 0, -.2, 0), Sp(.075, SKIN, 0, -.48, 0, 8)); a.rotation.set(-.45, 0, side * .12); return a; };
+  // 帽 T 身體：用車床曲線做出肩膀和腰身
+  const body = new THREE.LatheGeometry([[0, .47], [.2, .47], [.236, .52], [.25, .62], [.238, .78], [.25, .93], [.238, 1.0], [.19, 1.07], [.09, 1.1], [0, 1.11]].map(([r, y]) => new THREE.Vector2(r, y)), 22);
+  const torso = Sc(T(body, shirt), 1, 1, .64);
+  const hem = R(Sc(T(new THREE.TorusGeometry(.236, .03, 6, 22), trim, 0, .5, 0), 1, .64, 1), Math.PI / 2, 0, 0);
+  const pocket = Sc(T(new THREE.CylinderGeometry(.252, .258, .13, 10, 1, false, -.6, 1.2), trim, 0, .64, 0), 1, 1, .68);
+  const hood = Sc(ball(.17, trim, 0, 1.03, -.13, 14), 1.35, .62, .85);
+  const strings = [-.055, .055].map(x => G(rod([x, 1.05, .12], [x * 1.2, .9, .155], .007, trim), noLine(ball(.016, trim, x * 1.2, .89, .156, 6))));
+  root.add(legL, legR, torso, hem, pocket, hood, ...strings, tube(.066, .072, .1, skin, 0, 1.1, 0, 10));
+  // 頭：大眼睛、亮點、眉毛、微笑和腮紅
+  const face = [], shine = mat('#ffffff', { emissive: '#ffffff', emissiveIntensity: .6 });
+  [-1, 1].forEach(sd => {
+    const x = sd * .118;
+    face.push(Sc(ball(.054, toon('#2a1f24'), x, 1.415, .3, 14), 1, 1.35, .55),
+      ball(.019, shine, x + .02, 1.448, .328, 8), ball(.009, shine, x - .014, 1.39, .33, 6),
+      R(B(.085, .017, .02, hair, x, 1.525, .3), 0, 0, -sd * .12),
+      Sc(ball(.05, toon('#f4a3a3'), sd * .205, 1.345, .265, 10), 1, .55, .4));
+  });
+  face.push(R(T(new THREE.TorusGeometry(.034, .009, 5, 12, Math.PI), toon('#8a3f33'), 0, 1.318, .322), 0, 0, Math.PI));
+  face.forEach(noLine);
+  const head = ball(.345, skin, 0, 1.43, 0, 26);
+  const ears = [-1, 1].map(sd => Sc(ball(.07, skin, sd * .33, 1.41, 0, 10), .6, 1, .9));
+  const hairCap = R(T(new THREE.SphereGeometry(.372, 24, 14, 0, Math.PI * 2, 0, Math.PI * .54), hair, 0, 1.44, -.015), -.32, 0, 0);
+  const hairBack = Sc(ball(.345, hair, 0, 1.38, -.085, 18), 1.04, .96, .92);
+  const fringe = [-2, -1, 0, 1, 2].map(i => R(Sc(ball(.1, hair, i * .1, 1.635 - Math.abs(i) * .035, .235 - Math.abs(i) * .04, 10), 1, .72, .62), 0, 0, -i * .28));
+  const locks = [-1, 1].map(sd => R(Sc(ball(.085, hair, sd * .305, 1.36, .07, 10), .55, 1.45, .8), 0, 0, sd * .15));
+  const ahoge = G(R(Co(.035, .2, hair, .02, 1.86, -.02, 6), 0, 0, -.55), R(Co(.025, .14, hair, .09, 1.93, -.02, 6), 0, 0, -1.4));
+  root.add(head, ...ears, hairCap, hairBack, ...fringe, ...locks, ahoge, ...face);
+  // 手臂：肩、袖、袖口、手掌（長度維持 .48，道具掛點不變）
+  const mkArm = (x, side) => {
+    const a = new THREE.Group(); a.position.set(x, 1.02, 0);
+    a.add(ball(.082, shirt, 0, 0, 0, 12), tube(.072, .062, .34, shirt, 0, -.19, 0), tube(.066, .066, .045, trim, 0, -.37, 0), Sc(ball(.07, skin, 0, -.45, 0, 12), .95, 1.08, .9), ball(.03, skin, side * -.05, -.42, .04, 8));
+    a.rotation.set(-.45, 0, side * .12); return a;
+  };
   const armR = mkArm(-.31, -1), armL = mkArm(.31, 1);
   root.add(armR, armL);
+  outline(root);
   const gear = new THREE.Group(); root.add(gear);
   const glider = makeGlider(); root.add(glider.g);
-  root.traverse(o => { if (o.isMesh) o.castShadow = true; });
-  return { root, shirt, shoe, stripes, armR, armL, legL, legR, gear, glider };
+  return { root, shirt, trim, shoe, stripes, armR, armL, legL, legR, gear, glider, ahoge, ticks: [] };
 }
 const handPos = (arm, len = .48) => new THREE.Vector3(0, -len, 0).applyEuler(arm.rotation).add(arm.position);
 
@@ -459,6 +599,9 @@ function dress(ch, look, done) {
   ch.gear.clear();
   const col = primary ? ROLE[primary].color : '#E4572E';
   ch.shirt.color.set(primary ? mix(col, '#ffffff', .18) : '#F4F1EA');
+  ch.trim.color.set(primary ? mix(col, '#2b2622', .28) : '#d9d3c7');
+  ch.ahoge.visible = !items.some(i => i.slot === 'head');
+  ch.ticks = [];
   ch.glider.strips.forEach((m, i) => m.color.set(i % 2 ? '#fffaf1' : col));
   ch.armR.rotation.x = -.45; ch.armL.rotation.x = -.45;
   const sneakers = items.some(i => i.m === 'sneakers');
@@ -474,17 +617,216 @@ function dress(ch, look, done) {
     } else if (it.slot === 'wrist') o.position.copy(handPos(ch.armL, .4));
     else o.position.set(...ANCHOR[it.slot]);
     if (it.slot === 'pet') o.userData.bob = true;
-    o.traverse(m => { if (m.isMesh) m.castShadow = true; });
+    if (it.slot === 'head') o.scale.multiplyScalar(1.07);
+    o.traverse(m => { if (m.isMesh) m.castShadow = true; if (m.userData.tick) ch.ticks.push(m); });
+    if (!o.userData.noLine) outline(o);
     ch.gear.add(o);
   });
   return primary;
 }
 
-/* ───────────── 海洋 ───────────── */
-const waterGeo = new THREE.PlaneGeometry(400, 400, 96, 96); waterGeo.rotateX(-Math.PI / 2);
-const water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: '#63BCD0', flatShading: true, roughness: .35, metalness: .05, transparent: true, opacity: .93 }));
-water.receiveShadow = true; scene.add(water);
-const wPos = waterGeo.attributes.position, wBase = Float32Array.from(wPos.array);
+
+/* ───────────── 天空之城：天幕、雲海、巨型摩天輪 ─────────────
+ * 全部是程式產生的幾何與小著色器，不另外下載圖片；雲、輪輻、車廂都用 InstancedMesh 一次畫完。 */
+const SKY = new THREE.Mesh(new THREE.SphereGeometry(420, 32, 16), new THREE.ShaderMaterial({
+  side: THREE.BackSide, depthWrite: false,
+  uniforms: { top: { value: new THREE.Color('#5f9ee6') }, mid: { value: new THREE.Color('#b9dcf6') }, hor: { value: new THREE.Color('#fde3d3') }, low: { value: new THREE.Color('#9ebbe6') } },
+  vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+  fragmentShader: `uniform vec3 top, mid, hor, low; varying vec3 vP;
+    void main(){ float h = vP.y;
+      vec3 up = mix(mid, top, smoothstep(.12, .75, h));
+      vec3 c = h > 0. ? mix(hor, up, smoothstep(0., .2, h)) : mix(hor, low, smoothstep(0., .45, -h));
+      gl_FragColor = vec4(c, 1.); }`,
+}));
+SKY.renderOrder = -1; scene.add(SKY);
+
+const dotTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const g = cv.getContext('2d'), rg = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  rg.addColorStop(0, 'rgba(255,255,255,1)'); rg.addColorStop(.35, 'rgba(255,248,220,.75)'); rg.addColorStop(1, 'rgba(255,240,200,0)');
+  g.fillStyle = rg; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(cv);
+})();
+
+// 雲：一團由幾顆圓球組成，整片雲海只用一個 InstancedMesh
+const CLOUD_GEO = new THREE.IcosahedronGeometry(1, 2);
+const CLOUD_MAT = new THREE.MeshLambertMaterial({ color: '#ffffff', emissive: '#d9d1f0', emissiveIntensity: .32 });
+function cloudLayer(groups) {
+  const puffs = groups.flatMap(([x, y, z, size, n = 5, r]) => {
+    const rnd = r || Math.random, out = [];
+    for (let i = 0; i < n; i++) {
+      const a = rnd() * Math.PI * 2, d = rnd() * size * .9, s = size * (.45 + rnd() * .55);
+      out.push([x + Math.cos(a) * d, y + rnd() * size * .25, z + Math.sin(a) * d * .7, s]);
+    }
+    return out;
+  });
+  const im = new THREE.InstancedMesh(CLOUD_GEO, CLOUD_MAT, puffs.length), m4 = new THREE.Matrix4();
+  puffs.forEach(([x, y, z, s], i) => { m4.makeScale(s, s * .62, s); m4.setPosition(x, y, z); im.setMatrixAt(i, m4); });
+  return im;
+}
+const cRnd = rng(7), ringPos = (rMin, rMax) => { const a = cRnd() * Math.PI * 2, d = Math.sqrt(rMin * rMin + cRnd() * (rMax * rMax - rMin * rMin)); return [Math.sin(a) * d, Math.cos(a) * d]; };
+const WHEEL_AT = new THREE.Vector3(3, -33, -132);
+// 遠方雲海＋摩天輪腳下的雲堤
+scene.add(cloudLayer([
+  ...Array.from({ length: 95 }, () => { const [x, z] = ringPos(18, 230); return [x, -22 - cRnd() * 4, z, 5 + cRnd() * 6, 5, cRnd]; }),
+  ...Array.from({ length: 30 }, (_, i) => [WHEEL_AT.x - 56 + (i % 15) * 8 + cRnd() * 3, WHEEL_AT.y - 14 + cRnd() * 6 + (i < 15 ? 0 : 3), WHEEL_AT.z + (i < 15 ? 6 : 20) + cRnd() * 8, 8 + cRnd() * 5, 6, cRnd]),
+]));
+// 島下飄過的雲絲（慢慢繞著轉）
+const WISPS = cloudLayer(Array.from({ length: 16 }, () => { const [x, z] = ringPos(10, 46); return [x, -4.5 - cRnd() * 4, z, 1.4 + cRnd() * 1.8, 4, cRnd]; }));
+scene.add(WISPS);
+
+// 巨型摩天輪：從雲海裡穿出來，慢慢轉；車廂是四季色
+const WHEEL = (() => {
+  const R = 34, N = 32, W = 2;
+  const g = new THREE.Group(), wheel = new THREE.Group(); g.add(wheel);
+  const steel = new THREE.MeshLambertMaterial({ color: '#fbf6ef', emissive: '#9a9ec0', emissiveIntensity: .22 });
+  const up = new THREE.Vector3(0, 1, 0), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  const strutGeo = new THREE.CylinderGeometry(.16, .16, 1, 5); strutGeo.translate(0, .5, 0);
+  function struts(pairs, material) {
+    const im = new THREE.InstancedMesh(strutGeo, material, pairs.length);
+    pairs.forEach(([a, b], i) => { const d = b.clone().sub(a); q.setFromUnitVectors(up, d.clone().normalize()); sc.set(1, d.length(), 1); m4.compose(a, q, sc); im.setMatrixAt(i, m4); });
+    return im;
+  }
+  [-W, W].forEach(z => {
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(R, .42, 6, 128), steel); rim.position.z = z;
+    const inner = new THREE.Mesh(new THREE.TorusGeometry(R * .3, .32, 6, 48), steel); inner.position.z = z * .7;
+    wheel.add(rim, inner);
+  });
+  const V = (a, r, z) => new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, z), pairs = [];
+  for (let i = 0; i < N; i++) {
+    const a = i / N * Math.PI * 2, b = (i + 1) / N * Math.PI * 2;
+    [-W, W].forEach(z => { pairs.push([V(a, 0, z * .3), V(a, R, z)], [V(a, R * .3, z * .7), V(b, R, z)]); });
+    pairs.push([V(a, R, -W), V(a, R, W)]);
+  }
+  wheel.add(struts(pairs, steel));
+  // 輪框上的燈泡
+  const bulbs = [];
+  [-W, W].forEach(z => { for (let i = 0; i < 160; i++) { const a = i / 160 * Math.PI * 2; bulbs.push(Math.cos(a) * R, Math.sin(a) * R, z); } });
+  for (let i = 0; i < N; i++) for (let k = 1; k < 6; k++) { const a = i / N * Math.PI * 2, r = R * (.3 + k * .14); bulbs.push(Math.cos(a) * r, Math.sin(a) * r, W * .85); }
+  const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.Float32BufferAttribute(bulbs, 3));
+  wheel.add(new THREE.Points(bg, new THREE.PointsMaterial({ color: '#fff0c4', size: 1.5, map: dotTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending })));
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, W * 2.6, 16), new THREE.MeshLambertMaterial({ color: '#efe3d2' })); hub.rotation.x = Math.PI / 2; g.add(hub);
+  const star = new THREE.Mesh(new THREE.CircleGeometry(1.9, 6), new THREE.MeshBasicMaterial({ color: '#ffd76a' })); star.position.z = W * 1.31; g.add(star);
+  // A 字支架一路插進雲海
+  const foot = -R - 30;
+  g.add(struts([[V(0, 0, -W * 1.3), new THREE.Vector3(-R * .62, foot, -9)], [V(0, 0, -W * 1.3), new THREE.Vector3(R * .62, foot, -9)],
+    [V(0, 0, W * 1.3), new THREE.Vector3(-R * .62, foot, 9)], [V(0, 0, W * 1.3), new THREE.Vector3(R * .62, foot, 9)],
+    [new THREE.Vector3(-R * .31, foot / 2, W * 1.3 + 3.8), new THREE.Vector3(R * .31, foot / 2, W * 1.3 + 3.8)],
+    [new THREE.Vector3(-R * .31, foot / 2, -W * 1.3 - 3.8), new THREE.Vector3(R * .31, foot / 2, -W * 1.3 - 3.8)]].map(([a, b]) => [a, b]),
+    new THREE.MeshLambertMaterial({ color: '#f3ece4', emissive: '#9a9ec0', emissiveIntensity: .2 })));
+  // 車廂：吊在輪框下、永遠保持直立
+  const cabGeo = new THREE.SphereGeometry(1.35, 14, 10); cabGeo.scale(1, 1.12, .95);
+  const winGeo = new THREE.CylinderGeometry(1.39, 1.39, .62, 14);
+  const cabs = new THREE.InstancedMesh(cabGeo, new THREE.MeshLambertMaterial({ color: '#ffffff' }), N);
+  const wins = new THREE.InstancedMesh(winGeo, new THREE.MeshBasicMaterial({ color: '#fff3cf' }), N);
+  const rods = new THREE.InstancedMesh(strutGeo, steel, N);
+  const col = new THREE.Color();
+  for (let i = 0; i < N; i++) cabs.setColorAt(i, col.set(Y[1 + i % 4].color));
+  g.add(cabs, wins, rods);
+  g.position.copy(WHEEL_AT); g.rotation.y = .32;
+  const pos = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1), qi = new THREE.Quaternion();
+  function tick(t) {
+    const spin = t * .028; wheel.rotation.z = spin;
+    for (let i = 0; i < N; i++) {
+      const a = i / N * Math.PI * 2 + spin, x = Math.cos(a) * R, y = Math.sin(a) * R;
+      const sway = Math.sin(t * .9 + i) * .04; qi.setFromAxisAngle(new THREE.Vector3(0, 0, 1), sway);
+      pos.set(x, y - 2.3, 0); m4.compose(pos, qi, one); cabs.setMatrixAt(i, m4); wins.setMatrixAt(i, m4);
+      pos.set(x, y - 1.25, 0); sc.set(1, 1.25, 1); m4.compose(pos, qi, sc); rods.setMatrixAt(i, m4);
+    }
+    cabs.instanceMatrix.needsUpdate = wins.instanceMatrix.needsUpdate = rods.instanceMatrix.needsUpdate = true;
+  }
+  tick(0);
+  scene.add(g);
+  return { g, tick };
+})();
+
+// 空中的光點與繞島飛行的白鳥
+const MOTES = (() => {
+  const n = 160, a = new Float32Array(n * 3), r = rng(11);
+  for (let i = 0; i < n; i++) { const d = 6 + r() * 48, an = r() * Math.PI * 2; a.set([Math.sin(an) * d, -6 + r() * 20, Math.cos(an) * d], i * 3); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(a, 3));
+  const p = new THREE.Points(g, new THREE.PointsMaterial({ color: '#fff4cf', size: .42, map: dotTex, transparent: true, opacity: .85, depthWrite: false, blending: THREE.AdditiveBlending }));
+  scene.add(p); return p;
+})();
+const BIRDS = Array.from({ length: 7 }, (_, i) => {
+  const wm = mat('#fffaf1'), tip = mat('#c9c3d8');
+  const wing = s => { const w = G(B(.62, .03, .2, wm, s * .31, 0, 0), B(.22, .032, .14, tip, s * .7, 0, -.02)); return w; };
+  const L = wing(-1), Rw = wing(1), body = Sc(Sp(.13, wm, 0, 0, 0, 8), .8, .7, 1.8);
+  const b = G(body, L, Rw); b.traverse(o => { if (o.isMesh) o.castShadow = false; });
+  b.userData = { L, R: Rw, r: 30 + (i % 3) * 6 + i, h: 11 + (i % 4) * 1.6, sp: .07 + (i % 2) * .02, ph: i * .35 + (i > 3 ? 2.6 : 0) };
+  scene.add(b); return b;
+});
+function skyFrame(t) {
+  SKY.position.copy(camera.position);
+  WISPS.rotation.y = t * .012;
+  MOTES.rotation.y = t * .02; MOTES.position.y = Math.sin(t * .4) * .4;
+  WHEEL.tick(t);
+  FALL_MAT.uniforms.t.value = t;
+  BIRDS.forEach(b => {
+    const u = b.userData, a = u.ph + t * u.sp;
+    b.position.set(Math.sin(a) * u.r, u.h + Math.sin(t * .8 + u.ph) * .6, Math.cos(a) * u.r);
+    b.rotation.y = a + Math.PI / 2;
+    const f = Math.sin(t * 7 + u.ph * 3) * .55; u.L.rotation.z = -f; u.R.rotation.z = f;
+  });
+  FLOATERS.forEach(o => { o.position.y = o.userData.y + Math.sin(t * .9 + o.userData.ph) * .18; o.rotation.y = t * .15 + o.userData.ph; });
+}
+
+/* ───────────── 浮空島底：分層岩體、垂藤、瀑布 ───────────── */
+const hash3 = (x, y, z) => { const v = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453; return v - Math.floor(v); };
+const ROCK_MAT = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: .95 });
+const ROCK_BANDS = ['#c99a62', '#b0825a', '#94735f', '#7f6b78', '#6d6787', '#605d80'].map(c => new THREE.Color(c));
+function floatingRock(r, depth, seed) {
+  const geo = new THREE.ConeGeometry(r, depth, 12, 6);
+  geo.rotateX(Math.PI); geo.translate(0, -depth / 2, 0);
+  const p = geo.attributes.position, col = new Float32Array(p.count * 3);
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), k = -y / depth;
+    const h1 = hash3(x * 3.1 + seed, y * 2.3, z * 3.7), h2 = hash3(z * 2.9, x * 1.7 + seed, y * 4.1);
+    if (k > .02) { const s = 1 + (h1 - .5) * .42 * (1 - k * .3); p.setX(i, x * s); p.setZ(i, z * s); p.setY(i, y + (h2 - .5) * depth * .1); }
+    const b = ROCK_BANDS[Math.max(0, Math.min(ROCK_BANDS.length - 1, Math.floor(k * ROCK_BANDS.length + (h2 - .5) * .9)))];
+    col[i * 3] = b.r; col[i * 3 + 1] = b.g; col[i * 3 + 2] = b.b;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, ROCK_MAT); m.receiveShadow = true;
+  return m;
+}
+const FALL_MAT = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, side: THREE.DoubleSide, uniforms: { t: { value: 0 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+  fragmentShader: `uniform float t; varying vec2 vUv;
+    void main(){ float x = vUv.x;
+      float edge = smoothstep(0., .2, x) * smoothstep(1., .8, x);
+      float streak = .5 + .5 * sin(x * 31. + sin(x * 9.) * 2.) * sin(vUv.y * 7. + t * 2.4 + x * 8.);
+      float foam = smoothstep(.8, 1., sin(vUv.y * 24. + t * 10. + x * 13.));
+      vec3 c = mix(vec3(.6, .83, .97), vec3(1.), streak * .55 + foam * .35);
+      gl_FragColor = vec4(c, edge * smoothstep(0., .5, vUv.y) * (.7 + .25 * streak)); }`,
+});
+const FLOATERS = [];
+// 島的外緣：草皮唇＋倒錐岩體，少數島有瀑布從外側落下
+function skyIslandBase(grp, maxD, seed, opts = {}) {
+  const r = maxD + 1.45;
+  const lip = new THREE.Mesh(new THREE.CylinderGeometry(r, r - .2, .55, 24), [mat('#a87a4f'), mat(opts.top || '#62a447'), mat('#a87a4f')]);
+  lip.position.y = -.14; lip.receiveShadow = true; grp.add(lip);
+  const depth = r * 1.05 + 1.8, rock = floatingRock(r - .2, depth, seed);
+  rock.position.y = -.42; rock.scale.z = .92; grp.add(rock);
+  const rr = rng(seed * 13 + 5);
+  for (let i = 0; i < 6; i++) {
+    const a = rr() * Math.PI * 2, L = .8 + rr() * 2.2, x = Math.sin(a) * (r - .35), z = Math.cos(a) * (r - .35);
+    grp.add(Cy(.035, .02, L, '#5d9a4c', x, -.42 - L / 2, z, 4), Sp(.09, '#79b85c', x, -.42 - L, z, 5));
+  }
+  if (opts.fall) {
+    const H = depth * .75, fall = new THREE.Mesh(new THREE.PlaneGeometry(1.1, H), FALL_MAT);
+    fall.position.set(0, .1 - H / 2, r + .06); grp.add(fall);
+    grp.add(B(1.1, .06, .7, '#8fd0f0', 0, .14, r - .3));
+    [-.4, .1, .45].forEach((x, i) => { const puff = Sp(.38 + i * .08, CLOUD_MAT, x, .1 - H - .1, r + .3, 10); puff.castShadow = false; grp.add(puff); });
+  }
+  // 幾塊小浮石在島邊上下漂
+  for (let i = 0; i < 2 + (rr() < .5 ? 1 : 0); i++) {
+    const a = rr() * Math.PI * 2, d = r + 1 + rr() * 1.8, s = .35 + rr() * .45;
+    const f = G(floatingRock(s, s * 1.6, seed + i), Cy(s, s * .9, .16, '#62a447', 0, .02, 0, 7));
+    f.position.set(Math.sin(a) * d, -.8 - rr() * 1.4, Math.cos(a) * d);
+    f.userData = { y: f.position.y, ph: rr() * 6 }; grp.add(f); FLOATERS.push(f);
+  }
+}
 
 /* ───────────── 系徽貼圖 ───────────── */
 const TEX = {};
@@ -557,27 +899,64 @@ function graduationHall() {
   return { g, grad: { cupParts, crown, halo, gates } };
 }
 
+// 建築：統一用奶油牆、石基座、木作門窗，屋頂出簷、兩層屋瓦做出厚度，再依類型加一個招牌細節
+const WALL = '#fbf3e4', WOOD = '#8a5a3b', STONE = '#d6c4a6', INK = '#2b2622';
+const glass = () => mat('#cfe8f6', { emissive: '#8fc4e4', emissiveIntensity: .35, roughness: .3 });
+function gableRoof(len, depth, h, c, y, z = 0) {
+  const geo = new THREE.ExtrudeGeometry(new THREE.Shape([new THREE.Vector2(-depth / 2, 0), new THREE.Vector2(depth / 2, 0), new THREE.Vector2(0, h)]), { depth: len, bevelEnabled: false });
+  geo.translate(0, 0, -len / 2); geo.rotateY(Math.PI / 2);
+  return mesh(geo, c, 0, y, z);
+}
+// 兩層屋頂：下層深色當屋簷厚度
+const roof2 = (len, depth, h, c, y, z = 0) => [gableRoof(len + .06, depth + .08, h + .03, mix(c, INK, .3), y - .03, z), gableRoof(len, depth, h, c, y, z)];
+const win = (x, y, z, w = .12, h = .12) => [B(w + .035, h + .035, .02, WOOD, x, y, z), B(w, h, .026, glass(), x, y, z + .004)];
 function building(c) {
   const g0 = gearOf(c.id);
   const col = g0.role ? ROLE[g0.role].color : c.cat === 'gen' ? '#7C93AE' : '#5F86AE';
-  const wall = '#FBF6EC';
+  const dark = mix(col, INK, .3);
   let g, grad = null;
   if (c.gate) {
-    g = G(Cy(.06, .07, .75, col, -.3, .37, 0, 8), Cy(.06, .07, .75, col, .3, .37, 0, 8), B(.85, .09, .12, col, 0, .76, 0), B(.66, .06, .1, col, 0, .62, 0), B(.3, .16, .02, '#fff', 0, .48, .06));
+    const gm = gold();
+    g = G(...[-1, 1].flatMap(sd => [B(.17, .08, .17, STONE, sd * .3, .04, 0), Cy(.055, .065, .68, col, sd * .3, .42, 0, 10), Sp(.065, gm, sd * .3, .8, 0, 10)]),
+      B(.94, .075, .14, dark, 0, .83, 0), B(.76, .05, .1, col, 0, .68, 0), B(.36, .21, .02, gm, 0, .5, .03), B(.32, .17, .025, '#fffaf1', 0, .5, .04));
   } else if (c.id === 'A19034') {
     const hall = graduationHall(); g = hall.g; grad = hall.grad;
   } else if (c.cat === 'req') {
-    const roof = new THREE.CylinderGeometry(.36, .36, .88, 10, 1, false, 0, Math.PI); roof.rotateZ(Math.PI / 2);
-    g = G(B(.86, .42, .72, wall, 0, .21, 0), mesh(roof, col, 0, .42, 0), B(.3, .3, .02, col, 0, .15, .365), B(.5, .05, .02, '#2b2622', 0, .36, .365));
-  } else if (c.cat === 'gen' || c.cat === 'col' || c.cat === 'cole') {
-    const roof = c.cat === 'gen' ? (() => { const r = new THREE.CylinderGeometry(.44, .44, .76, 3); r.rotateZ(Math.PI / 2); r.rotateX(-Math.PI / 2); return mesh(r, col, 0, .64, 0); })() : R(Co(.56, .42, col, 0, .63, 0, 4), 0, Math.PI / 4, 0);
-    g = G(B(.7, .42, .56, wall, 0, .21, 0), roof, B(.18, .26, .02, col, 0, .13, .285), B(.14, .12, .02, '#bfe0f0', -.2, .26, .285), B(.14, .12, .02, '#bfe0f0', .2, .26, .285));
+    // 系必修＝片廠攝影棚：拱頂、拱肋、大推門、門楣上的發光跑馬燈
+    const vault = new THREE.CylinderGeometry(.37, .37, .86, 14, 1, false, 0, Math.PI); vault.rotateZ(Math.PI / 2);
+    g = G(B(.92, .07, .8, STONE, 0, .035, 0), B(.82, .34, .68, WALL, 0, .24, 0), mesh(vault, col, 0, .41, 0),
+      ...[-.3, 0, .3].map(x => R(To(.375, .02, dark, x, .41, 0, Math.PI), 0, Math.PI / 2, 0)),
+      B(.36, .27, .03, dark, 0, .2, .34), B(.02, .27, .035, WALL, 0, .2, .345), B(.46, .06, .04, glow('#fff1c0'), 0, .38, .35),
+      ...win(.32, .26, .34, .08, .1));
+  } else if (c.cat === 'gen') {
+    // 通識＝小木屋：出簷屋頂、紅磚煙囪、門上小雨遮
+    g = G(B(.76, .07, .62, STONE, 0, .035, 0), B(.64, .36, .5, WALL, 0, .25, 0), ...roof2(.74, .62, .3, col, .43),
+      B(.09, .22, .09, '#b4664a', .19, .62, -.1), B(.11, .03, .11, '#8f4c36', .19, .735, -.1),
+      B(.15, .23, .03, WOOD, 0, .185, .26), R(B(.22, .02, .11, dark, 0, .33, .3), .35, 0, 0), ...win(-.2, .28, .255), ...win(.2, .28, .255));
+  } else if (c.cat === 'col' || c.cat === 'cole') {
+    // 院課＝小學院：台階、兩根柱子撐起山牆門廊、四角攢尖頂
+    g = G(B(.8, .07, .66, STONE, 0, .035, 0), B(.36, .04, .14, STONE, 0, .09, .36), B(.66, .38, .5, WALL, 0, .26, 0),
+      R(Co(.52, .34, dark, 0, .6, 0, 4), 0, Math.PI / 4, 0), R(Co(.48, .32, col, 0, .63, 0, 4), 0, Math.PI / 4, 0),
+      ...[-.13, .13].map(x => Cy(.03, .034, .34, '#fffaf1', x, .27, .33, 8)), gableRoof(.34, .32, .14, col, .44, .3),
+      B(.14, .22, .03, WOOD, 0, .18, .255), ...win(-.21, .3, .255, .1, .14), ...win(.21, .3, .255, .1, .14));
   } else {
     const kind = { cam: 'tower', pro: 'tower', snd: 'dome', edt: 'dome' }[g0.role] || 'house';
-    if (kind === 'tower') g = G(B(.5, .86, .5, wall, 0, .43, 0), B(.58, .1, .58, col, 0, .91, 0), B(.36, .08, .02, '#bfe0f0', 0, .62, .255), B(.36, .08, .02, '#bfe0f0', 0, .42, .255), B(.2, .24, .02, col, 0, .12, .255), g0.role === 'cam' ? R(Cy(.1, .12, .18, '#2b2d33', 0, .75, .3, 10), Math.PI / 2, 0, 0) : Cy(.015, .015, .4, '#999', .15, 1.15, 0, 6));
-    else if (kind === 'dome') g = G(Cy(.4, .44, .34, wall, 0, .17, 0, 12), Hemi(.4, col, 0, .34, 0), B(.2, .22, .02, col, 0, .11, .43), Cy(.012, .012, .35, '#888', 0, .9, 0, 6), Sp(.04, glow(col), 0, 1.08, 0, 8));
-    else { const r = new THREE.CylinderGeometry(.44, .44, .76, 3); r.rotateZ(Math.PI / 2); r.rotateX(-Math.PI / 2);
-      g = G(B(.7, .44, .54, wall, 0, .22, 0), mesh(r, col, 0, .66, 0), B(.18, .26, .02, col, 0, .13, .275), B(.14, .12, .02, '#bfe0f0', -.2, .28, .275), B(.14, .12, .02, '#bfe0f0', .2, .28, .275)); }
+    if (kind === 'tower') g = G(B(.6, .09, .6, STONE, 0, .045, 0), B(.46, .8, .46, WALL, 0, .49, 0), B(.48, .04, .48, col, 0, .56, 0),
+      B(.56, .07, .56, col, 0, .92, 0), B(.5, .05, .5, dark, 0, .98, 0), B(.08, .5, .026, glass(), -.12, .5, .232), B(.08, .5, .026, glass(), .12, .5, .232),
+      B(.18, .22, .03, WOOD, 0, .2, .235),
+      ...(g0.role === 'cam' ? [R(Cy(.11, .13, .2, '#2b2d33', 0, 1.13, .02, 12), Math.PI / 2, 0, 0), R(Cy(.085, .085, .01, glow('#7cc8ff'), 0, 1.13, .125, 12), Math.PI / 2, 0, 0), B(.16, .1, .1, '#2b2d33', 0, 1.1, -.12)]
+        : [Cy(.014, .014, .45, '#9aa0a8', .14, 1.2, .1, 6), Sp(.035, glow('#ff6b5b'), .14, 1.43, .1, 6), B(.16, .1, .01, col, .22, 1.34, .1)]));
+    else if (kind === 'dome') g = G(Cy(.48, .5, .08, STONE, 0, .04, 0, 16), Cy(.4, .42, .32, WALL, 0, .24, 0, 16), Cy(.415, .415, .04, col, 0, .4, 0, 16),
+      Hemi(.39, col, 0, .42, 0), Cy(.06, .07, .1, WALL, 0, .84, 0, 8), Co(.085, .12, dark, 0, .95, 0, 8), Sp(.035, glow('#fff1c0'), 0, 1.03, 0, 8),
+      B(.15, .21, .03, WOOD, 0, .18, .41), ...[-.9, .9].flatMap(a => win(Math.sin(a) * .41, .27, Math.cos(a) * .41, .08, .1).map(o => R(o, 0, a, 0))),
+      ...(g0.role === 'snd' ? [R(Hemi(.13, '#eef2f6', .28, .62, .1), -1, 0, -.6)] : [Cy(.012, .012, .3, '#9aa0a8', -.2, .75, -.1, 6), Sp(.03, glow(col), -.2, .9, -.1, 6)]));
+    else {
+      // 職務選修的小洋房：陡屋頂、二樓凸窗、門口條紋雨棚、山牆小圓窗
+      g = G(B(.7, .07, .6, STONE, 0, .035, 0), B(.58, .5, .48, WALL, 0, .32, 0), ...roof2(.66, .58, .36, col, .57),
+        R(Cy(.055, .055, .03, glass(), 0, .7, .24, 12), Math.PI / 2, 0, 0),
+        B(.26, .17, .1, WOOD, .12, .45, .27), B(.22, .13, .1, glass(), .12, .45, .285),
+        B(.14, .21, .03, WOOD, -.14, .175, .245), ...[0, 1, 2].map(i => R(B(.065, .02, .13, i % 2 ? '#fffaf1' : col, -.205 + i * .065, .32, .3), .4, 0, 0)));
+    }
   }
   const flag = G(Cy(.014, .014, .55, '#ddd', 0, .27, 0, 6), B(.22, .13, .012, glow('#F3C623'), .11, .48, 0));
   flag.position.set(.34, 0, .22); g.add(flag);
@@ -587,31 +966,59 @@ function building(c) {
   return g;
 }
 function special(kind) {
+  // 博雅＝圓形書塔；跨域＝停在浮空碼頭的小飛船（在天空之城裡取代原本的船）
   const g = kind === 'BOYA'
-    ? G(Cy(.36, .42, .3, '#FBF6EC', 0, .15, 0, 8), Cy(.3, .34, .3, '#FBF6EC', 0, .45, 0, 8), Co(.38, .35, '#6FB7C9', 0, .77, 0, 8), ...[0, 1, 2, 3].map(i => B(.06, .1, .02, '#bfe0f0', Math.sin(i * 1.57) * .36, .2, Math.cos(i * 1.57) * .36)))
-    : G(B(.9, .06, .5, '#8b6a45', 0, .06, .1), Cy(.04, .04, .4, '#6b4a1d', -.4, .1, .32, 6), Cy(.04, .04, .4, '#6b4a1d', .4, .1, .32, 6), B(.6, .2, .3, '#E4572E', 0, .2, -.1), Co(.42, .4, '#fff', 0, .5, -.1, 4), Cy(.02, .02, .6, '#ddd', .25, .5, -.1, 6), B(.25, .15, .01, '#6FB7C9', .38, .7, -.1));
+    ? G(Cy(.44, .46, .07, STONE, 0, .035, 0, 12), Cy(.36, .4, .32, WALL, 0, .23, 0, 12), Cy(.37, .37, .04, '#6FB7C9', 0, .4, 0, 12), Cy(.3, .34, .28, WALL, 0, .55, 0, 12),
+      Co(.4, .36, '#4f97ad', 0, .87, 0, 12), Sp(.04, glow('#fff1c0'), 0, 1.07, 0, 8), B(.14, .2, .03, WOOD, 0, .17, .39),
+      ...[0, 1, 2, 3].map(i => R(B(.07, .12, .025, glass(), Math.sin(i * 1.57 + .78) * .31, .56, Math.cos(i * 1.57 + .78) * .31), 0, i * 1.57 + .78, 0)))
+    : G(B(.9, .05, .42, '#8b6a45', 0, .05, .16), ...[-.38, .38].map(x => Cy(.035, .035, .35, '#6b4a1d', x, .1, .34, 6)),
+      Sc(Sp(.3, '#E4572E', 0, .78, -.08, 16), 1.65, .78, .78), R(To(.235, .018, '#fffaf1', -.12, .78, -.08), 0, Math.PI / 2, 0), R(To(.235, .018, '#fffaf1', .2, .78, -.08), 0, Math.PI / 2, 0),
+      B(.3, .12, .14, WOOD, 0, .48, -.08), B(.24, .05, .145, glass(), 0, .5, -.08), rod([-.12, .54, -.08], [-.15, .64, -.08], .01, '#555'), rod([.12, .54, -.08], [.15, .64, -.08], .01, '#555'),
+      B(.03, .2, .16, '#c0392b', -.5, .8, -.08), B(.03, .16, .2, '#c0392b', -.5, .8, -.08), rod([.3, .05, .3], [.2, .6, -.08], .006, '#bfae8f'));
   ownMats(g); g.userData = { special: kind };
   return g;
 }
 function landmark(isl) {
   let g;
   if (isl.role) {
+    // 職務島中央：三層石台＋金環，道具浮在空中轉，背後一圈職務色光暈
+    const col = ROLE[isl.role].color, gm = gold();
     const m = { dir: 'clapper', pro: 'walkie', cam: 'camHand', art: 'palette', snd: 'headphones', edt: 'drone', mkt: 'megaphone', res: 'book' }[isl.role];
-    const item = GM[m](ROLE[isl.role].color);
+    const item = GM[m](col);
     const ctr = new THREE.Box3().setFromObject(item).getCenter(new THREE.Vector3());
     item.position.sub(ctr);
     const holder = G(item); holder.scale.setScalar({ headphones: 1.9, drone: 2.4, megaphone: 2.4 }[m] || 3.2);
-    holder.position.y = 1.35; holder.userData.spin = true;
-    g = G(Cy(.55, .65, .3, '#efe4cf', 0, .15, 0, 6), Cy(.04, .04, .6, '#ccc', 0, .55, 0, 6), holder);
+    holder.position.y = 1.4; holder.userData.spin = true;
+    const halo = R(To(.62, .025, glow(col), 0, 1.4, 0), Math.PI / 2 - .35, 0, 0), aura = haloSprite();
+    aura.scale.setScalar(1.7); aura.position.y = 1.4; aura.material.color.set(mix(col, '#ffffff', .4)); aura.material.userData.own = 1;
+    halo.userData.tick = t => { halo.rotation.z = t * .7; holder.position.y = 1.4 + Math.sin(t * 1.4) * .06; };
+    g = G(Cy(.66, .72, .14, STONE, 0, .07, 0, 8), Cy(.54, .6, .14, WALL, 0, .21, 0, 8), R(To(.555, .025, gm, 0, .29, 0), Math.PI / 2, 0, 0),
+      Cy(.36, .42, .12, col, 0, .34, 0, 8), Cy(.04, .06, .5, gm, 0, .65, 0, 8), Sp(.07, glow('#fff3a0'), 0, .92, 0, 8), halo, aura, holder);
   } else if (isl.id === 'port') {
-    g = G(Cy(.3, .42, 1.6, '#fafafa', 0, .8, 0, 10), Cy(.31, .36, .25, '#E4572E', 0, .55, 0, 10), Cy(.31, .33, .25, '#E4572E', 0, 1.15, 0, 10), Cy(.24, .24, .3, glow('#fff3b0'), 0, 1.75, 0, 8), Co(.34, .35, '#E4572E', 0, 2.07, 0, 10));
+    // 入學港的天空燈塔：紅白條紋、瞭望台欄杆、玻璃燈室與慢慢掃過的光束
+    const beamGeo = new THREE.ConeGeometry(.55, 3.2, 16, 1, true); beamGeo.translate(0, -1.6, 0); beamGeo.rotateZ(Math.PI / 2);
+    const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({ color: '#fff3c0', transparent: true, opacity: .22, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending }));
+    beam.position.y = 1.86; beam.userData.noShadow = true; beam.material.userData.own = 1; beam.userData.tick = t => beam.rotation.y = t * .8;
+    g = G(Cy(.5, .58, .16, STONE, 0, .08, 0, 10), Cy(.28, .4, 1.5, '#fafafa', 0, .9, 0, 14), Cy(.33, .37, .22, '#E4572E', 0, .5, 0, 14), Cy(.3, .325, .22, '#E4572E', 0, 1.02, 0, 14), Cy(.275, .29, .18, '#E4572E', 0, 1.44, 0, 14),
+      Cy(.42, .38, .06, INK, 0, 1.68, 0, 16), R(To(.4, .012, '#fafafa', 0, 1.8, 0), Math.PI / 2, 0, 0),
+      Cy(.22, .22, .32, glow('#fff3b0'), 0, 1.86, 0, 12), ...[0, 1, 2, 3, 4, 5].map(i => Cy(.012, .012, .32, INK, Math.sin(i * 1.05) * .225, 1.86, Math.cos(i * 1.05) * .225, 4)),
+      Cy(.26, .26, .04, INK, 0, 2.04, 0, 12), Co(.3, .3, '#E4572E', 0, 2.21, 0, 14), Sp(.05, gold(), 0, 2.39, 0, 8), beam);
   } else if (isl.id === 'college') {
-    g = G(B(1, .9, .7, '#FBF6EC', 0, .45, 0), R(Co(.8, .5, '#5F86AE', 0, 1.15, 0, 4), 0, Math.PI / 4, 0), B(.8, .14, .02, '#5F86AE', 0, .7, .36), ...[-.3, 0, .3].map(x => B(.16, .2, .02, '#bfe0f0', x, .35, .36)));
+    // 學院島：台階、六根柱廊、三角山牆和頂上的小穹頂
+    g = G(B(1.25, .1, .95, STONE, 0, .05, 0), B(1.1, .08, .82, STONE, 0, .14, .04), B(.95, .72, .6, WALL, 0, .54, -.06),
+      ...[-.4, -.24, -.08, .08, .24, .4].map(x => Cy(.045, .05, .62, '#fffaf1', x, .49, .33, 10)), B(1.04, .08, .2, '#fffaf1', 0, .84, .3),
+      gableRoof(1.04, .26, .2, '#5F86AE', .88, .3), ...roof2(1.04, .64, .3, '#5F86AE', .88, -.06),
+      Cy(.13, .15, .14, WALL, 0, 1.25, -.06, 12), Hemi(.14, '#c8941d', 0, 1.32, -.06), Sp(.03, gold(), 0, 1.5, -.06, 6),
+      B(.18, .32, .03, WOOD, 0, .34, .245), ...[-.3, .3].flatMap(x => win(x, .58, .245, .1, .16)));
   } else {
-    g = G(Cy(.22, .3, .5, '#E4572E', 0, .25, 0, 8), Cy(.12, .2, .5, '#fafafa', 0, .7, 0, 8), Sp(.12, glow('#fff3b0'), 0, 1.02, 0, 8));
+    // 博雅跨域外海：熱氣球（上下飄），警示燈掛在球頂
+    g = G(B(.3, .2, .3, '#a8794a', 0, .62, 0), B(.32, .04, .32, '#7a5534', 0, .73, 0),
+      ...[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([x, z]) => rod([x * .14, .74, z * .14], [x * .3, 1.32, z * .3], .007, '#6b5a48')),
+      Co(.22, .32, '#E4572E', 0, 1.36, 0, 12), Sc(Sp(.48, '#6FB7C9', 0, 1.82, 0, 18), 1, 1.12, 1),
+      R(To(.48, .025, '#fffaf1', 0, 1.82, 0), Math.PI / 2, 0, 0), R(To(.42, .025, '#F3C623', 0, 2.12, 0), Math.PI / 2, 0, 0), Sp(.06, '#E4572E', 0, 2.36, 0, 8));
     g.userData.bobBuoy = true;
   }
-  g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  g.traverse(o => { if (o.isMesh) { o.castShadow = !o.userData.noShadow; o.receiveShadow = true; } });
   return g;
 }
 // 四季樹：大一櫻花、大二綠樹、大三楓紅、大四雪松
@@ -646,7 +1053,7 @@ function islandCourses(id) {
 async function buildWorld(report) {
   disposeWorld();
   WORLD = new THREE.Group(); scene.add(WORLD);
-  BLD = {}; ISLAND_OBJ = {}; TILES.length = 0; LANDMARKS.length = 0; pickables.length = 0;
+  BLD = {}; ISLAND_OBJ = {}; TILES.length = 0; LANDMARKS.length = 0; pickables.length = 0; FLOATERS.length = 0;
   rand = rng(+S.cohort);
   const now = performance.now();
   for (const [idx, isl] of F.ISLANDS.entries()) {
@@ -718,9 +1125,7 @@ async function buildWorld(report) {
         for (let i = 0; i < n; i++) grp.add(tree(x + (rand() - .5) * .9, z + (rand() - .5) * .9, s.top, s.y));
       }
     });
-    const beach = Cy(maxD + 1.35, maxD + 1.75, .5, '#ecd9a6', 0, -.12, 0, 18); beach.castShadow = false; grp.add(beach);
-    const shallow = new THREE.Mesh(new THREE.CircleGeometry(maxD + 3.4, 24), new THREE.MeshBasicMaterial({ color: '#a8e3e6', transparent: true, opacity: .55 }));
-    shallow.rotation.x = -Math.PI / 2; shallow.position.y = .02; grp.add(shallow);
+    skyIslandBase(grp, maxD, idx + 1 + +S.cohort, { fall: isl.id === 'main' || isl.id === 'sea' || rand() < .35, top: isl.id === 'sea' ? '#bfe6e6' : null });
     ISLAND_OBJ[isl.id] = { grp, center: grp.localToWorld(new THREE.Vector3(0, 0, 0)), top: isl.id === 'main' ? 4.4 : 3, slots, radius: maxD + 1.5 };
     if (isl.id === 'main') buildCarpet(slots, grp);
     if (isl.id === 'port') addLogoSign(grp, maxD + 1.1);
@@ -740,7 +1145,7 @@ function buildSeaFx(grp, slots, maxD) {
   const tops = [];
   slots.forEach(s => { if (!s.mesh) return; s.mesh.material = s.mesh.material.map(m => { const c = m.clone(); c.userData.own = 1; return c; }); tops.push(s.mesh.material[1]); });
   const beaconMat = new THREE.MeshStandardMaterial({ color: '#ff3b30', emissive: '#ff3b30', emissiveIntensity: 1 }); beaconMat.userData.own = 1;
-  const beacon = Sp(.2, beaconMat, 0, 1.3, 0, 10); beacon.visible = false;
+  const beacon = Sp(.16, beaconMat, 0, 2.5, 0, 10); beacon.visible = false;
   const lm = LANDMARKS.find(l => l.userData.island === 'sea'); if (lm) lm.add(beacon);
   const waveMat = new THREE.MeshBasicMaterial({ color: '#ff5a4e', transparent: true, opacity: 0, side: THREE.DoubleSide }); waveMat.userData.own = 1;
   const wave = new THREE.Mesh(new THREE.RingGeometry(.96, 1, 64), waveMat); wave.rotation.x = -Math.PI / 2; wave.position.y = .14; grp.add(wave);
@@ -884,7 +1289,11 @@ const pScene = new THREE.Scene();
 const pSun = addLights(pScene, true, 3); pSun.position.set(-3, 6, 5); pSun.shadow.mapSize.set(1024, 1024);
 const pCam = new THREE.PerspectiveCamera(30, 1, .1, 50);
 const portrait = buildCharacter();
-const pedestal = G(Cy(1.15, 1.2, .16, '#efe0c2', 0, -.08, 0, 6), Cy(1.22, 1.26, .06, '#d9c29a', 0, -.19, 0, 6));
+// 肖像腳下也是一座小浮空島：草皮、分層岩、兩朵小雲
+const pedRock = floatingRock(1.12, 1.9, 3); pedRock.position.y = -.2;
+const pedestal = G(new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.12, .2, 18), [mat('#a87a4f'), mat('#62a447'), mat('#a87a4f')]), pedRock,
+  Sc(Sp(.32, CLOUD_MAT, -1.15, -.75, .45, 12), 1.5, .7, 1), Sc(Sp(.26, CLOUD_MAT, 1.2, -1.05, .2, 12), 1.6, .65, 1));
+pedestal.children[0].position.y = -.1;
 pedestal.traverse(o => { if (o.isMesh) o.receiveShadow = true; });
 const pRoot = G(portrait.root, pedestal); pScene.add(pRoot);
 let yaw = 0, drag = null;
@@ -1069,7 +1478,7 @@ function homePosition() {
   const aspect = innerWidth / innerHeight;
   const distance = innerWidth <= 900 ? Math.max(70, 34 / (Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * aspect)) : 70;
   controls.maxDistance = Math.max(120, distance * 1.25);
-  scene.fog.near = Math.max(90, distance + 20); scene.fog.far = Math.max(190, distance + 140);
+  scene.fog.near = Math.max(70, distance); scene.fog.far = Math.max(330, distance + 260);
   return HOME.p.clone().sub(HOME.t).normalize().multiplyScalar(distance).add(HOME.t);
 }
 const flyHome = () => flyTo(HOME.t, 0, homePosition());
@@ -1119,29 +1528,76 @@ function onLookClick(e) {
 $('#hero').addEventListener('click', e => { if (e.target.closest('[data-reset]')) return resetFreshman(); if (e.target.closest('#heroToggle')) { $('#hero').classList.toggle('open'); $('#heroToggle').textContent = $('#hero').classList.contains('open') ? '收起 ▴' : '職能與造型 ▾'; return; } onLookClick(e); });
 
 /* ───────────── UI：道具圖鑑 ───────────── */
+// 道具圖鑑分頁：「我的收集」看自己拿到什麼；八個職務分頁像展示櫃，直接攤開那條四年路線沿途的所有寶物
+let gpTab = 'mine';
+function gearCard(c, role) {
+  const g = gearOf(c.id), has = DONE().has(c.id), open = !!role || has, own = role && g.role === role;
+  const cls = [open ? '' : 'lock', g.tier >= 4 ? 'legendary' : '', own ? 'own' : ''].filter(Boolean).join(' ');
+  return `<button class="gcard ${cls}" data-course="${c.id}" title="${esc(c.name)}"${own ? ` style="--rc:${ROLE[role].color}"` : ''}><span class="y">${Y[c.y].em}</span>${role && has ? '<span class="got" title="已修">✓</span>' : ''}` +
+    `<div class="e">${g.e}</div><b>${open ? esc(g.n) : '？？？'}</b><span>${esc(c.name)}</span><span>${g.slot ? SLOT_NAME[g.slot] : '背包徽章'}${role && !isReq(c) ? '・職務選修' : ''}</span></button>`;
+}
+function gearTabs() {
+  return `<button class="gtab ${gpTab === 'mine' ? 'on' : ''}" data-gtab="mine" role="tab" aria-selected="${gpTab === 'mine'}">🎒 我的收集</button>` +
+    F.ROLES.map(r => `<button class="gtab ${gpTab === r.id ? 'on' : ''}" data-gtab="${r.id}" role="tab" aria-selected="${gpTab === r.id}" style="--rc:${r.color}">${r.icon} ${r.name}</button>`).join('');
+}
+function roleShowcase(r) {
+  const t = TRACK[r.id], ids = t.route.map(s => s.id).filter(id => BY[id]);
+  const own = ids.filter(id => gearOf(id).role === r.id).length, wear = ids.filter(id => gearOf(id).slot).length;
+  const got = ids.filter(id => DONE().has(id)).length;
+  const head = `<div class="gp-role" style="--rc:${r.color}"><div class="ic">${r.icon}</div><div class="tx"><b>${r.name}・四年寶物</b><span>${esc(r.sub)}</span>
+    <div class="steps">${r.titles.map(x => `<i>${x}</i>`).join('<em>→</em>')}</div></div>
+    <div class="nums"><b>${ids.length}</b><span>件寶物</span><small>穿戴 ${wear}・徽章 ${ids.length - wear}<br>職務專屬 ${own}・已拿到 ${got}</small></div></div>`;
+  const years = [1, 2, 3, 4].map(y => {
+    const list = t.route.filter(s => s.y === y && BY[s.id]).map(s => s.id);
+    if (!list.length) return '';
+    list.sort((a, b) => (gearOf(b).role === r.id) - (gearOf(a).role === r.id)); // 職務專屬的排前面
+    return `<div class="gsec"><h3><span class="ytag" style="background:${Y[y].tile}">${Y[y].em} ${Y[y].name}</span>${Y[y].label}<small>${list.length} 件</small></h3><div class="ggrid">${list.map(id => gearCard(BY[id], r.id)).join('')}</div></div>`;
+  }).join('');
+  return head + years + `<p class="note">照「${r.name}」四年路線（全部必修＋這個職務推薦的選修）沿途會拿到的寶物；有色框的是這個職務的專屬道具。點卡片可以到地圖上看那門課。${CREDIT}</p>`;
+}
 function renderGearPage() {
-  const L = levels(), done = DONE();
-  const [t, sub] = titleFor(L, S.look, lookItems(S.look).primary);
-  $('#gpTitle').innerHTML = t; $('#gpSub').textContent = sub;
+  const L = levels(), done = DONE(), r = ROLE[gpTab];
+  $('#gpTabs').innerHTML = gearTabs();
+  const on = $('#gpTabs .gtab.on'), bar = $('#gpTabs'); bar.scrollLeft = on.offsetLeft - bar.offsetLeft - (bar.clientWidth - on.offsetWidth) / 2;
+  $('#gearPage').classList.toggle('showcase', !!r);
   $('#gpLooks').innerHTML = lookChips(L, S.look);
   $('#gpRoles').innerHTML = roleRows(L, S.look);
+  if (r) {
+    // 肖像換上這個職務四年修完的樣子（只是預覽，不動自己的進度）
+    dress(portrait, r.id, new Set([...done, ...TRACK[r.id].codes, ...CO.courses.filter(isReq).map(c => c.id)]));
+    $('#gpTitle').innerHTML = `👀 ${r.titles[2]}<small>${r.name}・畢業時的樣子</small>`;
+    $('#gpSub').textContent = `照${r.name}四年路線修完會長這樣（預覽）`;
+    $('#gpCount').textContent = `${CO.year} 學年度｜${r.name}四年可得 ${TRACK[r.id].route.filter(s => BY[s.id]).length} 件`;
+    $('#gpBody').innerHTML = roleShowcase(r);
+    return;
+  }
+  const [t, sub] = titleFor(L, S.look, lookItems(S.look).primary);
+  $('#gpTitle').innerHTML = t; $('#gpSub').textContent = sub;
   const groups = [{ id: null, name: '共同與通識', icon: '🌍', color: '#7C93AE' }, ...F.ROLES];
   const got = CO.courses.filter(c => done.has(c.id)).length;
   $('#gpCount').textContent = `${CO.year} 學年度｜已收集 ${got} / ${CO.courses.length}`;
-  $('#gpBody').innerHTML = groups.map(gr => {
+  $('#gpBody').innerHTML = `<p class="gp-hint">想知道各職務四年能拿到哪些寶物？點上方的職務標籤，全部攤開給你看。</p>` + groups.map(gr => {
     const list = CO.courses.filter(c => (gearOf(c.id).role || null) === gr.id).sort((a, b) => a.y - b.y);
     if (!list.length) return '';
     const n = list.filter(c => done.has(c.id)).length;
     return `<div class="gsec"><h3><span style="color:${gr.color}">${gr.icon}</span>${gr.name}<small>${n} / ${list.length}</small></h3><div class="ggrid">` +
-      list.map(c => { const g = gearOf(c.id), has = done.has(c.id);
-        return `<button class="gcard ${has ? '' : 'lock'}" data-course="${c.id}" title="${esc(c.name)}"><span class="y">${Y[c.y].em}</span><div class="e">${g.e}</div><b>${has ? esc(g.n) : '？？？'}</b><span>${esc(c.name)}</span><span>${g.slot ? SLOT_NAME[g.slot] : '背包徽章'}</span></button>`; }).join('') + '</div></div>';
+      list.map(c => gearCard(c)).join('') + '</div></div>';
   }).join('') + `<p class="note">裝備是本地圖的設計詮釋，用來表現修課後漸漸像哪一行的人。${CREDIT}</p>`;
 }
 function openGearPage() { $('#gearPage').classList.add('show'); mountPortrait($('#gearPortrait')); renderGearPage(); AU.play('click'); }
-function closeGearPage() { $('#gearPage').classList.remove('show'); mountPortrait($('#heroPortrait')); }
+function closeGearPage() { $('#gearPage').classList.remove('show'); mountPortrait($('#heroPortrait')); if (ROLE[gpTab]) renderHero(); }
 $('#gearBtn').addEventListener('click', openGearPage);
 $('#gpClose').addEventListener('click', closeGearPage);
 $('#gearPage').addEventListener('click', e => {
+  const tb = e.target.closest('[data-gtab]');
+  if (tb) {
+    if (gpTab !== tb.dataset.gtab) AU.play('shimmer');
+    gpTab = tb.dataset.gtab; renderGearPage(); $('#gearPage').scrollTop = 0;
+    if (gpTab === 'mine') renderHero();
+    return;
+  }
+  // 在職務分頁點自己的造型，就回到「我的收集」
+  if (e.target.closest('[data-look]') && ROLE[gpTab]) gpTab = 'mine';
   if (onLookClick(e)) return;
   const c = e.target.closest('[data-course]');
   if (c) { closeGearPage(); select({ type: 'course', id: c.dataset.course }, true); }
@@ -1153,7 +1609,7 @@ const drawer = $('#drawer');
 let drawerKey = '';
 function openDrawer(html) {
   const key = JSON.stringify(S.sel), top = drawer.scrollTop;
-  drawer.innerHTML = `<button class="close" data-x aria-label="關閉">×</button>` + html;
+  drawer.innerHTML = `<div class="x-bar"><button class="close" data-x aria-label="關閉">×</button></div>` + html;
   drawer.classList.add('open');
   drawer.scrollTop = key === drawerKey ? top : 0;
   drawerKey = key;
@@ -1372,8 +1828,9 @@ async function complete(id, animate) {
   const after = levels();
   afterChange();
   const reward = () => {
-    AU.play('gear'); floater(g.e); heroSpin = performance.now();
-    toast(`${g.e} 獲得【${esc(g.n)}】<small>${Y[c.y].em} ${esc(c.name)}・${c.cr} 學分</small>`);
+    AU.play(g.tier >= 4 ? 'legend' : 'gear'); floater(g.e); heroSpin = performance.now();
+    if (g.tier >= 4) { banner(`${g.e} 傳說道具`, `【${g.n}】四年的每一格畫面，都成為你的光`); toast(`${g.e} 獲得傳說道具【${esc(g.n)}】<small>${Y[c.y].em} ${esc(c.name)}・紅毯走到山頂才拿得到</small>`, 'legendary'); }
+    else toast(`${g.e} 獲得【${esc(g.n)}】<small>${Y[c.y].em} ${esc(c.name)}・${c.cr} 學分</small>`);
     F.ROLES.forEach(r => { if (after[r.id].lv > before[r.id].lv) { AU.play('levelUp'); toast(`⬆ ${r.icon} ${r.name}升級：${r.titles[after[r.id].lv - 1]}`, 'up'); } });
     if (!wasGrad && graduated()) celebrate();
   };
@@ -1722,8 +2179,7 @@ let heroSpin = 0;
 const clock = new THREE.Clock();
 function frame(now) {
   const t = clock.getElapsedTime();
-  for (let i = 0; i < wPos.count; i++) { const x = wBase[i * 3], z = wBase[i * 3 + 2]; wPos.array[i * 3 + 1] = Math.sin(x * .35 + t * .9) * .07 + Math.cos(z * .3 + t * .7) * .07; }
-  wPos.needsUpdate = true;
+  skyFrame(t);
   if (WORLD) WORLD.children.forEach(g => { if (g.userData.grow) { const k = Math.min(1, Math.max(0, (now - g.userData.grow) / 650)); const e = 1 + 2.2 * Math.pow(k - 1, 3) + 1.2 * Math.pow(k - 1, 2); g.scale.y = Math.max(.01, k ? e : .01); if (k >= 1) { g.scale.y = 1; delete g.userData.grow; } } });
   stepMover(now, t);
   const sp = heroSpin ? (now - heroSpin) / 500 : 1;
@@ -1731,8 +2187,8 @@ function frame(now) {
   if (!mover.mode) hero.root.position.y = Math.abs(Math.sin(t * 2.4)) * .03;
   heroRing.visible = mover.mode !== 'glide';
   heroRing.material.opacity = .55 + Math.sin(t * 3) * .3;
-  [hero, portrait].forEach(ch => ch.gear.children.forEach(o => { if (o.userData.bob) o.position.y = ANCHOR.pet[1] + Math.sin(t * 2.2) * .07; }));
-  LANDMARKS.forEach(l => l.traverse(o => { if (o.userData.spin) o.rotation.y = t * .5; if (o.userData.bobBuoy) o.position.y = .45 + Math.sin(t * 1.6) * .06; }));
+  [hero, portrait].forEach(ch => { ch.gear.children.forEach(o => { if (o.userData.bob) o.position.y = ANCHOR.pet[1] + Math.sin(t * 2.2) * .07; }); ch.ticks.forEach(o => o.userData.tick(t)); });
+  LANDMARKS.forEach(l => l.traverse(o => { if (o.userData.spin) o.rotation.y = t * .5; if (o.userData.bobBuoy) o.position.y = .45 + Math.sin(t * 1.6) * .06; if (o.userData.tick) o.userData.tick(t); }));
   linkGroup.children.forEach(o => { o.scale.setScalar(.75 + .45 * Math.max(0, Math.sin(t * 4 - o.userData.bead * .45))); });
   routeGroup.children.forEach((o, i) => { if (o.material) o.material.emissiveIntensity = .35 + Math.sin(t * 3 - i * .4) * .2; });
   seaFrame(t);
