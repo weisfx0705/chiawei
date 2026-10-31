@@ -1553,7 +1553,9 @@ function onLookClick(e) {
   if (S.look !== l.dataset.look) AU.play('shimmer');
   S.look = l.dataset.look; S.preview = null; save(); renderHero(); return true;
 }
-$('#hero').addEventListener('click', e => { if (e.target.closest('[data-reset]')) return resetFreshman(); if (e.target.closest('#heroToggle')) { $('#hero').classList.toggle('open'); $('#heroToggle').textContent = $('#hero').classList.contains('open') ? '收起 ▴' : '職能與造型 ▾'; return; } onLookClick(e); });
+$('#hero').addEventListener('click', e => { if (e.target.closest('[data-reset]')) return resetFreshman();
+  if (innerWidth <= 900 && e.target.closest('.hero-text')) return $('#gearBtn').click(); // 手機名牌：點一下開道具欄
+  if (e.target.closest('#heroToggle')) { $('#hero').classList.toggle('open'); $('#heroToggle').textContent = $('#hero').classList.contains('open') ? '收起 ▴' : '職能與造型 ▾'; return; } onLookClick(e); });
 
 /* ───────────── UI：道具圖鑑 ───────────── */
 // 道具圖鑑分頁：「我的收集」看自己拿到什麼；八個職務分頁像展示櫃，直接攤開那條四年路線沿途的所有寶物
