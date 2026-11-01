@@ -1,5 +1,7 @@
 /* Studio skin: calmer surfaces, island-tinted mission panels, the two-mode welcome and the challenge-mode arcade. Layout positions are unchanged. */
 :root{--ink:#1d2142;--ink-2:#2d3264;--paper:#fffaf2;--cream:#fff3dc;--sun:#ffc83d;--tang:#ff6a3d;--tang-d:#d4471e;--mint:#2fbf95;--line:#ece2cf;--glass:#fffdf8eb;--lift:0 1px 0 #1d214212,0 12px 30px -14px #1d214255;--role:#f26b3a;font-family:"Arial Rounded MT Bold","PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{overscroll-behavior:none}
 button{-webkit-tap-highlight-color:transparent}
 button:focus-visible{outline:3px solid #6aa8ff;outline-offset:2px}
 
@@ -74,6 +76,7 @@ body.mode-arcade #questDots i{background:#ffffff2e}body.mode-arcade #questDots i
 .reward{background:#fffdf6;border:0;border-radius:28px;box-shadow:0 0 0 8px #ffffff8c,0 30px 80px -20px #2a1f4d99}
 .reward>#rewardIcon{width:104px;height:104px;margin:0 auto 6px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,#fff 45%,transparent 46%),conic-gradient(from 0deg,#ffd45c,#ff8a5c,#ffd45c,#ff8a5c,#ffd45c,#ff8a5c,#ffd45c,#ff8a5c,#ffd45c);font-size:52px;filter:none}
 .reward>b{color:var(--ink)}
+.rank-up{display:block;width:max-content;max-width:100%;margin:10px auto 0;background:var(--ink);color:var(--sun);border-radius:99px;padding:5px 14px;font-size:13px;animation:burst .45s cubic-bezier(.2,.9,.3,1.4)}
 .reward>button{background:var(--ink);border-bottom:4px solid #0b0d22;color:#fff;border-radius:14px}
 
 /* ---- Welcome: pick a mode ---- */
@@ -113,6 +116,7 @@ body.mode-arcade #questDots i{background:#ffffff2e}body.mode-arcade #questDots i
 @media(max-width:1100px),(pointer:coarse) and (max-width:1400px){
  .top-tools>#modeBtn{display:block;min-width:44px;min-height:44px;padding:8px 11px;font-size:19px;border-radius:12px}
  .top-tools>#modeBtn span{display:none}
+ .player-hud,.quest-banner{top:var(--hud-top,calc(90px + var(--safe-top)))}
  #missionBody::before{margin:-15px -20px 14px}
  .mission .m-hero h2{font-size:19px}.m-icon{width:44px;height:44px;font-size:23px;border-radius:13px}
 }

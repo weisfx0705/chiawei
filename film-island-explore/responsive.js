@@ -1,5 +1,13 @@
 /* One-handed, map-first controls for phones and tablets. */
 (() => {
+// Keep the page at its designed 1:1 scale: the 3D map has its own pinch zoom, so page zoom only gets players stuck.
+// iOS ignores user-scalable=no, so also cancel its pinch gestures, and re-apply the viewport to drop any zoom kept across reloads.
+const viewport=document.querySelector('meta[name=viewport]');
+function resetZoom(){viewport.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover';if('scrollRestoration' in history)history.scrollRestoration='manual';scrollTo(0,0)}
+resetZoom();
+for(const type of ['gesturestart','gesturechange','gestureend'])document.addEventListener(type,e=>e.preventDefault(),{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1&&!e.target.closest('#world'))e.preventDefault()},{passive:false});
+addEventListener('pageshow',resetZoom);addEventListener('orientationchange',()=>setTimeout(resetZoom,250));
 const $=s=>document.querySelector(s),sheet=$('#mission'),expand=$('#expandMission');
 const compact=matchMedia('(max-width:1100px), (pointer:coarse) and (max-width:1400px)');
 const toolbar=$('.top-tools'),utility=document.createElement('div');utility.id='utilityMenu';
@@ -18,6 +26,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&menuOpen){menu(fals
 function refresh(){cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
  const open=!sheet.hidden;document.body.classList.toggle('compact-ui',compact.matches);document.body.classList.toggle('sheet-open',compact.matches&&open);document.body.classList.toggle('sheet-expanded',compact.matches&&open&&expanded);
  sheet.classList.toggle('expanded',expanded);expand.setAttribute('aria-expanded',String(expanded));expand.textContent=expanded?'↓ 收合介紹':'↑ 展開介紹';
+ // Park the HUD just under the logo, whatever height the logo renders at on this device.
+ document.body.style.setProperty('--hud-top',compact.matches?Math.ceil($('.logo-brand').getBoundingClientRect().bottom+10)+'px':'');
  document.body.style.setProperty('--map-obstruction',open?Math.max(innerHeight<=520?140:160,innerHeight*(innerHeight<=520?.36:.33))+'px':($('.game-bottom').getBoundingClientRect().height+12)+'px');
  const dock=$('.game-bottom');dock.inert=compact.matches&&open;
  window.IslandScene?.layout();
@@ -26,6 +36,6 @@ function collapse(){expanded=false;refresh()}
 expand.onclick=()=>{expanded=!expanded;refresh()};
 new MutationObserver(()=>{if(sheet.hidden)expanded=false;refresh()}).observe(sheet,{attributes:true,attributeFilter:['hidden']});
 compact.addEventListener('change',()=>{placeMapTools();menu(false);if(!compact.matches)expanded=false;refresh()});
-addEventListener('resize',refresh);window.visualViewport?.addEventListener('resize',refresh);
+addEventListener('resize',refresh);$('.logo-brand img').addEventListener('load',refresh);window.visualViewport?.addEventListener('resize',refresh);
 window.MobileLayout={refresh,collapse,state:()=>({compact:compact.matches,expanded,menuOpen})};placeMapTools();menu(false);refresh();
 })();
