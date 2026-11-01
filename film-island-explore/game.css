@@ -143,6 +143,17 @@ body.mode-arcade .top-tools>#modeBtn{background:linear-gradient(135deg,var(--ink
 .island-label{border-radius:14px;border:1px solid #fff;border-bottom:4px solid var(--island-color,#d5bd8c);background:#fffdf8f2;color:var(--ink)}
 .island-label.active{background:var(--ink);color:#fff;border-color:var(--ink);border-bottom-color:var(--sun);box-shadow:0 0 0 3px #fff,0 10px 22px -8px #1d214288}
 .island-label.active small{color:#ffe7a6}
+/* Map labels collapse to icon badges when zoomed in (scene.js toggles these classes) */
+.island-label{transition:opacity .2s,background .2s}
+#labels.labels-mini .island-label{font-size:0;width:36px;height:36px;min-height:0;max-width:none;padding:0;border-radius:50%;display:grid;place-items:center;border-width:2px;border-bottom-width:3px}
+#labels.labels-mini .island-label::before{content:attr(data-icon);font-size:18px;line-height:1}
+#labels.labels-mini .island-label small{display:none}
+#labels.labels-mini .island-label.saved::after{width:16px;height:16px;line-height:13px;font-size:10px;right:-5px;top:-5px}
+#labels.labels-mini .island-label.active{width:auto;height:auto;border-radius:12px;padding:5px 10px;font-size:11px;display:block}
+#labels.labels-mini .island-label.active::before{content:none}
+.labels-zoomed #labelLeaders{display:none}
+#labels.labels-ghost .island-label:not(.active){opacity:.3}
+#labels.labels-ghost .island-label:not(.active):hover,#labels.labels-ghost .island-label:not(.active):focus-visible{opacity:1}
 body.mode-arcade .quest-banner{background:linear-gradient(135deg,#262b5c,var(--ink));border-color:#3d4380;box-shadow:0 12px 30px -14px #0d0f24aa}
 body.mode-arcade .quest-banner>span{color:var(--sun)}body.mode-arcade .quest-banner>b{color:#fff}
 body.mode-arcade #questDots i{background:#ffffff2e}body.mode-arcade #questDots i.done{background:var(--sun);box-shadow:0 0 0 3px #ffc83d40,0 0 12px #ffc83d}
