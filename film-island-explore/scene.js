@@ -38,18 +38,23 @@ items.forEach((it,i)=>{const [x,z]=positions[i],g=new T.Group();g.position.set(x
 const label=document.createElement('button');label.className='island-label'+(i===0?' core active':'');label.dataset.island=it.id;label.innerHTML=`${it.icon} ${it.name}<small>${i===0?'領取飛行證':'小任務 · +100 XP'}</small>`;label.setAttribute('aria-label',`飛往${it.name}島`);label.setAttribute('aria-pressed',String(i===0));labels.append(label);label.onclick=()=>window.Game?.travel(it.id);
 islands.push({g,ring,label,id:it.id,base:g.position.y});if(i){const curve=new T.QuadraticBezierCurve3(new T.Vector3(0,-.6,0),new T.Vector3(x*.5,-1.8,z*.5),new T.Vector3(x,-.6,z));const line=new T.Line(new T.BufferGeometry().setFromPoints(curve.getPoints(40)),new T.LineDashedMaterial({color:'#fff2be',dashSize:.5,gapSize:.45,transparent:true,opacity:.8}));line.computeLineDistances();scene.add(line)}});
 // Ferris wheel and cabins: an actual moving landmark above the back of the park.
-const wheelBase=new T.Group();wheelBase.position.set(0,-5,-22);wheelBase.scale.setScalar(1.8);scene.add(wheelBase);const wheel=new T.Group();wheelBase.add(wheel);wheel.position.y=6;
+const wheelBase=new T.Group();wheelBase.position.set(0,-2,-22);wheelBase.scale.setScalar(1.8);scene.add(wheelBase);const wheel=new T.Group();wheelBase.add(wheel);wheel.position.y=6;
 for(const z of [-.6,.6]){const ring=new T.Mesh(new T.TorusGeometry(6,.14,7,64),mat('#fff2dc'));ring.position.z=z;wheel.add(ring)}
 const cabins=[];for(let i=0;i<10;i++){const a=i*Math.PI/5,x=Math.cos(a)*6,y=Math.sin(a)*6;rod(wheel,[0,0,0],[x,y,0],.055,'#f7d78f');const c=new T.Group();c.position.set(x,y,0);wheel.add(c);box(c,.9,1,1,['#e8a0a8','#85b8d3','#f0cb68','#9abf81'][i%4],0,-.6);box(c,.7,.45,1.04,'#e4f5f4',0,-.4);cabins.push(c)}
 rod(wheelBase,[-3,-2,0],[0,6,0],.18,'#eee3c2');rod(wheelBase,[3,-2,0],[0,6,0],.18,'#eee3c2');
-// An architectural marquee using the official higher-resolution department wordmark.
-const marquee=new T.Group();marquee.position.set(0,15.5,-18);scene.add(marquee);const marqueeFace=new T.Group();marqueeFace.rotation.x=-Math.atan2(38,30);marquee.add(marqueeFace);
-function plaque(w,h,r,depth,color,z){const sh=new T.Shape();sh.moveTo(-w/2+r,-h/2);sh.lineTo(w/2-r,-h/2);sh.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);sh.lineTo(w/2,h/2-r);sh.quadraticCurveTo(w/2,h/2,w/2-r,h/2);sh.lineTo(-w/2+r,h/2);sh.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);sh.lineTo(-w/2,-h/2+r);sh.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);return mesh(marqueeFace,new T.ExtrudeGeometry(sh,{depth,bevelEnabled:true,bevelSize:.07,bevelThickness:.05,bevelSegments:2,steps:1}),color,0,0,z)}
-plaque(15,3.65,.45,.3,'#354d53',-.25);plaque(14.7,3.4,.4,.12,'#cda363',.12);plaque(14.35,3.08,.35,.08,'#fff9eb',.27);
-const wordmark=new T.TextureLoader().load('assets/department-logo-official.png');wordmark.encoding=T.sRGBEncoding;wordmark.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
-const wordmarkFace=new T.Mesh(new T.PlaneGeometry(12.8,12.8*70/418),new T.MeshBasicMaterial({map:wordmark,transparent:true,toneMapped:false}));wordmarkFace.position.z=.43;marqueeFace.add(wordmarkFace);
-for(const x of [-7.4,7.4]){rod(marquee,[x,-13,-2],[x,.2,-.1],.13,'#b79b70');ball(marquee,.17,'#f5df9c',x,1.55,.32)}
-for(let i=0;i<11;i++)ball(marqueeFace,.065,'#ffe2a1',-6.5+i*1.3,1.62,.31);
+// Stationary black Film & TV badge mounted at the wheel hub, with a subtle fixed sheen.
+// Its center lies on the viewing ray through the axle, so the badge visually stays centered.
+const hubBadge=new T.Group();wheelBase.add(hubBadge);
+const hubNormal=new T.Vector3(0,38,30).normalize();hubBadge.position.copy(hubNormal.clone().multiplyScalar(3)).add(new T.Vector3(0,6,0));
+hubBadge.rotation.x=-Math.atan2(38,30);
+rod(wheelBase,[0,6,0],hubBadge.position.toArray(),.2,'#45424a');
+function hubPlate(w,h,r,depth,color,z){const sh=new T.Shape();sh.moveTo(-w/2+r,-h/2);sh.lineTo(w/2-r,-h/2);sh.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);sh.lineTo(w/2,h/2-r);sh.quadraticCurveTo(w/2,h/2,w/2-r,h/2);sh.lineTo(-w/2+r,h/2);sh.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);sh.lineTo(-w/2,-h/2+r);sh.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);const plate=mesh(hubBadge,new T.ExtrudeGeometry(sh,{depth,bevelEnabled:true,bevelSize:.045,bevelThickness:.04,bevelSegments:2,steps:1}),color,0,0,z);plate.material=new T.MeshStandardMaterial({color:new T.Color(color).convertSRGBToLinear(),roughness:.28,metalness:.3});return plate}
+hubPlate(6.55,3.28,.2,.16,'#47444f',-.12);hubPlate(6.4,3.13,.16,.07,'#17151f',.06);
+logoTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const hubLogo=new T.Mesh(new T.PlaneGeometry(5.85,5.85*106/237),new T.MeshBasicMaterial({map:logoTexture,transparent:true,toneMapped:false}));hubLogo.position.z=.19;hubBadge.add(hubLogo);
+const sheenCanvas=document.createElement('canvas');sheenCanvas.width=sheenCanvas.height=128;const sheenCtx=sheenCanvas.getContext('2d');const sheenGradient=sheenCtx.createLinearGradient(0,0,128,105);
+sheenGradient.addColorStop(0,'rgba(255,255,255,0.13)');sheenGradient.addColorStop(.27,'rgba(255,255,255,0.035)');sheenGradient.addColorStop(.36,'rgba(255,255,255,0.12)');sheenGradient.addColorStop(.43,'rgba(255,255,255,0.025)');sheenGradient.addColorStop(.65,'rgba(255,255,255,0)');sheenGradient.addColorStop(1,'rgba(255,255,255,0)');sheenCtx.fillStyle=sheenGradient;sheenCtx.fillRect(0,0,128,128);
+const sheen=new T.Mesh(new T.PlaneGeometry(6.3,3.03),new T.MeshBasicMaterial({map:new T.CanvasTexture(sheenCanvas),transparent:true,depthWrite:false,toneMapped:false}));sheen.position.z=.205;hubBadge.add(sheen);
 
 // Posters on the actual islands point to real department productions.
 const posterLoader=new T.TextureLoader(),crowd=[];
@@ -133,8 +138,8 @@ function resize(){
  const short=compact&&h<=520&&w>h;
  if(short!==shortLayout){shortLayout=short;const rowPositions=[[0,6],[-30,-7],[-18,-7],[-6,-7],[6,-7],[18,-7],[30,-7],[-24,8],[-12,8],[14,8],[28,8]];
  islands.forEach((v,i)=>{v.g.position.x=short?rowPositions[i][0]:regularPositions[i].x;v.g.position.z=short?rowPositions[i][1]:regularPositions[i].z});
- wheelBase.position.set(0,short?-6:-5,short?-7:-22);wheelBase.scale.setScalar(short?.9:1.8);
- marquee.position.set(0,short?7:15.5,short?-5:-18);marquee.scale.setScalar(short?.8:1);
+ wheelBase.position.set(0,short?-6:-2,short?-7:-22);wheelBase.scale.setScalar(short?.9:1.8);
+
  const destination=islands.find(v=>v.id===selected);if(destination){const to=destination.g.position.clone().add(new T.Vector3(0,.45,2.5));if(flight){flight.from.copy(hero.position);flight.to.copy(to);flight.start=performance.now()}else hero.position.copy(to)}
  }
  let hh=Math.max(31,27/(w/h)),shiftX=0,shiftY=0;
