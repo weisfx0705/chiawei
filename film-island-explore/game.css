@@ -158,6 +158,19 @@ body.mode-arcade .quest-banner{background:linear-gradient(135deg,#262b5c,var(--i
 body.mode-arcade .quest-banner>span{color:var(--sun)}body.mode-arcade .quest-banner>b{color:#fff}
 body.mode-arcade #questDots i{background:#ffffff2e}body.mode-arcade #questDots i.done{background:var(--sun);box-shadow:0 0 0 3px #ffc83d40,0 0 12px #ffc83d}
 
+/* ---- Share / QR ---- */
+.view-tools #shareBtn{display:grid;place-items:center}.view-tools #shareBtn svg{width:20px;height:20px}
+#modal.share-mode{width:min(460px,calc(100% - 24px));text-align:center}
+.share-mode #modalBody h2{margin-bottom:10px}
+.share-qr{width:min(260px,70vw);margin:8px auto 10px;padding:14px;background:#fff;border-radius:20px;box-shadow:0 0 0 1px #ece2cf,0 14px 30px -18px #1d214288}
+.share-qr img{display:block;width:100%;height:auto}
+.share-url{font-family:ui-monospace,Menlo,monospace;font-size:12px!important;color:var(--ink)!important;word-break:break-all;background:#fff6e2;border-radius:10px;padding:8px 10px;margin:0 0 14px}
+.share-mode .passport-actions{justify-content:center}
+.share-note{font-size:12px!important}
+#modal.share-big{width:min(92vw,92dvh);max-height:96dvh}
+.share-big .share-qr{width:min(78vw,72dvh)}
+.share-big #modalBody>.eyebrow,.share-big .share-note{display:none}
+
 /* ---- Mission panel ---- */
 .mission{background:#fffdf8;border:1px solid #fff;box-shadow:0 18px 50px -18px #1d214266,0 2px 0 #1d21420d}
 #missionBody::before{content:'';display:block;height:5px;margin:-26px -22px 18px;background:linear-gradient(90deg,var(--role),color-mix(in srgb,var(--role) 40%,var(--sun)))}

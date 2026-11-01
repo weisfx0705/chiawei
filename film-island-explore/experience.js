@@ -2,7 +2,7 @@
 const $=s=>document.querySelector(s),E=FILM_MEDIA,C=E.catalog,modal=$('#modal'),body=$('#modalBody');let filter='海外創作',country='全部',currentRole='main',encounterTimer;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const film=id=>C.find(f=>f.id===id),source=f=>`<a class="source-link" href="${f.source}" target="_blank" rel="noopener">查看原始來源 ↗</a>`;
-function resetModal(){window.IslandScene?.mountPortrait(null);body.querySelectorAll('iframe').forEach(e=>e.remove());modal.classList.remove('library-mode','cinema-mode','gear-mode','timehouse-mode');FilmMusic.resume('video');FilmMusic.mode('explore');document.body.classList.remove('in-cinema')}
+function resetModal(){window.IslandScene?.mountPortrait(null);body.querySelectorAll('iframe').forEach(e=>e.remove());modal.classList.remove('library-mode','cinema-mode','gear-mode','timehouse-mode','share-mode','share-big');FilmMusic.resume('video');FilmMusic.mode('explore');document.body.classList.remove('in-cinema')}
 modal.addEventListener('close',()=>{if(!modal.open)resetModal()});
 function open(html,kind=''){resetModal();if(kind)modal.classList.add(kind);body.innerHTML=html;if(!modal.open)modal.showModal();modal.scrollTop=0}
 function thumb(f){return `<img src="${f.thumb}" alt="${esc(f.title)}影片縮圖" loading="lazy" onerror="this.onerror=null;this.src='assets/international0.webp'">`}
