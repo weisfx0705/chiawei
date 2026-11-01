@@ -1501,7 +1501,7 @@ art:{name:'穿幫大搜查',genre:'找不同',icon:'🔍',course:0,
 
 snd:{name:'Boom 收音不穿幫',genre:'拖曳定位挑戰',icon:'🎙️',course:1,
  pitch:'攝影機框住了演員，你是收音師！把 Boom 麥克風舉到「畫框外、但離嘴巴最近」的位置，錄完三條鏡頭。',
- how:['拖曳畫面（或用方向鍵）移動 Boom 麥克風','碰到畫框就穿幫 NG；離太遠會收進太多噪音','三條鏡頭（中景、近景、移動特寫）至少兩條 OK 就過關'],
+ how:['拖曳畫面（或用方向鍵）移動 Boom 麥克風','麥克風任何一部分碰到或太貼近畫框都算穿幫 NG；離太遠則會收進太多噪音','三條鏡頭（中景、近景、移動特寫）至少兩條 OK 就過關'],
  note:'🎓 改編自課程教材〈電影同步錄音基本態度〉的 Boom 互動練習。',
  lesson:'同步錄音追求最高的「訊噪比」：麥克風越靠近嘴巴，人聲越清楚、環境噪音越少；可是一進入畫面就穿幫。收音師永遠在畫框邊緣，找那個「最近又看不見」的位置。',
  mount(api){
@@ -1511,16 +1511,22 @@ snd:{name:'Boom 收音不穿幫',genre:'拖曳定位挑戰',icon:'🎙️',cours
   api.stage.innerHTML=`<div class="bm-wrap"><div class="bm-bar"><div class="bm-status" id="bmStatus"><b>架好 Boom！</b><small>拖曳麥克風到畫框外最靠近嘴巴的位置</small></div><div class="bm-snr" aria-label="訊噪比"><small>SNR</small><span id="bmSnr">${'<i></i>'.repeat(5)}</span></div></div><div class="bm-stage" id="bmStage"><svg class="bm-actor" id="bmActor" aria-hidden="true"></svg><svg class="bm-svg" id="bmSvg" aria-hidden="true"></svg><div class="bm-frame" id="bmFrame"><span>🎥 CAMERA FRAME 16:9</span><i class="bm-rec" id="bmRec">● REC</i></div><div class="bm-cue" id="bmCue"></div><div class="bm-take"><i id="bmTakeBar"></i></div></div></div>`;
   const st=$('#bmStage'),svg=$('#bmSvg'),actor=$('#bmActor'),fr=$('#bmFrame'),cue=$('#bmCue'),status=$('#bmStatus'),bars=[...api.stage.querySelectorAll('#bmSnr i')],takeBar=$('#bmTakeBar');
   function layout(t=0){W=st.clientWidth;H=st.clientHeight;const k=takes[Math.max(0,take)],s=Math.min(H*.0085,W*.9/128),fh=k.h*s,fw=fh*16/9;
-   const actorX=W/2,top=Math.max(26+7*s,H*.46-30*s);mouth={x:actorX,y:top+15.6*s};
+   const actorX=W/2,top=Math.max(26+7*s,H*.54-30*s);mouth={x:actorX,y:top+15.6*s};
    const cx=Math.max(fw/2+8,Math.min(W-fw/2-8,actorX+(k.drift?Math.sin(t*1.3)*W*k.drift:0))),ft=top-fh*.1;frame={l:cx-fw/2,t:ft,r:cx+fw/2,b:ft+fh};
    fr.style.cssText=`left:${frame.l}px;top:${frame.t}px;width:${fw}px;height:${fh}px`;
    return {actorX,top,s}}
   function draw(){const {actorX,top,s}=layout(phase==='rec'?phaseT:0);const ang=Math.atan2(mouth.y-mic.y,mouth.x-mic.x)*180/Math.PI;
    const pose=`translate(${actorX} ${top}) scale(${s})`;if(actor.dataset.pose!==pose){actor.dataset.pose=pose;actor.innerHTML=`<g transform="${pose}">${person('#8668a1')}</g>`}svg.innerHTML=`<g transform="translate(${mic.x} ${mic.y}) rotate(${ang})"><rect x="-1400" y="-2.5" width="1390" height="5" rx="2.5" fill="#9aa3c7"/><rect x="-12" y="-5" width="6" height="10" rx="2" fill="#2b2f55"/><rect x="-8" y="-11" width="40" height="22" rx="11" class="bm-mic ${state}"/><path d="M-4 -11v22M4 -11v22M12 -11v22M20 -11v22" stroke="#0002" stroke-width="2"/></g>`}
-  function measure(){const m=16,inFrame=mic.x>frame.l-m&&mic.x<frame.r+m&&mic.y>frame.t-m&&mic.y<frame.b+m;if(inFrame)return{ng:true,q:0};
-   const d=Math.hypot(mic.x-mouth.x,mic.y-mouth.y),dmin=Math.min(mouth.y-frame.t,frame.b-mouth.y,mouth.x-frame.l,frame.r-mouth.x)+m;const q=Math.max(0,Math.min(1,1-(d-dmin-12)/(H*.42)));return{ng:false,q}}
+  // Test the whole drawn capsule (axis x 3–21 in mic space, radius 11) plus its mount, not just the pivot:
+  // any part within PAD px of the frame (its 3px border included) is visible on camera.
+  function measure(){const PAD=6,a=Math.atan2(mouth.y-mic.y,mouth.x-mic.x),ux=Math.cos(a),uy=Math.sin(a);
+   const gap=(x,y)=>Math.hypot(Math.max(frame.l-x,0,x-frame.r),Math.max(frame.t-y,0,y-frame.b));
+   let clear=gap(mic.x-9*ux,mic.y-9*uy)-5;for(let k=3;k<=21;k+=2)clear=Math.min(clear,gap(mic.x+k*ux,mic.y+k*uy)-11);
+   if(clear<PAD)return{ng:true,edge:clear>=0,q:0};
+   const tip={x:mic.x+32*ux,y:mic.y+32*uy},d=Math.hypot(tip.x-mouth.x,tip.y-mouth.y),dmin=Math.min(mouth.y-frame.t,frame.b-mouth.y,mouth.x-frame.l,frame.r-mouth.x)+PAD;
+   return{ng:false,q:Math.max(0,Math.min(1,1-(d-dmin)/(H*.3)))}}
   function feedback(r){state=r.ng?'ng':r.q>=.82?'best':r.q>=.6?'good':'far';
-   status.className='bm-status '+state;status.innerHTML=r.ng?'<b>穿幫了！麥克風進入畫面</b><small>Mic in frame — 往畫框外移一點</small>':r.q>=.82?'<b>完美位置！Sweet Spot</b><small>又近又看不見，人聲最清楚</small>':r.q>=.6?'<b>尚可 Good</b><small>再靠近畫框邊緣一點</small>':'<b>太遠了！噪音太多</b><small>Too far — 貼近畫框邊緣，靠近嘴巴</small>';
+   status.className='bm-status '+state;status.innerHTML=r.ng?(r.edge?'<b>太貼框了！算穿幫</b><small>手一晃就會入鏡，留一點安全距離</small>':'<b>穿幫了！麥克風進入畫面</b><small>Mic in frame — 往畫框外移一點</small>'):r.q>=.82?'<b>完美位置！Sweet Spot</b><small>又近又看不見，人聲最清楚</small>':r.q>=.6?'<b>尚可 Good</b><small>再靠近畫框邊緣一點</small>':'<b>太遠了！噪音太多</b><small>Too far — 貼近畫框邊緣，靠近嘴巴</small>';
    const lv=r.ng?5:Math.round(r.q*5);bars.forEach((b,i)=>{b.className=i<lv?(r.ng?'on ng':r.q>=.6?'on':'on far'):''})}
   function setMic(x,y){mic.x=Math.max(8,Math.min(W-8,x));mic.y=Math.max(8,Math.min(H-8,y))}
   // On touch, hold the mic a little above the finger so it stays visible.
