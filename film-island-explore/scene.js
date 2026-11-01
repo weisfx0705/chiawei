@@ -43,10 +43,9 @@ for(const z of [-.6,.6]){const ring=new T.Mesh(new T.TorusGeometry(6,.14,7,64),m
 const cabins=[];for(let i=0;i<10;i++){const a=i*Math.PI/5,x=Math.cos(a)*6,y=Math.sin(a)*6;rod(wheel,[0,0,0],[x,y,0],.055,'#f7d78f');const c=new T.Group();c.position.set(x,y,0);wheel.add(c);box(c,.9,1,1,['#e8a0a8','#85b8d3','#f0cb68','#9abf81'][i%4],0,-.6);box(c,.7,.45,1.04,'#e4f5f4',0,-.4);cabins.push(c)}
 rod(wheelBase,[-3,-2,0],[0,6,0],.18,'#eee3c2');rod(wheelBase,[3,-2,0],[0,6,0],.18,'#eee3c2');
 // Stationary black Film & TV badge mounted at the wheel hub, with a subtle fixed sheen.
-// Its center lies on the viewing ray through the axle, so the badge visually stays centered.
+// Keep the face parallel to the wheel plane, with only a shallow spacer in front of the axle.
 const hubBadge=new T.Group();wheelBase.add(hubBadge);
-const hubNormal=new T.Vector3(0,38,30).normalize();hubBadge.position.copy(hubNormal.clone().multiplyScalar(3)).add(new T.Vector3(0,6,0));
-hubBadge.rotation.x=-Math.atan2(38,30);
+hubBadge.position.set(0,6,.82);
 rod(wheelBase,[0,6,0],hubBadge.position.toArray(),.2,'#45424a');
 function hubPlate(w,h,r,depth,color,z){const sh=new T.Shape();sh.moveTo(-w/2+r,-h/2);sh.lineTo(w/2-r,-h/2);sh.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);sh.lineTo(w/2,h/2-r);sh.quadraticCurveTo(w/2,h/2,w/2-r,h/2);sh.lineTo(-w/2+r,h/2);sh.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);sh.lineTo(-w/2,-h/2+r);sh.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);const plate=mesh(hubBadge,new T.ExtrudeGeometry(sh,{depth,bevelEnabled:true,bevelSize:.045,bevelThickness:.04,bevelSegments:2,steps:1}),color,0,0,z);plate.material=new T.MeshStandardMaterial({color:new T.Color(color).convertSRGBToLinear(),roughness:.28,metalness:.3});return plate}
 hubPlate(6.55,3.28,.2,.16,'#47444f',-.12);hubPlate(6.4,3.13,.16,.07,'#17151f',.06);
