@@ -1,0 +1,14 @@
+/* Browser-synthesized score; no recordings, downloads, API, or credentials. */
+(() => {
+const KEY='film-island-score-v1';let enabled=true;try{enabled=localStorage.getItem(KEY)!=='off'}catch{}
+let ctx,master,timer,next=0,beat=0,mode='explore',started=false;const pauses=new Set(),voices=new Set();
+const melody=[76,0,79,83,81,79,76,0,74,76,79,0,74,72,71,0,72,76,79,84,83,79,76,0,74,79,78,74,72,0,0,0];const bass=[48,53,57,55];
+function note(midi,t,len,gain,type='sine'){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=440*Math.pow(2,(midi-69)/12);o.connect(g);g.connect(master);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(gain,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+len);o.start(t);o.stop(t+len+.02);voices.add(o);o.onended=()=>{voices.delete(o);o.disconnect();g.disconnect()}}
+function schedule(){if(!ctx||!enabled||pauses.size||document.hidden)return;while(next<ctx.currentTime+.12){const b=beat%32,chord=bass[Math.floor(b/8)];if(mode==='cinema'){if(b%8===0)for(const n of [chord+12,chord+19,chord+24])note(n,next,2.6,.032);if(b%4===0)note(chord+36,next,1.4,.025)}else{if(melody[b]){note(melody[b],next,.24,.065,'triangle');note(melody[b]+12,next,.12,.013)}if(b%4===0)note(chord,next,.36,.08);if(b%4===2)for(const n of [chord+12,chord+16,chord+19])note(n,next,.1,.016);if(b%2===1)note(102,next,.025,.007)}next+=60/104/2;beat++}}
+function stop(){clearInterval(timer);timer=null;if(master&&ctx){master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(0,ctx.currentTime,.04)}for(const o of voices){try{o.stop(ctx.currentTime+.15)}catch{}}}
+async function run(){if(!started||!enabled||pauses.size||document.hidden){stop();return}try{ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();if(!master){master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination)}await ctx.resume();if(!enabled||pauses.size||document.hidden)return;master.gain.setTargetAtTime(.48,ctx.currentTime,.18);next=ctx.currentTime+.04;clearInterval(timer);timer=setInterval(schedule,50);schedule()}catch{enabled=false;render()}}
+function render(){const b=document.getElementById('musicBtn');if(b){b.setAttribute('aria-pressed',String(enabled));b.innerHTML=`${enabled?'♫':'♩'} <span>配樂${enabled?'開':'關'}</span>`;b.title=enabled?'關閉合成配樂':'開啟合成配樂'}}
+window.FilmMusic={start(){started=true;run()},toggle(){started=true;enabled=!enabled;try{localStorage.setItem(KEY,enabled?'on':'off')}catch{}render();run()},pause(reason){pauses.add(reason);stop()},resume(reason){if(pauses.delete(reason))run()},mode(value){if(mode===value)return;mode=value;beat=0;stop();if(started)run()},state(){return{enabled,mode,paused:pauses.size>0,started,running:!!timer}}};
+document.addEventListener('pointerdown',()=>FilmMusic.start(),{once:true});
+document.addEventListener('visibilitychange',()=>document.hidden?FilmMusic.pause('hidden'):FilmMusic.resume('hidden'));render();
+})();
