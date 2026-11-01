@@ -5,8 +5,8 @@
  .game-top{top:calc(8px + var(--safe-top));left:10px;right:10px;gap:8px;align-items:center;z-index:14}
  .logo-brand{padding:8px 12px;border-radius:12px;min-height:48px;gap:0}.logo-brand>span{display:none}.logo-brand img{width:112px!important;height:auto}
  .top-tools{display:flex;flex-wrap:nowrap;max-width:none;gap:6px;position:relative;align-items:center}
- .top-tools>#bagBtn,.top-tools>#moreTools{display:block;min-width:44px;min-height:44px;padding:8px 11px;font-size:19px;border-radius:12px;order:initial}
- .top-tools>#bagBtn span,.top-tools>#moreTools span{display:none}
+ .top-tools>#bagBtn,.top-tools>#restartBtn,.top-tools>#moreTools{display:block;min-width:44px;min-height:44px;padding:8px 11px;font-size:19px;border-radius:12px;order:initial}
+ .top-tools>#bagBtn span,.top-tools>#restartBtn span,.top-tools>#moreTools span{display:none}
  #utilityMenu{display:none;position:absolute;right:0;top:54px;width:268px;max-height:calc(100dvh - 86px - var(--safe-top));overflow:auto;overscroll-behavior:contain;padding:10px;background:#fff9ed;border:2px solid white;border-radius:16px;box-shadow:0 12px 36px #2c25494a;z-index:20;gap:7px;grid-template-columns:1fr 1fr}
  .tools-open #utilityMenu{display:grid}.top-tools #utilityMenu>button{display:block;position:static;inset:auto;min-height:46px;min-width:0;padding:9px 8px;width:100%;background:#eee7d7;color:#302b40;border:1px solid #ddd0b9;border-radius:10px;font-size:12px;box-shadow:none;white-space:normal;line-height:1.6;animation:none}
  .top-tools #utilityMenu>button span{display:inline;font-size:12px}.top-tools #utilityMenu>button small{display:none}#compactPassport,#compactFestival{display:block}
@@ -47,7 +47,7 @@
  .timehouse-picks .film-tile{min-height:115px}.cinema-mode .dialog-top{min-height:58px}.cinema-mode #modalBody{padding-bottom:calc(24px + var(--safe-bottom))}
 }
 @media(max-height:520px) and (max-width:1100px), (max-height:520px) and (pointer:coarse) and (max-width:1400px){
- .game-top{top:6px;left:8px;right:8px}.logo-brand{min-height:42px;padding:6px 9px}.logo-brand img{width:90px!important}.top-tools>#bagBtn,.top-tools>#moreTools{min-height:42px;height:42px;padding:6px 10px}
+ .game-top{top:6px;left:8px;right:8px}.logo-brand{min-height:42px;padding:6px 9px}.logo-brand img{width:90px!important}.top-tools>#bagBtn,.top-tools>#restartBtn,.top-tools>#moreTools{min-height:42px;height:42px;padding:6px 10px}
  .player-hud{top:57px;height:55px;width:161px}.portrait-wrap{width:34px;height:45px}.player-info>b{font-size:11px}#xpText{font-size:8px}.quest-banner{top:57px;right:9px;width:210px;padding:6px;min-height:42px}.quest-banner>span,#questDots{display:none}.quest-banner>b{font-size:10px}
  .mission{height:36dvh;min-height:140px;width:min(900px,calc(100% - 16px));left:50%;right:auto;transform:translateX(-50%)}.mission.expanded{height:calc(100dvh - 55px - var(--safe-bottom))}.sheet-bar{flex-basis:48px}#expandMission,#closeMission{height:44px;min-height:44px}#missionBody{padding:10px 16px 20px}
  .view-tools{display:flex;flex-direction:row;right:10px;gap:5px}.view-tools button{width:40px;height:40px;font-size:20px}.game-bottom{height:60px;padding:5px}.game-bottom #islandNav button{min-height:46px;min-width:85px;display:flex;align-items:center;justify-content:center;gap:5px}.game-bottom #islandNav button b{display:inline;margin:0}
