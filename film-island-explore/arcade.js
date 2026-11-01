@@ -20,8 +20,57 @@ const sfx={
  cut(){if(soundOn()){noise(.06,4200,.12,0,'highpass');tone(1760,.05,'triangle',.03)}},
  pop(){if(soundOn())tone(520,.08,'sine',.05,0,900)},
  win(){if(soundOn())[523,659,784,1047,1319].forEach((f,i)=>tone(f,.22,'triangle',.055,i*.09))},
- lose(){if(soundOn())[392,330,262].forEach((f,i)=>tone(f,.25,'triangle',.05,i*.14))}
+ lose(){if(soundOn())[392,330,262].forEach((f,i)=>tone(f,.25,'triangle',.05,i*.14))},
+ count(){if(soundOn()){tone(880,.12,'square',.035);tone(440,.12,'triangle',.03)}},
+ // Clapperboard: a sharp wooden clack, then a bright "go" chord stands in for the shouted ACTION.
+ slate(){if(soundOn()){noise(.035,2600,.32,0,'bandpass');noise(.05,900,.18,.012,'bandpass');tone(170,.08,'triangle',.06,0,90)}},
+ action(){if(!soundOn())return;sfx.slate();[523,784,1047].forEach((f,i)=>tone(f,.32,'triangle',.045,.06+i*.035,f*1.01))},
+ rec(){if(soundOn())tone(1000,.32,'sine',.04,.05)}
 };
+
+/* ---------- Music: a tiny step sequencer, so every game gets its own synth loop (no audio files) ---------- */
+// Each song: 16 steps per bar; chords loop bar by bar. bass x=root o=fifth; lead digits pick chord tones (4–7 = an octave up).
+const CHORD={M:[0,4,7,12],m:[0,3,7,12],M7:[0,4,7,11],m7:[0,3,7,10],d7:[0,4,7,10],sus:[0,5,7,12]};
+const SONGS={
+ dir:{bpm:104,chords:[[53,'M7'],[52,'m7'],[50,'m7'],[48,'M7']],bass:'x...o...x.x.o...',lead:'0.2.4.2.1.3.5.3.',lw:'triangle',lv:.03,k:'x.......x.......',s:'....x.......x...',h:'..x...x...x...x.'},
+ cam:{bpm:84,chords:[[57,'m7'],[53,'M7'],[48,'M'],[55,'sus']],pad:1,bass:'x.......o.......',bw:'sine',lead:'4...6...5...7...',lo:12,lw:'sine',lv:.022,ld:5,h:'....x.......x...'},
+ art:{bpm:108,chords:[[50,'m'],[50,'m'],[58,'M'],[57,'M']],bass:'x.o.x.o.x.o.x.o.',bd:.6,lead:'0..2.1..3..2.1..',lw:'triangle',lv:.032,ld:.8,k:'x.....x...x.....',s:'....x.......x..x',h:'x.x.x.x.x.x.x.x.'},
+ snd:{bpm:88,chords:[[52,'m'],[52,'m'],[48,'M'],[50,'M']],pad:1,bass:'x...............',bw:'sine',lead:'....0.......1...',lo:12,lw:'sine',lv:.016,ld:4,k:'x..x............'},
+ edt:{bpm:92,chords:[[57,'m'],[53,'M'],[48,'M'],[55,'M']],bass:'x...x...x...x.o.',lead:'4.2.0.2.4.2.5.4.',lw:'square',lv:.012,k:'x...x...x...x...',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.'},
+ pro:{bpm:140,chords:[[48,'M'],[55,'M'],[57,'m'],[53,'M']],bass:'x.x.o.x.x.x.o.x.',bw:'square',bv:.022,lead:'4.4.5.4.2...0.2.',lw:'square',lv:.016,k:'x...x...x...x...',s:'....x.......x...',h:'x.x.x.x.x.x.x.x.'},
+ mkt:{bpm:124,chords:[[55,'m7'],[60,'d7'],[55,'m7'],[62,'d7']],bass:'x..x..x.x..x.o..',lead:'..0.2..4.3..2...',lw:'square',lv:.014,k:'x...x...x...x...',s:'....x.......x...',h:'.xx..xx..xx..xx.'},
+ res:{bpm:116,chords:[[48,'m'],[56,'M'],[58,'M'],[55,'M']],bass:'x...o...x...o...',bd:.5,lead:'0.1.2.1.0.1.2.3.',lw:'sine',lv:.024,ld:.9,h:'x...x...x...x...'}
+};
+const midi=n=>440*Math.pow(2,(n-69)/12);
+let nbuf=null;
+function voice(a,out,freq,t,dur,type,vol,atk=.01){const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+atk);g.gain.exponentialRampToValueAtTime(.0006,t+dur);o.connect(g);g.connect(out);o.start(t);o.stop(t+dur+.05);o.onended=()=>{o.disconnect();g.disconnect()}}
+function drum(a,out,kind,t){
+ if(kind==='k'){const o=a.createOscillator(),g=a.createGain();o.frequency.setValueAtTime(140,t);o.frequency.exponentialRampToValueAtTime(42,t+.16);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.connect(g);g.connect(out);o.start(t);o.stop(t+.25);o.onended=()=>{o.disconnect();g.disconnect()};return}
+ if(!nbuf){nbuf=a.createBuffer(1,a.sampleRate,a.sampleRate);const d=nbuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}
+ const src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain(),snare=kind==='s',dur=snare?.13:.035;src.buffer=nbuf;f.type=snare?'bandpass':'highpass';f.frequency.value=snare?1900:7200;
+ g.gain.setValueAtTime(snare?.07:.03,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);src.connect(f);f.connect(g);g.connect(out);src.start(t,Math.random()*.8,dur+.02);src.onended=()=>{src.disconnect();f.disconnect();g.disconnect()}}
+function startMusic(name,at){
+ const S=SONGS[name],a=audio();if(!S||!a)return null;
+ const bus=a.createGain();bus.gain.value=0;bus.connect(a.destination);
+ let step=0,next=Math.max(at||0,a.currentTime+.06),rate=1,level=1,want=-1;
+ const sixteenth=()=>60/S.bpm/4/rate;
+ function play(i,t){
+  const bar=Math.floor(i/16)%S.chords.length,n=i%16,[root,q]=S.chords[bar],tones=CHORD[q],sx=sixteenth();
+  if(S.pad&&n===0)tones.slice(0,3).forEach(iv=>voice(a,bus,midi(root-12+iv),t,sx*16*1.05,'triangle',.014,.35));
+  const b=S.bass[n];if(b!=='.')voice(a,bus,midi(root-24+(b==='o'?7:0)),t,sx*(S.bd?S.bd*4:2.4),S.bw||'triangle',S.bv||.07);
+  const d=S.lead[n];if(d!=='.'){const k=+d;voice(a,bus,midi(root+(S.lo||0)+tones[k%4]+(k>=4?12:0)),t,sx*(S.ld?S.ld*4:1.8),S.lw,S.lv)}
+  ['k','s','h'].forEach(kind=>{if(S[kind]?.[n]==='x')drum(a,bus,kind,t)});
+ }
+ const iv=setInterval(()=>{
+  const target=soundOn()?.75*level:0;if(target!==want){want=target;bus.gain.setTargetAtTime(target,a.currentTime,.12)}
+  if(next<a.currentTime-.2)next=a.currentTime+.05;// tab was hidden: skip ahead instead of firing a burst of notes
+  while(next<a.currentTime+.15){if(want>0)play(step,next);next+=sixteenth();step++}
+ },30);
+ return{
+  stop(){clearInterval(iv);bus.gain.cancelScheduledValues(a.currentTime);bus.gain.setTargetAtTime(0,a.currentTime,.08);setTimeout(()=>bus.disconnect(),700)},
+  hurry(on){rate=on?1.15:1},
+  duck(v){level=v;want=-1}
+ }}
 
 /* ---------- Overlay shell ---------- */
 const root=document.createElement('div');root.id='arcade';root.className='arcade';root.hidden=true;root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','arcadeTitle');
@@ -33,13 +82,14 @@ let opts=null,current=null,run=0,timers=[],frames=[],offs=[],hudState={},inerted
 function teardown(){run++;timers.forEach(t=>{clearTimeout(t);clearInterval(t)});frames.forEach(cancelAnimationFrame);offs.forEach(f=>f());timers=[];frames=[];offs=[];hudState={};hudEl.innerHTML=''}
 function hud(patch){Object.assign(hudState,patch);hudEl.innerHTML=Object.entries(hudState).filter(([,v])=>v!=null).map(([k,v])=>`<span class="chip chip-${k}">${v}</span>`).join('')}
 function makeApi(){
- const token=run,alive=()=>token===run&&!root.hidden;
+ const token=run,alive=()=>token===run&&!root.hidden;let song=null;
  const api={
   stage,hud,sfx,tone,noise,alive,
+  music(name,at){song?.stop();song=startMusic(name,at);if(song){const m=song;offs.push(()=>m.stop())}return song||{hurry(){},duck(){},stop(){}}},
   later(fn,ms){const t=setTimeout(()=>alive()&&fn(),ms);timers.push(t);return t},
   loop(fn){let last=performance.now();const step=now=>{if(!alive())return;const dt=Math.min(.05,(now-last)/1000);last=now;if(fn(dt,now)!==false)frames.push(requestAnimationFrame(step))};frames.push(requestAnimationFrame(step))},
   on(el,ev,fn,o){el.addEventListener(ev,fn,o);offs.push(()=>el.removeEventListener(ev,fn,o))},
-  timer(sec,onEnd){let left=sec,stopped=false;const show=()=>hud({time:`⏱ ${Math.max(0,left)}`});show();const iv=setInterval(()=>{if(stopped||!alive())return;left--;show();if(left<=5&&left>0)sfx.tick(false);if(left<=0){stopped=true;clearInterval(iv);onEnd()}},1000);timers.push(iv);return{stop(){stopped=true;clearInterval(iv)},add(d){left=Math.max(1,left+d);show()},get left(){return left}}},
+  timer(sec,onEnd){let left=sec,stopped=false;const show=()=>hud({time:`⏱ ${Math.max(0,left)}`});show();const iv=setInterval(()=>{if(stopped||!alive())return;left--;show();if(left===10)song?.hurry(true);if(left<=5&&left>0)sfx.tick(false);if(left<=0){stopped=true;clearInterval(iv);onEnd()}},1000);timers.push(iv);return{stop(){stopped=true;clearInterval(iv)},add(d){left=Math.max(1,left+d);show()},get left(){return left}}},
   win(n,detail){if(alive())result(true,n,detail)},
   lose(detail){if(alive())result(false,0,detail)}
  };
@@ -59,7 +109,7 @@ function intro(){
  stage.innerHTML=`<div class="arcade-intro"><div class="ai-poster"><span class="ai-icon" aria-hidden="true">${g.icon}</span><span class="ai-genre">經典玩法｜${g.genre}</span></div><div class="ai-copy"><h3>${g.name}</h3><p>${g.pitch}</p><ol>${g.how.map(s=>`<li>${s}</li>`).join('')}</ol><div class="ai-course"><small>🎓 這關對應課程</small><b>《${c.name}》</b><span>${c.type} · ${c.learn}</span></div>${opts.best?`<p class="ai-best">最佳紀錄 <b>${starText(opts.best)}</b></p>`:''}${g.note?`<p class="ai-note">${g.note}</p>`:''}<button class="arcade-go" id="arcadeGo" type="button">▶ 開始闖關</button></div></div>`;
  $('#arcadeGo').onclick=()=>{audio();play()};$('#arcadeGo').focus({preventScroll:true});
 }
-function play(){teardown();stage.innerHTML='';const api=makeApi();GAMES[current].mount(api)}
+function play(){teardown();stage.innerHTML='';sfx.slate();const api=makeApi();GAMES[current].mount(api)}
 function result(win,n,detail){
  teardown();const id=current,g=GAMES[id],c=course(id);
  if(win){sfx.win();opts.onWin?.(n)}else sfx.lose();
@@ -91,7 +141,7 @@ dir:{name:'分鏡翻牌大考驗',genre:'記憶翻牌',icon:'🎬',course:1,
  how:['翻開兩張牌，名稱和畫面相符就配對成功','六組全部配對就過關，限時 90 秒','步數越少，星星越多'],
  lesson:'分鏡師用「景別」決定觀眾和角色的距離：遠景交代環境、全景看見動作、特寫放大情緒。先把文字轉成這些鏡頭，劇組才知道要怎麼拍。',
  mount(api){
-  const color=role('dir').color,deck=shuffle(SHOTS.flatMap(s=>[{s,face:'img'},{s,face:'txt'}]));let first=null,lock=false,moves=0,pairs=0;
+  api.music('dir');const color=role('dir').color,deck=shuffle(SHOTS.flatMap(s=>[{s,face:'img'},{s,face:'txt'}]));let first=null,lock=false,moves=0,pairs=0;
   api.hud({pairs:`🃏 0 / 6`,moves:'步數 0'});
   api.stage.innerHTML=`<div class="mm-wrap"><p class="game-tip">翻牌找出相同景別的「名稱」和「畫面」</p><div class="mm-grid">${deck.map((c,i)=>`<button class="mm-card" data-i="${i}" type="button" aria-label="第 ${i+1} 張牌，尚未翻開"><span class="mm-inner"><span class="mm-back"><b>🎬</b><small>SHOT ${String(i+1).padStart(2,'0')}</small></span><span class="mm-face ${c.face}">${c.face==='img'?shotSvg(c.s,color):`<b>${c.s.name}</b><em>${c.s.en}</em><small>${c.s.hint}</small>`}</span></span></button>`).join('')}</div></div>`;
   const cards=[...api.stage.querySelectorAll('.mm-card')];
@@ -111,6 +161,7 @@ cam:{name:'點亮片場',genre:'點燈解謎（Lights Out）',icon:'💡',course
  how:['點一盞燈：它和上下左右的燈都會切換開／關','全部燈都亮起，這場戲就曝光正確；共兩場（3×3、4×4），限時 120 秒','卡關就按「💡 看提示」：它會標出下一盞該按的燈。跟著提示也能過關，順便學會規律！'],
  lesson:'燈光師打一盞燈，從來不只影響一個點——光會溢散到周圍。控制光的方向、範圍與明暗，讓畫面亮在該亮的地方，就是燈光課每天在練的事。',
  mount(api){
+  api.music('cam');
   const rounds=[{n:3,k:3},{n:4,k:4}];let r=0,board,start,need,moves=0,total=0,par=0,hints=0,busy=false,nudge=false,hinted=-1;
   const t=api.timer(120,()=>api.lose(`時間到！完成了 ${r} / 2 場。記得：每盞燈都會影響上下左右。`));
   const idx=(x,y,n)=>y*n+x;
@@ -135,6 +186,7 @@ art:{name:'穿幫大搜查',genre:'找不同',icon:'🔍',course:0,
  how:['比較「第一天」與「隔天補拍」兩個鏡頭','點擊不一樣的位置（左右兩邊都可以點）','點錯扣 3 秒，限時 60 秒'],
  lesson:'鏡頭一換，桌上的杯子就不見了？這就是「穿幫」。美術組會拍照、記錄每一件陳設，讓場景在每一顆鏡頭裡都一致——從美術設計到場景製作，細節決定觀眾信不信。',
  mount(api){
+  api.music('art');
   const rows=[['🖼️','🕰️','📅','🪞','🎐','🏮','🎨'],['📚','🏺','🕯️','📻','🌵','📷','⏰','🧴'],['☕','🍎','📖','🧁','✉️','🔑','👓','🥤'],['🪑','🧸','🪴','📦','🎸','👟','☂️','🧺','🐈']];
   const A=[];rows.forEach(pool=>{const p=shuffle(pool),gap=Math.floor(Math.random()*5);for(let x=0;x<5;x++)A.push(x===gap?'':p[x])});
   const B=[...A],diffs=shuffle([...A.keys()]).slice(0,5);
@@ -156,6 +208,7 @@ snd:{name:'Boom 收音不穿幫',genre:'拖曳定位挑戰',icon:'🎙️',cours
  lesson:'同步錄音追求最高的「訊噪比」：麥克風越靠近嘴巴，人聲越清楚、環境噪音越少；可是一進入畫面就穿幫。收音師永遠在畫框邊緣，找那個「最近又看不見」的位置。',
  mount(api){
   const takes=[{name:'中景',h:72},{name:'近景',h:50},{name:'移動特寫',h:32,drift:.08}];
+  const mus=api.music('snd');let beeped=0;
   let take=-1,phase='idle',phaseT=0,sum=0,samples=0,passes=0,ngs=0,qualities=[],mic={x:40,y:9999},W=0,H=0,frame={},mouth={},state='';
   api.hud({take:'第 1 / 3 條',ok:'OK 0',ng:'NG 0'});
   api.stage.innerHTML=`<div class="bm-wrap"><div class="bm-bar"><div class="bm-status" id="bmStatus"><b>架好 Boom！</b><small>拖曳麥克風到畫框外最靠近嘴巴的位置</small></div><div class="bm-snr" aria-label="訊噪比"><small>SNR</small><span id="bmSnr">${'<i></i>'.repeat(5)}</span></div></div><div class="bm-stage" id="bmStage"><svg class="bm-actor" id="bmActor" aria-hidden="true"></svg><svg class="bm-svg" id="bmSvg" aria-hidden="true"></svg><div class="bm-frame" id="bmFrame"><span>🎥 CAMERA FRAME 16:9</span><i class="bm-rec" id="bmRec">● REC</i></div><div class="bm-cue" id="bmCue"></div><div class="bm-take"><i id="bmTakeBar"></i></div></div></div>`;
@@ -186,11 +239,12 @@ snd:{name:'Boom 收音不穿幫',genre:'拖曳定位挑戰',icon:'🎙️',cours
   function say(t,cls=''){cue.textContent=t;cue.className='bm-cue show '+cls}
   function nextTake(){take++;if(take>=takes.length){const avg=qualities.length?qualities.reduce((a,b)=>a+b,0)/qualities.length:0;phase='done';
     if(passes>=2){const n=passes===3&&avg>=.85?3:passes===3?2:1;api.win(n,`三條鏡頭 OK ${passes} 條、NG ${ngs} 條，平均收音品質 ${Math.round(avg*100)}%。`)}else api.lose(`OK ${passes} 條、NG ${ngs} 條。記得：麥克風要「貼著畫框外緣」，越靠近嘴巴越好，但不能進框！`);return}
-   phase='setup';phaseT=0;sum=0;samples=0;fr.classList.remove('rolling','ng','ok');api.hud({take:`第 ${take+1} / 3 條`});say(`第 ${take+1} 條・${takes[take].name}　架好 Boom！`)}
-  function endTake(ok,q){phase='between';phaseT=0;fr.classList.remove('rolling');fr.classList.add(ok?'ok':'ng');if(ok){passes++;qualities.push(q);api.sfx.ok();say(`CUT！OK，收音品質 ${Math.round(q*100)}%`,'ok')}else{ngs++;api.sfx.bad();say(q<0?'NG！穿幫了，重來下一條':`NG！收音品質 ${Math.round(q*100)}%，太遠了`,'ng')}api.hud({ok:`OK ${passes}`,ng:`NG ${ngs}`})}
+   phase='setup';phaseT=0;beeped=0;mus.duck(1);sum=0;samples=0;fr.classList.remove('rolling','ng','ok');api.hud({take:`第 ${take+1} / 3 條`});say(`第 ${take+1} 條・${takes[take].name}　架好 Boom！`)}
+  function endTake(ok,q){phase='between';phaseT=0;mus.duck(1);fr.classList.remove('rolling');fr.classList.add(ok?'ok':'ng');if(ok){passes++;qualities.push(q);api.sfx.ok();say(`CUT！OK，收音品質 ${Math.round(q*100)}%`,'ok')}else{ngs++;api.sfx.bad();say(q<0?'NG！穿幫了，重來下一條':`NG！收音品質 ${Math.round(q*100)}%，太遠了`,'ng')}api.hud({ok:`OK ${passes}`,ng:`NG ${ngs}`})}
   layout();mic={x:W*.12,y:H*.92};
   api.loop(dt=>{if(phase==='done')return false;phaseT+=dt;draw();const r=measure();feedback(r);
-   if(phase==='setup'){const left=3-phaseT;if(left<=0){phase='rec';phaseT=0;fr.classList.add('rolling');say('ACTION！維持位置…','rec');api.sfx.tick(true)}else if(phaseT>1.2)say(`${Math.ceil(left)}…`)}
+   if(phase==='setup'){const left=4-phaseT;if(left<=0){phase='rec';phaseT=0;fr.classList.add('rolling');say('ACTION！維持位置…','rec');api.sfx.action();api.sfx.rec()}
+    else if(phaseT>=1){const n=Math.ceil(left);if(n!==beeped){beeped=n;api.sfx.count();if(n===1)mus.duck(.25)}say(`${n}…`)}}
    else if(phase==='rec'){takeBar.style.width=Math.min(100,phaseT/6*100)+'%';if(r.ng){endTake(false,-1);return}sum+=r.q*dt;samples+=dt;if(phaseT>=6){const q=sum/samples;endTake(q>=.7,q)}}
    else if(phase==='between'){takeBar.style.width='0%';if(phaseT>1.6)nextTake()}});
   nextTake();
@@ -211,6 +265,7 @@ edt:{name:'節拍剪接台',genre:'節奏遊戲',icon:'✂️',course:0,
   const lineX=()=>track.clientWidth*.24;
   t0=clock()+beat*4+.25;
   if(a&&soundOn())for(let b=-4;b<=17;b++){const at=t0+b*beat-a.currentTime;if(at>0){const accent=b%4===0;tone(accent?1568:1046,.04,'square',b<0?.035:.018,at)}}
+  api.music('edt',t0);
   for(let b=-4;b<0;b++)api.later(()=>{$('#rhCount').textContent=String(-b)},Math.max(0,(t0+b*beat-clock())*1000));
   api.later(()=>{$('#rhCount').textContent='剪！'},Math.max(0,(t0-clock())*1000));
   function show(text,cls){judgeEl.textContent=text;judgeEl.className='rh-judge '+cls;void judgeEl.offsetWidth;judgeEl.classList.add('pop')}
@@ -235,7 +290,7 @@ pro:{name:'製片補給大作戰',genre:'接物遊戲',icon:'📋',course:1,
   api.hud({score:'📦 0 / 15',lives:'❤❤❤'});
   api.stage.innerHTML=`<div class="ct-wrap" id="ctWrap"><div class="ct-sky"><span class="ct-sign">🎬 外景片場</span></div><div class="ct-legend"><span class="good"><b>✅ 接住 +1</b>${G.join(' ')}</span><span class="bad"><b>❌ 閃開 −❤</b>${B.join(' ')}</span></div><div class="ct-ready" id="ctReady"><b>準備開拍！</b><p><span class="good">綠圈 = 劇組需要的補給，接住 +1</span><span class="bad">紅圈 = 下雨、超支、延誤，碰到 −❤</span></p><em id="ctCount">3</em></div><div class="ct-field" id="ctField"></div><div class="ct-cart" id="ctCart"><span>🛒</span><small>製片車</small></div><div class="ct-pop" id="ctPop"></div></div>`;
   const field=$('#ctField'),wrap=$('#ctWrap'),cart=$('#ctCart');
-  [2,1].forEach((n,i)=>api.later(()=>{$('#ctCount').textContent=n},(i+1)*900));api.later(()=>{$('#ctReady').classList.add('gone');live=true;t=api.timer(45,()=>end(false,`時間到！接到 ${score} / 15 個補給。`))},2700);
+  api.later(api.sfx.count,250);[2,1].forEach((n,i)=>api.later(()=>{$('#ctCount').textContent=n;api.sfx.count()},(i+1)*900));api.later(()=>{$('#ctReady').classList.add('gone');api.sfx.action();api.music('pro');live=true;t=api.timer(45,()=>end(false,`時間到！接到 ${score} / 15 個補給。`))},2700);
   function end(win,detail){if(over)return;over=true;t?.stop();if(win){const n=lives;api.later(()=>api.win(n,detail),400)}else api.later(()=>api.lose(detail),400)}
   const setTarget=e=>{const r=wrap.getBoundingClientRect();target=Math.min(.95,Math.max(.05,(e.clientX-r.left)/r.width))};
   api.on(wrap,'pointerdown',e=>{setTarget(e);try{wrap.setPointerCapture(e.pointerId)}catch{}});api.on(wrap,'pointermove',e=>{if(e.pointerType==='mouse'||e.buttons)setTarget(e)});
@@ -261,14 +316,14 @@ mkt:{name:'找對觀眾打地鼠',genre:'打地鼠',icon:'📣',course:1,
  mount(api){
   const types={horror:['👻','驚悚迷'],romance:['💕','愛情迷'],scifi:['🚀','科幻迷'],music:['🎵','音樂迷'],sport:['⚽','運動迷'],family:['🧸','親子觀眾'],food:['🍜','美食迷']};
   const films=[{title:'《午夜的錄音帶》',genre:'驚悚短片',target:['horror']},{title:'《夏日和弦》',genre:'青春音樂愛情片',target:['music','romance']},{title:'《小行星搬家記》',genre:'科幻動畫',target:['scifi','family']}];
-  let round=-1,score=0,holes=Array(9).fill(null),spawnT=0,live=false,remain=15,all=Object.keys(types);
+  let mus=null,round=-1,score=0,holes=Array(9).fill(null),spawnT=0,live=false,remain=15,all=Object.keys(types);
   api.hud({score:'🎯 0 分',round:null,time:null});
   api.stage.innerHTML=`<div class="wm-wrap"><div class="wm-brief" id="wmBrief"></div><div class="wm-grid">${holes.map((_,i)=>`<button class="wm-hole" data-i="${i}" type="button" aria-label="座位 ${i+1}"><span class="wm-mole"></span><i class="wm-seat"></i></button>`).join('')}</div></div>`;
   const els=[...api.stage.querySelectorAll('.wm-hole')],brief=$('#wmBrief');
   function nextRound(){round++;if(round>=films.length){live=false;const ok=score>=12,n=score>=20?3:score>=16?2:1;ok?api.win(n,`三部片宣傳結束，總分 ${score} 分！`):api.lose(`總分 ${score} 分，差 ${12-score} 分過關。先看清楚每部片的目標觀眾再出手！`);return}
    const f=films[round];live=false;holes.forEach((h,i)=>hide(i));remain=15;
    brief.innerHTML=`<small>第 ${round+1} / 3 部 · ${f.genre}</small><b>${f.title}</b><span>目標觀眾：${f.target.map(k=>`<em>${types[k][0]} ${types[k][1]}</em>`).join('')}</span>`;brief.classList.remove('flash');void brief.offsetWidth;brief.classList.add('flash');
-   api.hud({round:`第 ${round+1} / 3 部`,time:`⏱ 15`});api.later(()=>{live=true;tick()},1500)}
+   api.hud({round:`第 ${round+1} / 3 部`,time:`⏱ 15`});api.sfx.count();api.later(()=>{api.sfx.action();if(!mus)mus=api.music('mkt');mus.hurry(round===2);live=true;tick()},1500)}
   function tick(){if(!live)return;remain--;api.hud({time:`⏱ ${remain}`});if(remain<=0){live=false;api.later(nextRound,700);return}api.later(tick,1000)}
   function hide(i){holes[i]=null;els[i].classList.remove('up','hit','wrong')}
   function show(){const free=holes.map((h,i)=>h?-1:i).filter(i=>i>=0);if(!free.length)return;const i=free[Math.floor(Math.random()*free.length)],f=films[round],isT=Math.random()<.46,pool=isT?f.target:all.filter(k=>!f.target.includes(k)),k=pool[Math.floor(Math.random()*pool.length)],id=Symbol();
@@ -283,6 +338,7 @@ res:{name:'影史快問快答',genre:'問答遊戲',icon:'📚',course:0,
  how:['讀題後從四個選項選一個','每題 15 秒，作答後會看到解說','答對 3 題過關，答對越多星星越多'],
  lesson:'蒙太奇、長鏡頭、場面調度……這些詞不是拿來背的，而是拆解電影的工具。學會它們，你就能從「好好看」說到「為什麼這樣拍」。',
  mount(api){
+  api.music('res');
   const bank=[
    {q:'同一張面無表情的臉，接上一碗湯、一副棺材或一個小孩的畫面，觀眾會讀出飢餓、哀傷或溫柔。這個實驗叫做？',a:'庫勒雪夫效應',o:['蝴蝶效應','安慰劑效應','光暈效應'],why:'蘇聯導演庫勒雪夫發現：鏡頭的意義會被前後鏡頭改變——這正是剪接的力量。'},
    {q:'一個鏡頭從頭到尾不剪接、長時間連續拍攝，稱為？',a:'長鏡頭',o:['跳接','定格','溶接'],why:'長鏡頭保留真實的時間流動，讓觀眾跟著角色一起「待在」現場。'},
