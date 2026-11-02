@@ -383,7 +383,6 @@
   $('matrix-body').addEventListener('click',e=>{const b=e.target.closest('[data-matrix]');if(!b)return;const [i,j]=b.dataset.matrix.split(',').map(Number),values=['off','pre','post'];matrix[i][j]=values[(values.indexOf(matrix[i][j])+1)%3];b.dataset.value=matrix[i][j];b.textContent=matrix[i][j].toUpperCase();b.setAttribute('aria-label',`INPUT ${i+1} 到 ${['MAIN 1','MAIN 2','SUB 1','SUB 2'][j]}：${matrix[i][j].toUpperCase()}`);update();});
   $('check').addEventListener('click',runCheck);$('record-test').addEventListener('click',captureTake);$('listen-live').addEventListener('click',()=>listenAt('live'));
   $('record-results').addEventListener('click',e=>{const b=e.target.closest('[data-listen]');if(!b)return;const t=solve().tracks.find(t=>'rec-'+t.id===b.dataset.listen);if(t)listenAt('rec-'+t.id);});
-  document.querySelectorAll('[data-experiment]').forEach(b=>b.addEventListener('click',()=>{loadExample(b.dataset.experiment);$('lab').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selected){state.selected=null;update();message('已取消選取。');}});
   $('patch-navigation').addEventListener('click',e=>{
     const button=e.target.closest('[data-board-column]');if(!button)return;

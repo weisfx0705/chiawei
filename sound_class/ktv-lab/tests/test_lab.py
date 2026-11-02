@@ -114,7 +114,8 @@ def run():
         check('Two singers plus stereo occupy four inputs; F4 PRE/POST matrix keeps ISO independent')
 
         fresh()
-        page.locator('[data-experiment="aux"]').click()
+        page.locator('#pa-type').select_option('aux')
+        demo()
         page.locator('#goal').select_option('film')
         page.locator('#check').click()
         assert '5 / 5' in page.locator('#check-score').inner_text()

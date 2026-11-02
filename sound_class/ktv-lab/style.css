@@ -1356,38 +1356,6 @@ input[type=checkbox] {
 .take .take-warning {
   color:#944a31
 }
-.experiments {
-  background:#e9ecdf;
-  padding:30px;
-  border:1px solid #d2dac9;
-  border-radius:15px
-}
-.experiment-grid {
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:30px;
-  margin-top:25px
-}
-.experiment-grid article {
-  border-top:1px solid #b3c0a6;
-  padding-top:16px
-}
-.experiment-grid article>b {
-  font-size:10px;
-  color:var(--green)
-}
-.experiment-grid h3 {
-  font-size:15px;
-  margin:10px 0
-}
-.experiment-grid p {
-  font-size:12px;
-  color:var(--muted);
-  line-height:1.9
-}
-.experiment-grid .text-link {
-  font-size:11px
-}
 .notes-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -1818,18 +1786,12 @@ input[type=checkbox] {
   .test-toolbar label {
     font-size:10px
   }
-  .experiment-grid,.notes-grid {
+  .notes-grid {
     grid-template-columns:1fr;
     gap:24px
   }
-  .experiments {
-    padding:23px
-  }
-  .experiment-grid p,.notes-grid p {
+  .notes-grid p {
     font-size:12px
-  }
-  .experiment-grid h3 {
-    font-size:16px
   }
   .notes-grid {
     gap:14px
@@ -1867,7 +1829,7 @@ input[type=checkbox] {
   }
 }
 @media print {
-  .topbar,.hero .button,.patch-toolbar button,.skip,.test-toolbar,.button,.experiments button {
+  .topbar,.hero .button,.patch-toolbar button,.skip,.test-toolbar,.button {
     display:none!important
   }
   .wrap {
