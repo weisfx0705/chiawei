@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f5ec">
+  <meta name="description" content="替自己的迷你演唱會選器材、接線、做 soundcheck。互動理解 PA、Zoom F4 routing、乾聲分軌與現場混音。">
+  <title>我的迷你演唱會｜KTV 接線實驗室・影視錄音實務 14</title>
+  <link rel="stylesheet" href="./ktv-lab/style.css">
+  <script src="./ktv-lab/audio-engine.js" defer></script>
+  <script src="./ktv-lab/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#lab">跳到接線工作台</a>
+  <header class="topbar wrap">
+    <a class="back" href="./index2.html"><span aria-hidden="true">↖</span> 影視錄音實務</a>
+    <span class="wordmark">SOUND CLUB <span class="mini-star">✳</span> FIELD NOTES 14</span>
+    <a class="text-link" href="#field-notes">老師的小筆記 ↗</a>
+  </header>
+  <main class="wrap">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot"></span> 今天，你是演唱會的聲音總監</p>
+        <h1 id="page-title">我的迷你演唱會<span class="title-sub">從一條線，開始唱。<span class="spark" aria-hidden="true">✶</span></span></h1>
+        <p class="intro">一支麥克風、一首伴奏，還有想留下的好聲音。<br>把器材接起來，讓台前的快樂與幕後的錄音，各走對的路。</p>
+        <a class="button primary" href="#lab">來準備我的演出 <span aria-hidden="true">↘</span></a>
+        <a class="hero-note" href="#sound-studio">先聽聽合成小樂團 ♪</a>
+      </div>
+      <div class="stage" id="stage" aria-label="迷你舞台：接通投影與左右喇叭後會亮起">
+        <div class="stage-tag">TONIGHT ONLY <span>你的房間巡迴演唱會</span></div>
+        <div class="spotlight one"></div><div class="spotlight two"></div>
+        <div class="projection" id="projection"><span class="projection-label">KARAOKE CLUB</span><b id="lyric">等你接上畫面 ♪</b><span class="lyric-line"></span><small>電腦 → HDMI → 投影</small></div>
+        <div class="stage-speaker left" id="stage-left"><i></i><i></i><span>L</span></div>
+        <div class="stage-speaker right" id="stage-right"><i></i><i></i><span>R</span></div>
+        <div class="singer" aria-hidden="true"><div class="hair"></div><div class="face"><i></i><i></i><b>◡</b></div><div class="shirt">♪</div><div class="singer-arm"></div><div class="hand-mic"></div><div class="legs"></div></div>
+        <div class="stage-floor"></div><div class="stage-sticker">MAKE SOME<br><b>good noise!</b></div>
+        <div class="stage-caption"><span class="dot"></span><span id="stage-status">舞台待機中・等你接線</span></div>
+      </div>
+    </section>
+    <ol class="journey"><li><b>01</b><span>挑選演出夥伴</span><small>Input / Output</small></li><li><b>02</b><span>讓訊號走對路</span><small>Patch & Routing</small></li><li><b>03</b><span>聽見，也留下來</span><small>Soundcheck & Record</small></li></ol>
+
+    <section id="lab" class="section" aria-labelledby="kit-title">
+      <div class="section-head"><div><p class="eyebrow">01 / PACK YOUR KIT</p><h2 id="kit-title">今天帶哪些夥伴上場？</h2></div><span class="pill">小場地，大學問 ♪</span></div>
+      <div class="kit-grid">
+        <fieldset class="kit peach"><legend><span aria-hidden="true">♩</span> 麥克風系統</legend>
+          <label for="mic-count">幾位演唱者？</label><select id="mic-count"><option value="1">1 支麥克風・獨唱</option><option value="2">2 支麥克風・一起唱</option></select>
+          <label for="mic-type">聲音怎麼進來？</label><select id="mic-type"><option value="wired">有線動圈麥克風</option><option value="wireless">無線麥克風＋接收機</option></select><p>無線也要接線：接收機的音訊輸出，仍要進入下一台設備。</p>
+        </fieldset>
+        <fieldset class="kit lilac"><legend><span aria-hidden="true">≋</span> PA 混音系統</legend>
+          <label for="pa-type">輸出與 routing 能力</label><select id="pa-type"><option value="basic">入門台・MAIN LR＋REC LR 複製</option><option value="aux">小型台・MAIN LR＋獨立 AUX 1</option><option value="digital">數位台・MAIN LR＋BUS 1/2＋直出</option></select>
+          <label for="pa-mics">可用的 MIC 輸入</label><select id="pa-mics"><option value="1">1 路 MIC ＋ 4 路 LINE</option><option value="2" selected>2 路 MIC ＋ 4 路 LINE</option><option value="4">4 路 MIC ＋ 4 路 LINE</option></select><p>這裡是能力模型。第二組插孔，不一定等於第二套獨立混音。</p>
+        </fieldset>
+        <fieldset class="kit mint"><legend><span aria-hidden="true">⏺</span> 錄音系統</legend>
+          <label for="rec-type">需要幾個獨立輸入？</label><select id="rec-type"><option value="mono">1 軌・單聲道錄音機</option><option value="stereo" selected>2 軌・兩輸入＋LR 輸出</option><option value="three">3 軌・三輸入＋LR 輸出</option><option value="four">4 軌・四輸入＋LR 輸出</option><option value="f4">Zoom F4・4 路主輸入＋MAIN / SUB</option></select>
+          <label for="record-format">要留下哪些軌道？</label><select id="record-format"><option value="iso">輸入分軌 ISO</option><option value="mix" disabled>LR 混音（F4）</option><option value="both" disabled>ISO ＋ LR 混音（F4）</option></select><p>本課 F4 用 INPUT 1–4；ISO 是各輸入分軌，不代表輸入裡一定只有人聲。</p>
+        </fieldset>
+        <fieldset class="kit butter"><legend><span aria-hidden="true">◉</span> 舞台與伴奏</legend>
+          <label for="speakers">喇叭系統</label><select id="speakers"><option value="active">一對主動式喇叭・內建擴大機</option><option value="passive">一對被動式喇叭・另接擴大機</option></select>
+          <label for="music-format">電腦伴奏輸出</label><select id="music-format"><option value="stereo">Stereo・音訊 L / R 兩路</option><option value="mono">Mono・先在電腦加總成一路</option></select><p>畫面走 HDMI；本課聲音另走音訊介面／適當的分線輸出。</p>
+        </fieldset>
+      </div>
+      <p class="small-note">更換器材會清除接線並重設控制。Mono 伴奏先在軟體加總；不能用被動 Y 線硬併兩個輸出。</p>
+    </section>
+
+    <section class="section" aria-labelledby="patch-title">
+      <div class="section-head"><div><p class="eyebrow">02 / CONNECT THE DOTS</p><h2 id="patch-title">來，把這場演出接起來。</h2></div><label class="goal-label" for="goal">這次任務<select id="goal"><option value="concert">小型演唱會：能聽，也能錄</option><option value="film">影視拍攝：優先保留乾淨人聲分軌</option></select></label></div>
+      <div class="mode-tabs" role="group" aria-label="訊號流程學習路線">
+        <button data-mode="pa" aria-pressed="true"><span>A</span><b>先進 PA</b><small>先混音，再錄下來</small></button>
+        <button data-mode="split" aria-pressed="false"><span>B</span><b>先進錄音機</b><small>人聲左、伴奏右</small></button>
+        <button data-mode="stereo" aria-pressed="false"><span>C</span><b>F4 雙組輸出</b><small>乾聲保留、伴奏立體聲</small></button>
+      </div>
+      <div class="route-note"><b id="mode-heading"></b><p id="mode-note"></p></div>
+      <section id="sound-studio" class="sound-studio" aria-labelledby="studio-title">
+        <div class="studio-heading"><div><p class="eyebrow">MEET YOUR TINY BAND</p><h3 id="studio-title">先聽見他們，再接出你的聲音。</h3></div><span class="pill">原創合成小曲 · 108 BPM</span></div>
+        <div class="source-cards">
+          <article class="source-card vocal-card"><div class="source-card-top"><span class="source-character" aria-hidden="true">♬</span><span class="signal-chip vocal">V · VOCAL</span></div><h4>哇啦小主唱</h4><p>帶著母音與顫音唱旋律。<br>第二支麥克風，是低一點的和聲夥伴。</p><div class="source-level" aria-hidden="true"><i id="vocal-motion"></i></div><div class="source-actions"><button class="button small" data-audio-target="source-vocal">▶ 單獨聽 Vocal</button><label><input id="source-mic" type="checkbox" checked>人聲 ON</label></div></article>
+          <article class="source-card music-card"><div class="source-card-top"><span class="source-character" aria-hidden="true">♫</span><span class="signal-chip music">B · BACKING</span></div><h4>雲朵伴奏樂團</h4><p>小鼓、貝斯和叮咚電鋼琴。<br>左右聲部不同，聽聽 Stereo 的空間。</p><div class="source-level" aria-hidden="true"><i id="music-motion"></i></div><div class="source-actions"><button class="button small" data-audio-target="source-music">▶ 單獨聽伴奏</button><label><input id="source-music" type="checkbox" checked>伴奏 ON</label></div></article>
+          <article class="source-card video-card"><div class="source-card-top"><span class="source-character" aria-hidden="true">▰</span><span class="signal-chip video">AV · VIDEO</span></div><h4>歌詞小電視</h4><p>紫色只送畫面，不會發出聲音。<br>把 HDMI 接好，舞台歌詞才看得見。</p><div class="tiny-video" aria-hidden="true"><span id="tiny-lyric">LA · OH · LA ♪</span></div><div class="source-actions"><button class="text-link" data-audio-target="source-both">人聲＋伴奏一起聽 ↗</button><label><input id="source-video" type="checkbox" checked>畫面 ON</label></div></article>
+        </div>
+        <div class="listen-console">
+          <div class="transport-controls"><button id="audio-play" class="button primary" aria-pressed="false">▶ 開始試聽</button><label class="listen-target-label" for="listen-target">耳朵現在接在哪裡？<select id="listen-target"><option value="live">現場喇叭 L / R（依接線）</option><option value="source-vocal">原始聲源 · Vocal</option><option value="source-music">原始聲源 · 立體伴奏</option><option value="source-both">原始聲源 · 人聲＋伴奏</option></select></label><label class="preview-volume-label" for="preview-volume">耳機試聽音量 <output id="preview-volume-value">55%</output><input id="preview-volume" type="range" min="0" max="100" value="55"></label></div>
+          <div class="monitor-heading"><span id="listen-mode" class="monitor-badge">接線後的訊號</span><span id="listen-description">跟隨接線、推桿、PAN 與 routing。可一邊播放，一邊調整。</span></div>
+          <canvas id="listen-scope" width="960" height="128" role="img" aria-label="目前監聽的左右聲道即時波形；開始試聽後顯示瀏覽器輸出"></canvas>
+          <div class="listen-footer"><p id="audio-status" role="status" aria-live="polite">先按「單獨聽 Vocal」或「單獨聽伴奏」，認識兩種聲音。按暫停即可停止。</p><span id="listen-clock">00:00 / 00:09 ↻</span></div>
+        </div>
+        <p class="small-note">Vocal 是母音合成示意，沒有真人錄音或語音辨識。耳機音量只改變你現在聽到的大小，不改變錄音路由；電平表仍為教學示意。先降低實體播放音量。</p>
+      </section>
+      <div class="patch-shell">
+        <div class="patch-toolbar"><span><b class="dot"></b> PATCH PLAYGROUND</span><div><button id="patch-listen" class="button small">▶ 聽目前接線</button><button id="example" class="button small">載入示範接線 ↗</button><button id="clear" class="button small quiet">清空接線</button></div></div>
+        <div class="patch-instructions"><b>怎麼玩？</b> 點一個 <strong>OUT 輸出</strong>，再點另一台的 <strong>IN 輸入</strong>。可用鍵盤 Tab ＋ Enter。<span>灰虛線＝已接但暫無訊號；彩色實線＝訊號通過；雙色＝同一路已混合人聲與伴奏。</span></div>
+        <div class="signal-legend" aria-label="訊號顏色圖例"><span class="signal-chip vocal">V · 人聲／Vocal</span><span class="signal-chip music">B · 伴奏／Backing</span><span class="signal-chip video">AV · 視訊／Video</span><span class="signal-chip mixed">V＋B · 已混音</span><small>接孔旁的 ✓ 表示已通；顏色與文字一起辨認來源。</small></div>
+        <div class="board-scroll" tabindex="0" role="region" aria-label="接線工作台，窄螢幕可水平捲動"><div id="board" class="board"><svg id="cables" aria-hidden="true"></svg><div id="nodes" class="nodes"></div></div></div>
+        <p id="patch-message" class="patch-message" role="status" aria-live="polite">選一個 OUT，開始你的第一條線。</p>
+        <details class="connections"><summary>我的接線清單 <span id="cable-count">0 條</span></summary><ul id="connection-list"></ul></details>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="routing-title">
+      <div class="section-head"><div><p class="eyebrow">TURN A KNOB, FOLLOW THE SOUND</p><h2 id="routing-title">線接好了，聲音要送去哪？</h2></div><span class="pill">每一次調整，結果都會改變</span></div>
+      <div class="controls-grid">
+        <div class="control-panel"><div class="panel-head"><span class="panel-icon lilac">≋</span><div><h3>PA 小控制室</h3><p>現場音量 ≠ 錄音音量</p></div></div>
+          <div class="master-controls"><label for="pa-master">MAIN 總音量 <output id="pa-master-value">80%</output><input id="pa-master" type="range" min="0" max="150" value="80"></label><label for="send-master">錄音輸出總量 <output id="send-master-value">80%</output><input id="send-master" type="range" min="0" max="150" value="80"></label></div>
+          <div class="inline-controls"><label><input type="checkbox" id="pa-fx"> 現場加一點殘響 FX</label><label id="aux-pre-label" hidden><input type="checkbox" id="aux-pre" checked> AUX 用 pre-fader</label></div>
+          <p id="pa-bus-note" class="control-note"></p><div id="pa-strips" class="strips"></div>
+        </div>
+        <div class="control-panel"><div class="panel-head"><span class="panel-icon mint">⏺</span><div><h3>錄音機小控制室</h3><p>先決定檔案，再決定送出去的 mix</p></div></div>
+          <label class="rec-master-label" for="rec-master">輸出總量 <output id="rec-master-value">80%</output><input id="rec-master" type="range" min="0" max="150" value="80"></label>
+          <div id="rec-strips" class="strips"></div>
+          <div id="f4-controls" hidden><label for="f4-route">MAIN OUT 來源<select id="f4-route"><option value="lr">LR 混音（跟隨 Fader / Pan）</option><option value="matrix">各輸入直接指定（矩陣）</option></select></label><p class="control-note">SUB 一律依下方矩陣。PRE 取輸入分軌、POST 經該軌 fader；矩陣直接指定輸出，不跟隨 Pan。這是原理簡化介面。</p><div class="matrix-scroll"><table class="matrix"><caption>F4 輸出矩陣・點按 OFF → PRE → POST</caption><thead><tr><th scope="col">來源</th><th scope="col">MAIN 1</th><th scope="col">MAIN 2</th><th scope="col">SUB 1</th><th scope="col">SUB 2</th></tr></thead><tbody id="matrix-body"></tbody></table></div></div>
+          <p class="control-note">TRIM 改變進來的訊號與 ISO；FADER / PAN 改變輸出混音，不改變已啟用的 ISO。ARM 關掉仍可能聽得到，但不會留下該軌。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="soundcheck" class="section" aria-labelledby="check-title">
+      <div class="section-head"><div><p class="eyebrow">03 / READY, SOUND, GO!</p><h2 id="check-title">不是有聲音，就代表有錄到。</h2></div><button class="button primary" id="check">開始 Soundcheck <span aria-hidden="true">♪</span></button></div>
+      <p class="test-toolbar">點現場 mix 或任一錄音軌的「試聽」，耳朵就會切到那個位置。播放不中斷，直接比較混音與乾聲；上方可暫停或單獨關掉人聲／伴奏。</p>
+      <div class="results-grid"><div class="listen-panel"><span class="result-tag">LIVE / 台前聽到什麼</span><h3>給正在唱歌的人</h3><div id="live-results"></div><p id="stereo-result"></p><button id="listen-live" class="button small">▶ 試聽現場 mix</button></div><div class="record-panel"><span class="result-tag">RECORD / 幕後留下什麼</span><h3>給未來剪接的自己</h3><div id="record-results"></div><button id="record-test" class="button small">⏺ 留下一次測試快照</button><p class="control-note">模擬路由結果，不產生 WAV，也不會錄製你的聲音。</p></div><div class="check-panel"><span class="result-tag">CHECK / 演出準備單</span><h3 id="check-score">等待 Soundcheck</h3><ul id="checklist"></ul><div id="diagnostics" aria-live="polite"></div></div></div>
+      <div id="takes" class="takes" hidden><h3>你的測試快照</h3><p>保留最近 3 次當下的訊號配置；改動控制後再錄一次，比較有什麼不同。</p><div id="take-list"></div></div>
+    </section>
+
+    <section class="section experiments" aria-labelledby="experiments-title"><div><p class="eyebrow">ONE MORE TRY</p><h2 id="experiments-title">試試看，答案藏在路徑裡。</h2></div><div class="experiment-grid"><article><b>01 / 推桿消失術</b><h3>現場變小聲，ISO 會跟著變嗎？</h3><p>載入 B，將錄音機人聲 FADER 拉到 0。觀察喇叭，再看 ISO。換成 TRIM，結果一樣嗎？</p><button class="text-link" data-experiment="split">帶我做這個實驗 ↗</button></article><article><b>02 / 一個旋鈕的差別</b><h3>錄音小聲一點，觀眾還聽得到嗎？</h3><p>載入 A，只轉「錄音輸出總量」。再轉 MAIN。比較複製輸出與獨立 pre-fader AUX 的差別。</p><button class="text-link" data-experiment="aux">試試獨立 AUX ↗</button></article><article><b>03 / 把空間感找回來</b><h3>左右聲道，能有不同的任務嗎？</h3><p>B 把 L/R 當兩條獨立傳送線；C 用 MAIN 送人聲、SUB 送立體伴奏。看看保留立體聲要多用哪些輸入。</p><button class="text-link" data-experiment="stereo">挑戰雙組輸出 ↗</button></article></div></section>
+
+    <section id="field-notes" class="section field-notes" aria-labelledby="notes-title"><p class="eyebrow">TAKE IT TO THE SET</p><h2 id="notes-title">把這份接線思考，帶回真正的現場。</h2>
+      <div class="notes-grid"><article><span>✳</span><h3>兩個目標，可以分開工作</h3><p>PA 照顧現場觀眾與表演者；錄音照顧後期要留下的素材。大型製作可能用 splitter 分送 FOH、監聽、錄音／轉播系統，也可能用共享前級與數位網路；不一定剛好兩台 console。</p><div class="split-diagram"><b>麥克風</b><span>→ Splitter →</span><div><b>現場混音 → 觀眾</b><b>獨立收音 → 後期</b></div></div></article><article><span>♩</span><h3>Dry，不是隔音魔法</h3><p>這裡的乾聲指未與伴奏電氣混合、未加 PA 效果的人聲獨立軌。麥克風仍會收進喇叭漏音、空間殘響與噪音。影視拍攝要一起考慮擺位、PA 音量、指向性，以及是否能用耳返。</p></article><article><span>↔</span><h3>一條插頭，不等於一個聲道</h3><p>F4 的 MAIN OUT 1/2 是兩個平衡 XLR 輸出；SUB OUT 1/2 在同一個 3.5 mm 立體聲插孔上，要用適當分接線。平衡 mono TRS 與 stereo TRS 的接法不同，不能看外形就認定相容。</p></article></div>
+      <details><summary>器材細節、模型邊界與資料來源</summary><div class="source-notes"><p>本工作台是訊號流教學，電平為相對值與示意 dBFS；不模擬實際前級噪音、阻抗、聲學回授、延遲、相位抵消與動態處理。每個 OUT 在本課只接一個 IN；需要一對多時，實物須規劃適當 splitter／分配器。</p><p>PA 三種配置皆是抽象能力模型，不代表某款 mixer 一定有這些功能。「REC LR 複製」在本課跟隨 MAIN mix 與 MAIN 總量，再由錄音輸出旋鈕控制。獨立 AUX 為 mono，可選 pre/post 通道推桿；本課 PRE 同時略過 PA FX，實機 pre-fader 不必然 pre-EQ / pre-FX，必須查 block diagram。數位 BUS 1/2 以通道獨立 send 分送；Direct Out 取通道推桿與 FX 前。</p><p>F4 本課使用四個主輸入，錄音流程中可保留 ISO 與 LR mix。本機另外可用 INPUT 5/6／膠囊擴充；本課未建模。MAIN / SUB 可選各輸入 pre/post 或 LR；本課用 LR 模式與矩陣兩種介面教學，矩陣不再疊加 Pan。LR 是混音軌，不是另外兩個實體輸入。請另核對取樣率、韌體與錄音格式限制。</p><p>接 PA／錄音機的 line output，要設對方 LINE 輸入並關閉不需要的 phantom power；F4 主輸入的 XLR / TRS、MIC / LINE 設定須依實機手冊核對。被動式喇叭須經功率擴大機，功率輸出不可接錄音機或一般 LINE IN。無線接收機在本模型固定為 MIC 輸出，實機須核對接收機輸出電平。</p><p>試聽以原創的母音合成主唱、和聲與鼓／貝斯／電鋼琴伴奏示意。合成音源依同一套訊號路徑即時分送，PA FX 用合成殘響示意；沒有真人語音，也不能據此判斷實機音質。波形來自瀏覽器實際監聽輸出，以固定 6 倍倍率放大供觀察；超出波形視窗不代表實機 CLIP，超載判斷請參考各路的示意電平標記。圖上的靜態電平仍是路由模型示意。耳機音量與輸出保護不會回寫錄音分軌或路由，超大訊號的試聽會受保護限制。測試快照只留在本頁記憶體，重新整理即清除。</p><ul><li><a href="https://zoomcorp.com/media/documents/F4_OperationManual_English.pdf" target="_blank" rel="noopener noreferrer">ZOOM F4 原廠手冊</a>：p.25–28（錄音軌與輸入／監聽混音）、p.70–71（signal flow / LR）、p.90–96（routing / output）。</li><li><a href="https://zoomcorp.com/en/us/field-recorders/field-recorders/f4-field-recorder/" target="_blank" rel="noopener noreferrer">ZOOM F4 原廠產品資料</a>：輸入、MAIN / SUB 與 pre/post routing。</li><li><a href="https://data.yamaha.com/files/download/other_assets/1/331001/mg10xu_en_om_c0.pdf" target="_blank" rel="noopener noreferrer">Yamaha MG10XU / MG10 原廠手冊</a>：對照 MAIN、MONITOR、AUX / FX SEND，觀察第二組插孔和獨立 bus 的差異。</li></ul></div></details>
+    </section>
+    <noscript><p class="patch-message">這個互動教材需要啟用 JavaScript。你仍可閱讀頁面下方的現場筆記與原廠手冊。</p></noscript>
+  </main>
+  <aside id="audio-dock" class="audio-dock" aria-label="試聽控制" hidden><a href="#sound-studio"><span>NOW LISTENING ♪</span><b id="dock-target">現場喇叭</b></a><button id="dock-pause" class="button small">Ⅱ 暫停</button></aside>
+  <footer class="wrap footer"><span>SOUND CLUB <b>✳</b> 做一場聽得見、也留得住的演出。</span><span>義守大學 電影與電視學系 · 陳嘉暐老師</span><a href="./index2.html">回課程列表 ↗</a></footer>
+</body>
+</html>
