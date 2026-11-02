@@ -97,29 +97,34 @@
     </section>
 
     <section class="section" aria-labelledby="routing-title">
-      <div class="section-head"><div><p class="eyebrow">TURN A KNOB, FOLLOW THE SOUND</p><h2 id="routing-title">線接好了，聲音要送去哪？</h2></div><span class="pill">每一次調整，結果都會改變</span></div>
-      <div class="controls-grid">
-        <div class="control-panel"><div class="panel-head"><span class="panel-icon lilac">≋</span><div><h3>PA 小控制室</h3><p>現場音量 ≠ 錄音音量</p></div></div>
+      <div class="section-head"><div><p class="eyebrow">TURN A KNOB, FOLLOW THE SOUND</p><h2 id="routing-title">線接好了，聲音要送去哪？</h2></div><span class="pill">一邊調整，一邊看見對應訊號</span></div>
+      <p class="paired-intro">現場與錄音各自配對：上方看訊號，下方調控制。也可以直接試聽現場 mix 或各個錄音軌。</p>
+      <div class="controls-grid paired-workspace">
+        <section class="signal-pair live-pair" aria-label="PA 控制與現場喇叭訊號">
+          <div class="listen-panel pair-monitor"><span class="result-tag">LIVE / 台前聽到什麼</span><h3>給正在唱歌的人</h3><div id="live-results"></div><p id="stereo-result"></p><button id="listen-live" class="button small">▶ 試聽現場 mix</button></div>
+          <div class="control-panel"><div class="panel-head"><span class="panel-icon lilac">≋</span><div><h3>PA 小控制室</h3><p>現場音量 ≠ 錄音音量</p></div></div>
           <div class="master-controls"><label for="pa-master">MAIN 總音量 <output id="pa-master-value">80%</output><input id="pa-master" type="range" min="0" max="150" value="80"></label><label for="send-master">錄音輸出總量 <output id="send-master-value">80%</output><input id="send-master" type="range" min="0" max="150" value="80"></label></div>
           <div class="inline-controls"><label><input type="checkbox" id="pa-fx"> 現場加一點殘響 FX</label><label id="aux-pre-label" hidden><input type="checkbox" id="aux-pre" checked> AUX 用 pre-fader</label></div>
           <p id="pa-bus-note" class="control-note"></p><div id="pa-strips" class="strips"></div>
         </div>
-        <div class="control-panel"><div class="panel-head"><span class="panel-icon mint">⏺</span><div><h3>錄音機小控制室</h3><p>先決定檔案，再決定送出去的 mix</p></div></div>
+        </section>
+        <section class="signal-pair record-pair" aria-label="錄音機控制與錄音軌訊號">
+          <div class="record-panel pair-monitor"><span class="result-tag">RECORD / 幕後留下什麼</span><h3>給未來剪接的自己</h3><div id="record-results"></div><button id="record-test" class="button small">⏺ 留下一次測試快照</button><p class="control-note">模擬路由結果，不產生 WAV，也不會錄製你的聲音。</p></div>
+          <div class="control-panel"><div class="panel-head"><span class="panel-icon mint">⏺</span><div><h3>錄音機小控制室</h3><p>先決定檔案，再決定送出去的 mix</p></div></div>
           <label class="rec-master-label" for="rec-master">輸出總量 <output id="rec-master-value">80%</output><input id="rec-master" type="range" min="0" max="150" value="80"></label>
           <div id="rec-strips" class="strips"></div>
           <div id="f4-controls" hidden><label for="f4-route">MAIN OUT 來源<select id="f4-route"><option value="lr">LR 混音（跟隨 Fader / Pan）</option><option value="matrix">各輸入直接指定（矩陣）</option></select></label><p class="control-note">SUB 一律依下方矩陣。PRE 取輸入分軌、POST 經該軌 fader；矩陣直接指定輸出，不跟隨 Pan。這是原理簡化介面。</p><div class="matrix-scroll" tabindex="0" role="region" aria-label="F4 輸出矩陣，窄螢幕可左右滑動"><table class="matrix"><caption>F4 輸出矩陣・點按 OFF → PRE → POST</caption><thead><tr><th scope="col">來源</th><th scope="col">MAIN 1</th><th scope="col">MAIN 2</th><th scope="col">SUB 1</th><th scope="col">SUB 2</th></tr></thead><tbody id="matrix-body"></tbody></table></div></div>
           <p class="control-note">TRIM 改變進來的訊號與 ISO；FADER / PAN 改變輸出混音，不改變已啟用的 ISO。ARM 關掉仍可能聽得到，但不會留下該軌。</p>
         </div>
+        </section>
       </div>
     </section>
 
     <section id="soundcheck" class="section" aria-labelledby="check-title">
       <div class="section-head"><div><p class="eyebrow">03 / READY, SOUND, GO!</p><h2 id="check-title">不是有聲音，就代表有錄到。</h2></div><button class="button primary" id="check">開始 Soundcheck <span aria-hidden="true">♪</span></button></div>
-      <p class="test-toolbar">點現場 mix 或任一錄音軌的「試聽」，耳朵就會切到那個位置。播放不中斷，直接比較混音與乾聲；上方可暫停或單獨關掉人聲／伴奏。</p>
-      <div class="results-grid"><div class="listen-panel"><span class="result-tag">LIVE / 台前聽到什麼</span><h3>給正在唱歌的人</h3><div id="live-results"></div><p id="stereo-result"></p><button id="listen-live" class="button small">▶ 試聽現場 mix</button></div><div class="record-panel"><span class="result-tag">RECORD / 幕後留下什麼</span><h3>給未來剪接的自己</h3><div id="record-results"></div><button id="record-test" class="button small">⏺ 留下一次測試快照</button><p class="control-note">模擬路由結果，不產生 WAV，也不會錄製你的聲音。</p></div><div class="check-panel"><span class="result-tag">CHECK / 演出準備單</span><h3 id="check-score">等待 Soundcheck</h3><ul id="checklist"></ul><div id="diagnostics" aria-live="polite"></div></div></div>
+      <div class="results-grid"><div class="check-panel"><span class="result-tag">CHECK / 演出準備單</span><h3 id="check-score">等待 Soundcheck</h3><ul id="checklist"></ul><div id="diagnostics" aria-live="polite"></div></div></div>
       <div id="takes" class="takes" hidden><h3>你的測試快照</h3><p>保留最近 3 次當下的訊號配置；改動控制後再錄一次，比較有什麼不同。</p><div id="take-list"></div></div>
     </section>
-
 
     <section id="field-notes" class="section field-notes" aria-labelledby="notes-title"><p class="eyebrow">TAKE IT TO THE SET</p><h2 id="notes-title">把這份接線思考，帶回真正的現場。</h2>
       <div class="notes-grid"><article><span>✳</span><h3>兩個目標，可以分開工作</h3><p>PA 照顧現場觀眾與表演者；錄音照顧後期要留下的素材。大型製作可能用 splitter 分送 FOH、監聽、錄音／轉播系統，也可能用共享前級與數位網路；不一定剛好兩台 console。</p><div class="split-diagram"><b>麥克風</b><span>→ Splitter →</span><div><b>現場混音 → 觀眾</b><b>獨立收音 → 後期</b></div></div></article><article><span>♩</span><h3>Dry，不是隔音魔法</h3><p>這裡的乾聲指未與伴奏電氣混合、未加 PA 效果的人聲獨立軌。麥克風仍會收進喇叭漏音、空間殘響與噪音。影視拍攝要一起考慮擺位、PA 音量、指向性，以及是否能用耳返。</p></article><article><span>↔</span><h3>一條插頭，不等於一個聲道</h3><p>F4 的 MAIN OUT 1/2 是兩個平衡 XLR 輸出；SUB OUT 1/2 在同一個 3.5 mm 立體聲插孔上，要用適當分接線。平衡 mono TRS 與 stereo TRS 的接法不同，不能看外形就認定相容。</p></article></div>

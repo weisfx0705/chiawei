@@ -2205,3 +2205,70 @@ input[type=checkbox] {
   .back { min-height:44px; display:inline-flex; align-items:center; }
   .topbar>.text-link { padding-block:12px; }
 }
+
+/* Keep each control room beside its own persistent view of the signal. */
+.paired-intro { margin:0 0 20px; color:var(--muted); font-size:12px; line-height:1.85; }
+.paired-workspace { align-items:stretch; gap:22px; }
+.signal-pair { display:flex; flex-direction:column; gap:14px; min-width:0; }
+.pair-monitor { position:sticky; top:12px; z-index:4; display:flex; flex-direction:column; height:clamp(290px,42svh,410px); flex-shrink:0; min-width:0; padding:18px; border:1px solid #b6cbb5; border-radius:12px; box-shadow:0 5px 12px #3f59410e; }
+.record-panel.pair-monitor { border-color:#ddc4af; }
+.pair-monitor h3 { margin:6px 0 10px; font-size:17px; }
+.pair-monitor p { font-size:11px; }
+.pair-monitor>.button { align-self:flex-start; min-height:40px; margin-top:8px; flex-shrink:0; }
+.pair-monitor>.control-note { margin:7px 0 0; font-size:10px; }
+.pair-monitor #live-results,.pair-monitor #record-results { overflow:auto; min-height:0; flex:1; scrollbar-width:thin; }
+.pair-monitor #record-results { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-content:start; gap:4px 12px; }
+.pair-monitor .signal-row { padding:7px 0; min-width:0; }
+.pair-monitor .signal-badges { margin-block:3px; gap:4px; }
+.pair-monitor .signal-detail { font-size:11px; overflow-wrap:anywhere; }
+.record-panel .signal-top { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 7px; }
+.record-panel .signal-top b { grid-column:1; grid-row:1; font-size:11px; }
+.record-panel .signal-top>span { grid-column:1; grid-row:2; font-size:10px; }
+.record-panel .signal-top button { grid-column:2; grid-row:1 / span 2; align-self:center; }
+.paired-workspace .control-panel { flex-shrink:0; }
+.paired-workspace .control-panel .strips { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.paired-workspace .control-panel :is(input,select,button) { scroll-margin-block-start:calc(clamp(290px,42svh,410px) + 30px); }
+.live-pair:has(.control-panel:focus-within)>.pair-monitor { border-color:#548865; box-shadow:0 0 0 2px #7dbe8b33,0 5px 12px #3f59410e; }
+.record-pair:has(.control-panel:focus-within)>.pair-monitor { border-color:#b67a51; box-shadow:0 0 0 2px #dbaf7933,0 5px 12px #3f59410e; }
+#soundcheck .results-grid { grid-template-columns:1fr; }
+#soundcheck .check-panel { grid-column:auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:32px; }
+#soundcheck .result-tag,#soundcheck #check-score { grid-column:1/-1; }
+#soundcheck #checklist { display:block; }
+#soundcheck #diagnostics { margin-top:0; }
+@media(max-width:1100px) {
+  .paired-workspace { gap:28px; }
+  .paired-workspace .pair-monitor { height:clamp(290px,36svh,400px); }
+  .paired-workspace .control-panel :is(input,select,button) { scroll-margin-block-start:calc(clamp(290px,36svh,400px) + 30px); }
+  .pair-monitor>.button { min-height:44px; }
+}
+@media(max-width:700px) {
+  .paired-intro { font-size:12px; margin-bottom:16px; }
+  .paired-workspace { gap:30px; }
+  .signal-pair { gap:10px; }
+  .paired-workspace .pair-monitor { top:6px; height:auto; max-height:min(44svh,360px); padding:13px; }
+  .pair-monitor h3 { font-size:16px; margin:4px 0 8px; }
+  .pair-monitor .result-tag { font-size:9px; }
+  .pair-monitor .signal-top b { font-size:11px; }
+  .pair-monitor .signal-detail { font-size:10px; margin-block:2px; }
+  .pair-monitor .signal-chip { font-size:8px; padding:1px 4px; }
+  .pair-monitor .signal-row { padding-block:5px; }
+  .pair-monitor .signal-top button { min-width:40px; min-height:44px; font-size:10px; padding:5px; }
+  .pair-monitor .meter { margin-top:4px; }
+  .pair-monitor>.button { font-size:11px; }
+  .pair-monitor>.control-note { font-size:9px; }
+  .pair-monitor #record-results { gap:2px 10px; }
+  .pair-monitor #stereo-result { margin:8px 0 0; font-size:10px; }
+  .paired-workspace .control-panel .strips { grid-template-columns:1fr; }
+  .paired-workspace .control-panel :is(input,select,button) { scroll-margin-block-start:calc(min(44svh,360px) + 24px); }
+  #soundcheck .check-panel { grid-template-columns:1fr; gap:0; }
+  #soundcheck #checklist,#soundcheck #diagnostics { grid-column:1; }
+  #soundcheck #diagnostics { margin-top:10px; }
+}
+@media(max-height:560px) {
+  .paired-workspace .pair-monitor { position:static; height:auto; max-height:none; }
+  .paired-workspace .control-panel :is(input,select,button) { scroll-margin-block-start:20px; }
+}
+@media print {
+  .paired-workspace .pair-monitor { position:static; height:auto; max-height:none; box-shadow:none; }
+  .pair-monitor #live-results,.pair-monitor #record-results { overflow:visible; }
+}
