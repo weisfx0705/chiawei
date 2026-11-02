@@ -132,6 +132,7 @@ def run():
         page.emulate_media(reduced_motion='reduce')
         page.locator('[data-audio-target="source-vocal"]').click()
         audible()  # Reduced visual motion must not disable audio.
+        page.locator('#soundcheck').scroll_into_view_if_needed()
         expect(page.locator('#audio-dock')).to_be_visible()
         page.locator('#dock-pause').click()
         expect(page.locator('#audio-dock')).to_be_hidden()

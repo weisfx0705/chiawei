@@ -11,7 +11,7 @@
   let state = {mode:'pa',connections:[],selected:null,checked:false,running:false,takes:[],takeNumber:0};
   let ports = new Map(), paSettings={},recSettings={},matrix=[], latest=null, stopTimer=null, resizeFrame=0;
   const sound = window.KtvSound.create();
-  let listenTarget='live', listenChannels=[{},{}], visualFrame=0, lastLyric=-1;
+  let listenTarget='live', listenChannels=[{},{}], visualFrame=0, lastLyric=-1, playButtonVisible=false;
   const signalColors={vocal:'#be5061',music:'#227b8a',video:'#7964ae'};
   const config=()=>({mics:Number($('mic-count').value),wireless:$('mic-type').value==='wireless',pa:$('pa-type').value,paMics:Number($('pa-mics').value),rec:$('rec-type').value,model:recModels[$('rec-type').value],passive:$('speakers').value==='passive',mono:$('music-format').value==='mono',format:$('record-format').value});
   const escape = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -197,7 +197,19 @@
     if(result.loops.size){state.connections.pop();message('這條線會造成循環回送。請把錄音與現場使用的 bus 分開，避免訊號又繞回自己。',true);update();return;}
     state.selected=null;message(`接通！${out.label} → ${deviceName(p.device)} ${p.label}。彩色線與 ✓ 表示訊號已通過，可依顏色追蹤來源。`);update();
   }
-  function scheduleDraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(draw);}
+  function syncBoardNavigation(){
+    const scroll=document.querySelector('.board-scroll'),nav=$('patch-navigation');
+    const max=scroll.scrollWidth-scroll.clientWidth;
+    nav.hidden=max<2;
+    const columns=[...document.querySelectorAll('.node-column')];
+    if(!columns.length)return;
+    const starts=columns.map(col=>col.getBoundingClientRect().left-scroll.getBoundingClientRect().left+scroll.scrollLeft-16);
+    const active=scroll.scrollLeft>=max-2?3:starts.reduce((best,x,i)=>Math.abs(x-scroll.scrollLeft)<Math.abs(starts[best]-scroll.scrollLeft)?i:best,0);
+    const labels=state.mode==='pa'?['聲源','PA','錄音機','舞台']:['聲源','錄音機','PA','舞台'];
+    nav.querySelectorAll('[data-board-column]').forEach((button,i)=>{button.textContent=labels[i];button.setAttribute('aria-pressed',String(i===active));button.setAttribute('aria-label','跳到'+labels[i]);});
+    $('patch-nav-hint').textContent=state.selected?`已選 ${ports.get(state.selected).label} → 到下一台點 IN`:'↔ 左右滑動，或點設備快速跳轉';
+  }
+  function scheduleDraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{syncBoardNavigation();draw();});}
   function draw(){
     const board=$('board'),rect=board.getBoundingClientRect(),svg=$('cables');svg.setAttribute('viewBox',`0 0 ${rect.width} ${rect.height}`);
     svg.innerHTML=state.connections.map((wire,i)=>{
@@ -293,12 +305,17 @@
     $('listen-scope').dataset.signal=kinds.length>1?'mixed':kinds[0]||'none';
     $('audio-play').textContent=sound.playing?'Ⅱ 暫停試聽':'▶ 開始試聽';
     $('audio-play').setAttribute('aria-pressed',String(sound.playing));
-    $('audio-dock').hidden=!sound.playing;
+    syncAudioDock();
     $('dock-target').textContent=target.selectedOptions[0].textContent;
     $('patch-listen').textContent=sound.playing&&listenTarget==='live'?'Ⅱ 暫停現場試聽':'▶ 聽目前接線';
     document.querySelectorAll('[data-audio-target]').forEach(b=>b.setAttribute('aria-pressed',String(sound.playing&&b.dataset.audioTarget===listenTarget)));
     $('stage').classList.toggle('running',state.running||sound.playing);
     if(!sound.playing)drawMonitor();
+  }
+  function syncAudioDock(){
+    const visible=sound.playing&&!playButtonVisible;
+    $('audio-dock').hidden=!visible;
+    document.body.classList.toggle('audio-dock-visible',visible);
   }
   function drawMonitor(){
     const canvas=$('listen-scope'),ctx=canvas.getContext('2d');
@@ -368,6 +385,13 @@
   $('record-results').addEventListener('click',e=>{const b=e.target.closest('[data-listen]');if(!b)return;const t=solve().tracks.find(t=>'rec-'+t.id===b.dataset.listen);if(t)listenAt('rec-'+t.id);});
   document.querySelectorAll('[data-experiment]').forEach(b=>b.addEventListener('click',()=>{loadExample(b.dataset.experiment);$('lab').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}));
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selected){state.selected=null;update();message('已取消選取。');}});
+  $('patch-navigation').addEventListener('click',e=>{
+    const button=e.target.closest('[data-board-column]');if(!button)return;
+    const scroll=document.querySelector('.board-scroll'),column=document.querySelectorAll('.node-column')[Number(button.dataset.boardColumn)];
+    scroll.scrollTo({left:column.getBoundingClientRect().left-scroll.getBoundingClientRect().left+scroll.scrollLeft-16,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+  });
+  document.querySelector('.board-scroll').addEventListener('scroll',syncBoardNavigation,{passive:true});
+  new IntersectionObserver(([entry])=>{playButtonVisible=entry.intersectionRatio>=.75;syncAudioDock();},{threshold:[0,.75,1]}).observe($('audio-play'));
   $('audio-play').addEventListener('click',()=>sound.playing?pauseListening():listenAt());
   $('dock-pause').addEventListener('click',pauseListening);
   $('patch-listen').addEventListener('click',()=>sound.playing&&listenTarget==='live'?pauseListening():listenAt('live'));
@@ -376,6 +400,6 @@
   $('preview-volume').addEventListener('input',()=>{sound.setVolume(Number($('preview-volume').value)/100);$('preview-volume-value').value=$('preview-volume').value+'%';});
   window.addEventListener('pagehide',()=>sound.pause());
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&sound.playing)pauseListening();});
-  window.addEventListener('resize',scheduleDraw);new ResizeObserver(scheduleDraw).observe($('nodes'));if(document.fonts)document.fonts.ready.then(scheduleDraw);
+  window.addEventListener('resize',()=>{scheduleDraw();if(!sound.playing)drawMonitor();});new ResizeObserver(scheduleDraw).observe($('nodes'));if(document.fonts)document.fonts.ready.then(scheduleDraw);
   resetControls();renderBoard();
 })();
