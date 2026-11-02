@@ -8,7 +8,7 @@
 
 1. 選麥克風數量／有線或無線、PA 能力與 MIC 輸入數、錄音機輸入數、主動或被動喇叭、Stereo 或 Mono 伴奏。
 2. 選 A、B 或 C 路線。切換路線會給適合的起始器材；更換器材會清空接線與重設控制。
-3. 自己依序點 OUT、IN；或先「載入示範接線」，再拔線、改控制來研究。珊瑚紅 V 代表人聲、湖水藍 B 代表伴奏、紫色 AV 代表視訊；同一條輸出混有人聲與伴奏時顯示雙色。Tab + Enter 也可接線，Escape 取消選取。窄螢幕的工作台可水平捲動，也可用設備快跳列切換聲源、PA、錄音機與舞台；切換路線時快跳順序同步更新，跳轉會保留已選的 OUT。
+3. 自己依序點 OUT、IN；或先「載入示範接線」，再拔線、改控制來研究。點已接好的 OUT 或 IN 可直接改接，接著選新 IN，也可先換 OUT 再選 IN；有效的新接法會取代原線與占用端點，訊號不會硬併。按「拔選取線」、再次點選原本同一對 OUT / IN，或從接線清單拔線，都可直接斷開。再點已選 OUT 或按 Esc 取消，原線保留；錯誤訊號與循環回送也會保留原接線。珊瑚紅 V 代表人聲、湖水藍 B 代表伴奏、紫色 AV 代表視訊；同一條輸出混有人聲與伴奏時顯示雙色。Tab + Enter 也可接線，Escape 取消選取。窄螢幕的工作台可水平捲動，也可用設備快跳列切換聲源、PA、錄音機與舞台；切換路線時快跳順序同步更新，跳轉會保留已選的 OUT。
 4. PA 控制室與現場喇叭訊號表放在同一組；錄音機控制室與錄音軌訊號表放在另一組。訊號表在捲動控制時保持可見，可直接比較音量變化；過矮的橫向螢幕改用一般排列，確保控制能操作。按 Soundcheck 看準備單與診斷。切到「影視拍攝」任務，會要求每支麥克風都有獨立乾聲軌。
 5. 用「單獨聽 Vocal」「單獨聽伴奏」先認識合成小樂團，再將監聽切到現場 L/R 或任一錄音軌。約 9 秒的原創曲子循環播放，可邊接線、邊改推桿、Pan、bus；音訊立即跟隨路由變化。沒有真人錄音或麥克風權限。原始聲源試聽明確標為「不經接線」，不可把它當成 PA 已接通。
 6. 各聲源卡片可單獨關人聲、伴奏或視訊。彩色線依剩餘的實際內容更新，沒有訊號時變灰虛線。視訊沒有聲音。上方監聽波形來自瀏覽器實際輸出；耳機音量只控制預覽，不回寫到錄音路由。
@@ -58,6 +58,7 @@ python3 sound_class/ktv-lab/tests/test_lab.py
 python3 sound_class/ktv-lab/tests/test_audio.py
 python3 sound_class/ktv-lab/tests/test_responsive.py
 python3 sound_class/ktv-lab/tests/test_paired_panels.py
+python3 sound_class/ktv-lab/tests/test_repatch.py
 node sound_class/ktv-lab/tests/test_synth.cjs
 node --check sound_class/ktv-lab/app.js
 node --check sound_class/ktv-lab/audio-engine.js
@@ -70,3 +71,5 @@ node --check sound_class/ktv-lab/audio-engine.js
 手機採全寬器材選單與通道卡片；平板直向將兩個控制室依序排列，室內通道維持雙欄。觸控版選單使用至少 16px 字體，主要按鈕與接孔保留 44px 操作高度。`test_responsive.py` 以 320／390／600／820／1024／1180／1440px 驗證內容範圍、觸控大小、設備快跳、跨設備接線、旋轉後保留接線，以及播放器顯示／收起規則。
 
 `test_paired_panels.py` 以手機、平板與桌機驗證：調整 PA 與錄音機控制時，對應的訊號表和使用中的控制同時可見；PA 音量、錄音 TRIM、FADER、下方 F4 通道的訊號數值也會依原本的路由正確更新。
+
+`test_repatch.py` 透過桌機與手機實際點選，驗證改接輸出、從已接輸入選線、改變兩端、取代占用端點、直接拔線、取消、靜音線路重接，以及錯誤類型／循環回送後原線完整保留。音訊測試也驗證選線時仍聽得到原路徑，完成改接後才切到新路徑。

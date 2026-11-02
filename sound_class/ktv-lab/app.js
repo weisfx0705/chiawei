@@ -8,7 +8,7 @@
     split:['B / 錄音優先，LR 借來當兩條路','人聲和 Mono 伴奏先進錄音機，保留 ISO。把人聲 Pan L、伴奏 Pan R，送到 PA 兩路 LINE IN；PA 兩路都置中，兩邊喇叭都有完整的 Mono mix。'],
     stereo:['C / 用兩組輸出，把立體聲找回來','F4 MAIN 1 送人聲，SUB 1/2 送伴奏 L/R。PA 人聲置中、伴奏分別 Pan L / R；一位歌手要 3 路錄音輸入，兩位要 4 路。']
   };
-  let state = {mode:'pa',connections:[],selected:null,checked:false,running:false,takes:[],takeNumber:0};
+  let state = {mode:'pa',connections:[],selected:null,rewire:null,checked:false,running:false,takes:[],takeNumber:0};
   let ports = new Map(), paSettings={},recSettings={},matrix=[], latest=null, stopTimer=null, resizeFrame=0;
   const sound = window.KtvSound.create();
   let listenTarget='live', listenChannels=[{},{}], visualFrame=0, lastLyric=-1, playButtonVisible=false;
@@ -166,6 +166,7 @@
     document.querySelectorAll('[data-port]').forEach(b=>{
       const p=ports.get(b.dataset.port),wire=state.connections.find(x=>p.dir==='out'?x.from===p.id:x.to===p.id),v=wire?r.output(wire.from):empty();
       b.classList.toggle('connected',!!wire&&has(v));b.classList.toggle('muted',!!wire&&!has(v));b.classList.toggle('selected',state.selected===p.id);
+      b.classList.toggle('rewiring',!!state.rewire&&(state.rewire.from===p.id||state.rewire.to===p.id));
       b.setAttribute('aria-pressed',String(state.selected===p.id));
       b.classList.toggle('compatible',!!state.selected&&p.dir==='in'&&compatible(ports.get(state.selected),p));
       const kinds=signalKinds(v);
@@ -173,6 +174,7 @@
       b.querySelector('span').innerHTML=escape(p.label)+(wire?`<span class="port-sources">${has(v)?'✓ ':''}${badges(v,true)}</span>`:'');
       b.setAttribute('aria-label',`${p.label}，${p.dir.toUpperCase()} ${p.dir==='out'?'輸出':'輸入'}${wire?'；'+(v.video?'視訊':describe(v)):''}`);
     });
+    $('unplug-selected').disabled=!state.rewire;
     syncListening(r);
     scheduleDraw();
   }
@@ -182,20 +184,50 @@
   }
   function deviceName(d){return ({pa:'PA',rec:'錄音機',screen:'投影',amp:'擴大機','sp-l':'左喇叭','sp-r':'右喇叭'})[d]||d;}
   function compatible(out,inp){if(!out||!inp||out.dir!=='out'||inp.dir!=='in'||out.device===inp.device)return false;return out.type===inp.type||(inp.type==='combo'&&(out.type==='line'||out.type==='mic'));}
+  const sameWire=(a,b)=>!!a&&!!b&&a.from===b.from&&a.to===b.to;
+  function cancelPatch(){
+    state.selected=null;state.rewire=null;update();message('已取消選取，原有接線保留。');
+  }
+  function unplugWire(wire){
+    if(!wire)return;
+    state.connections=state.connections.filter(x=>!sameWire(x,wire));
+    state.selected=null;state.rewire=null;update();
+    message('已拔掉這條線。再選一個 OUT 和 IN，就能試另一種接法。');
+  }
+  function selectOutput(id,wire=null){
+    state.selected=id;
+    if(!state.rewire)state.rewire=wire||state.connections.find(x=>x.from===id)||null;
+    if(state.rewire)message(`正在改接：已選 ${ports.get(id).label}。點新的 IN（也可先換 OUT）；原線先保留。按「拔選取線」可直接拔線，再次點選原本那對 OUT／IN 也能拔線。`);
+    else message(`已選 ${ports.get(id).label}。下一步：點另一台設備的相容 IN；已有線的 IN 也能換接。`);
+    update();
+  }
   function connect(id){
     const p=ports.get(id);if(!p)return;
     if(p.dir==='out'){
-      if(state.selected&&ports.get(state.selected)?.dir==='out'&&state.selected!==id){message('這是另一個 OUT。OUT 不能接 OUT；已改選這個輸出，接著找 IN。',true);state.selected=id;update();return;}
-      state.selected=state.selected===id?null:id;message(state.selected?`已選 ${p.label}。下一步：點另一台設備的相容 IN。`:'已取消選取。');update();return;
+      if(state.selected===id){cancelPatch();return;}
+      selectOutput(id);return;
     }
-    if(!state.selected){message('這是 IN 輸入。先選上游設備的 OUT，再把聲音送進來。',true);return;}
+    const attached=state.connections.find(x=>x.to===id);
+    if(!state.selected){
+      if(attached){selectOutput(attached.from,attached);return;}
+      message('這是 IN 輸入。先選上游設備的 OUT，再把聲音送進來。',true);return;
+    }
     const out=ports.get(state.selected);
     if(!compatible(out,p)){message(out.type==='power'?'擴大機的 SPEAKER OUT 是功率輸出，只能送被動式喇叭。不可送錄音機或一般 LINE IN。':out.type==='video'||p.type==='video'?'畫面與聲音是不同路徑：HDMI 要接 HDMI IN。':'訊號類型不合。MIC 找 MIC／錄音機輸入；LINE 找 LINE／錄音機輸入。被動式喇叭需要功率擴大機。',true);return;}
-    if(state.connections.some(x=>x.to===id)){message('這個 IN 已有一條線。請先在接線清單拔線；兩個 OUT 不能硬併在一起。',true);return;}
-    if(state.connections.some(x=>x.from===out.id)){message('這個 OUT 已有一條線。本課一個插孔只接一條；現場要分送，請另外規劃 splitter／分配器。',true);return;}
-    state.connections.push({from:out.id,to:id});const result=solve();
-    if(result.loops.size){state.connections.pop();message('這條線會造成循環回送。請把錄音與現場使用的 bus 分開，避免訊號又繞回自己。',true);update();return;}
-    state.selected=null;message(`接通！${out.label} → ${deviceName(p.device)} ${p.label}。彩色線與 ✓ 表示訊號已通過，可依顏色追蹤來源。`);update();
+    const next={from:out.id,to:id};
+    if(sameWire(attached,next)&&(!state.rewire||sameWire(state.rewire,next))){unplugWire(attached);return;}
+    // Replace the selected cable and occupied endpoints together, after validation.
+    const previous=state.connections;
+    const kept=previous.filter(x=>!sameWire(x,state.rewire)&&x.from!==out.id&&x.to!==id);
+    const replaced=previous.length-kept.length;
+    state.connections=[...kept,next];
+    if(solve().loops.size){
+      state.connections=previous;
+      message('這條線會造成循環回送。原有接線已保留，請換一個接點或用獨立 bus 隔離。',true);update();return;
+    }
+    state.selected=null;state.rewire=null;
+    message(`${replaced?'已改接':'接通'}！${out.label} → ${deviceName(p.device)} ${p.label}。${replaced?'相關插孔的舊線已取代；可以再點接孔試另一種接法。':'彩色線與 ✓ 表示訊號已通過。'}`);
+    update();
   }
   function syncBoardNavigation(){
     const scroll=document.querySelector('.board-scroll'),nav=$('patch-navigation');
@@ -207,7 +239,7 @@
     const active=scroll.scrollLeft>=max-2?3:starts.reduce((best,x,i)=>Math.abs(x-scroll.scrollLeft)<Math.abs(starts[best]-scroll.scrollLeft)?i:best,0);
     const labels=state.mode==='pa'?['聲源','PA','錄音機','舞台']:['聲源','錄音機','PA','舞台'];
     nav.querySelectorAll('[data-board-column]').forEach((button,i)=>{button.textContent=labels[i];button.setAttribute('aria-pressed',String(i===active));button.setAttribute('aria-label','跳到'+labels[i]);});
-    $('patch-nav-hint').textContent=state.selected?`已選 ${ports.get(state.selected).label} → 到下一台點 IN`:'↔ 左右滑動，或點設備快速跳轉';
+    $('patch-nav-hint').textContent=state.selected?`${state.rewire?'改接':'已選'} ${ports.get(state.selected).label} → 選新 IN，或先換 OUT`:'↔ 左右滑動，或點設備快速跳轉';
   }
   function scheduleDraw(){cancelAnimationFrame(resizeFrame);resizeFrame=requestAnimationFrame(()=>{syncBoardNavigation();draw();});}
   function draw(){
@@ -218,27 +250,27 @@
       const offset=Math.max(35,Math.abs(x2-x1)*.45)+(i%3)*6;
       const kinds=signalKinds(latest.output(wire.from));
       const path=dy=>`M ${x1} ${y1+dy} C ${x1+offset} ${y1+dy}, ${x2-offset} ${y2+dy}, ${x2} ${y2+dy}`;
-      if(!kinds.length)return `<path class="cable" data-wire="${wire.from}" d="${path(0)}"/>`;
+      if(!kinds.length)return `<path class="cable${sameWire(wire,state.rewire)?' rewiring':''}" data-wire="${wire.from}" d="${path(0)}"/>`;
       return kinds.map((kind,j)=>{
         const d=path((j-(kinds.length-1)/2)*4),color=signalColors[kind];
-        return `<path class="cable live signal-${kind}" data-wire="${wire.from}" data-kind="${kind}" style="--signal-color:${color}" d="${d}"/>${state.running||sound.playing?`<path class="cable-pulse" style="--signal-color:${color}" d="${d}"/>`:''}`;
+        return `<path class="cable live signal-${kind}${sameWire(wire,state.rewire)?' rewiring':''}" data-wire="${wire.from}" data-kind="${kind}" style="--signal-color:${color}" d="${d}"/>${state.running||sound.playing?`<path class="cable-pulse" style="--signal-color:${color}" d="${d}"/>`:''}`;
       }).join('');
     }).join('');
   }
   function changeEquipment(){
-    state.connections=[];state.selected=null;state.checked=false;state.running=false;
+    state.connections=[];state.selected=null;state.rewire=null;state.checked=false;state.running=false;
     const f4=$('rec-type').value==='f4';Array.from($('record-format').options).forEach(o=>o.disabled=o.value!=='iso'&&!f4);if(!f4)$('record-format').value='iso';
     resetControls();renderBoard();message('演出夥伴換好了！接線與旋鈕已重設，現在可以重新設計路徑。');
   }
   function setMode(mode){
-    state.mode=mode;state.connections=[];state.selected=null;state.checked=false;state.running=false;
+    state.mode=mode;state.connections=[];state.selected=null;state.rewire=null;state.checked=false;state.running=false;
     $('pa-type').value='basic';$('pa-mics').value='2';$('rec-type').value=mode==='pa'?'stereo':'f4';$('music-format').value=mode==='split'?'mono':'stereo';$('record-format').value='iso';
     changeEquipment();message('新任務開始。可以自己接線，也可以載入示範再拆解研究。');
   }
   function loadExample(kind=state.mode){
     if(kind==='aux'){setMode('pa');$('pa-type').value='aux';changeEquipment();}
     else if(kind!==state.mode)setMode(kind);
-    const c=config();state.connections=[];state.selected=null;state.checked=false;resetControls();
+    const c=config();state.connections=[];state.selected=null;state.rewire=null;state.checked=false;resetControls();
     const wire=(from,to)=>{if(ports.has(from)&&ports.has(to)&&!state.connections.some(x=>x.to===to||x.from===from))state.connections.push({from,to});};
     wire('pc-video','screen');
     if(state.mode==='pa'){
@@ -371,11 +403,11 @@
     $('audio-status').textContent='試聽已暫停。再次播放會接續同一首小曲。';
   }
   $('nodes').addEventListener('click',e=>{const p=e.target.closest('[data-port]');if(p)connect(p.dataset.port);});
-  $('connection-list').addEventListener('click',e=>{const b=e.target.closest('[data-unplug]');if(!b)return;state.connections.splice(Number(b.dataset.unplug),1);b.blur();update();renderConnections();message('已拔掉一條線。再看看哪個目的地失去訊號。');});
+  $('connection-list').addEventListener('click',e=>{const b=e.target.closest('[data-unplug]');if(!b)return;const wire=state.connections[Number(b.dataset.unplug)];b.blur();unplugWire(wire);renderConnections();});
   ['mic-count','mic-type','pa-type','pa-mics','rec-type','speakers','music-format'].forEach(k=>$(k).addEventListener('change',changeEquipment));
   $('record-format').addEventListener('change',update);$('goal').addEventListener('change',update);
   document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
-  $('example').addEventListener('click',()=>loadExample());$('clear').addEventListener('click',()=>{state.connections=[];state.selected=null;state.running=false;update();message('接線清空了，控制器設定保留。試試自己重建一遍。');});
+  $('example').addEventListener('click',()=>loadExample());$('clear').addEventListener('click',()=>{state.connections=[];state.selected=null;state.rewire=null;state.running=false;update();message('接線清空了，控制器設定保留。試試自己重建一遍。');});
   ['pa-master','send-master','rec-master'].forEach(k=>$(k).addEventListener('input',()=>{$(k+'-value').value=$(k).value+'%';update();}));
   ['pa-fx','aux-pre','source-mic','source-music','source-video'].forEach(k=>$(k).addEventListener('change',update));
   ['pa-strips','rec-strips'].forEach(k=>{$(k).addEventListener('input',e=>controlChanged(e.target));$(k).addEventListener('change',e=>controlChanged(e.target));$(k).addEventListener('focusout',e=>{if(e.target.dataset.control)requestAnimationFrame(()=>{if(!document.activeElement?.dataset.control)update();});});});
@@ -383,7 +415,8 @@
   $('matrix-body').addEventListener('click',e=>{const b=e.target.closest('[data-matrix]');if(!b)return;const [i,j]=b.dataset.matrix.split(',').map(Number),values=['off','pre','post'];matrix[i][j]=values[(values.indexOf(matrix[i][j])+1)%3];b.dataset.value=matrix[i][j];b.textContent=matrix[i][j].toUpperCase();b.setAttribute('aria-label',`INPUT ${i+1} 到 ${['MAIN 1','MAIN 2','SUB 1','SUB 2'][j]}：${matrix[i][j].toUpperCase()}`);update();});
   $('check').addEventListener('click',runCheck);$('record-test').addEventListener('click',captureTake);$('listen-live').addEventListener('click',()=>listenAt('live'));
   $('record-results').addEventListener('click',e=>{const b=e.target.closest('[data-listen]');if(!b)return;const t=solve().tracks.find(t=>'rec-'+t.id===b.dataset.listen);if(t)listenAt('rec-'+t.id);});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selected){state.selected=null;update();message('已取消選取。');}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.selected)cancelPatch();});
+  $('unplug-selected').addEventListener('click',()=>unplugWire(state.rewire));
   $('patch-navigation').addEventListener('click',e=>{
     const button=e.target.closest('[data-board-column]');if(!button)return;
     const scroll=document.querySelector('.board-scroll'),column=document.querySelectorAll('.node-column')[Number(button.dataset.boardColumn)];

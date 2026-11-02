@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#f8f5ec">
   <meta name="description" content="替自己的迷你演唱會選器材、接線、做 soundcheck。互動理解 PA、Zoom F4 routing、乾聲分軌與現場混音。">
   <title>我的迷你演唱會｜KTV 接線實驗室・影視錄音實務 14</title>
-  <link rel="stylesheet" href="./ktv-lab/style.css?v=paired-panels">
+  <link rel="stylesheet" href="./ktv-lab/style.css?v=repatch">
   <script src="./ktv-lab/audio-engine.js" defer></script>
-  <script src="./ktv-lab/app.js" defer></script>
+  <script src="./ktv-lab/app.js?v=repatch" defer></script>
 </head>
 <body>
   <a class="skip" href="#lab">跳到接線工作台</a>
@@ -86,8 +86,8 @@
         <p class="small-note">Vocal 是母音合成示意，沒有真人錄音或語音辨識。耳機音量只改變你現在聽到的大小，不改變錄音路由；電平表仍為教學示意。先降低實體播放音量。</p>
       </section>
       <div class="patch-shell">
-        <div class="patch-toolbar"><span><b class="dot"></b> PATCH PLAYGROUND</span><div><button id="patch-listen" class="button small">▶ 聽目前接線</button><button id="example" class="button small">載入示範接線 ↗</button><button id="clear" class="button small quiet">清空接線</button></div></div>
-        <div class="patch-instructions"><b>怎麼玩？</b> 點一個 <strong>OUT 輸出</strong>，再點另一台的 <strong>IN 輸入</strong>。可用鍵盤 Tab ＋ Enter。<span>灰虛線＝已接但暫無訊號；彩色實線＝訊號通過；雙色＝同一路已混合人聲與伴奏。</span></div>
+        <div class="patch-toolbar"><span><b class="dot"></b> PATCH PLAYGROUND</span><div><button id="patch-listen" class="button small">▶ 聽目前接線</button><button id="example" class="button small">載入示範接線 ↗</button><button id="unplug-selected" class="button small" title="先點已連接的 OUT 或 IN，再拔線" disabled>拔選取線 ×</button><button id="clear" class="button small quiet">清空接線</button></div></div>
+        <div class="patch-instructions"><b>怎麼玩？</b> 點一個 <strong>OUT 輸出</strong>，再點另一台的 <strong>IN 輸入</strong>。已接線也能點選改接；選好新接點後會取代舊線。按「拔選取線」可直接拔線，再次點選原本那對 OUT／IN 也能拔線。可用鍵盤 Tab ＋ Enter，Esc 取消。<span>灰虛線＝已接但暫無訊號；彩色實線＝訊號通過；雙色＝同一路已混合人聲與伴奏。</span></div>
         <div class="signal-legend" aria-label="訊號顏色圖例"><span class="signal-chip vocal">V · 人聲／Vocal</span><span class="signal-chip music">B · 伴奏／Backing</span><span class="signal-chip video">AV · 視訊／Video</span><span class="signal-chip mixed">V＋B · 已混音</span><small>接孔旁的 ✓ 表示已通；顏色與文字一起辨認來源。</small></div>
         <nav id="patch-navigation" class="patch-navigation" aria-label="接線台設備快跳" hidden><p id="patch-nav-hint">↔ 左右滑動，或點設備快速跳轉</p><div><button data-board-column="0" aria-pressed="true">聲源</button><button data-board-column="1" aria-pressed="false">PA</button><button data-board-column="2" aria-pressed="false">錄音機</button><button data-board-column="3" aria-pressed="false">舞台</button></div></nav>
         <div class="board-scroll" tabindex="0" role="region" aria-label="接線工作台，窄螢幕可水平捲動"><div id="board" class="board"><svg id="cables" aria-hidden="true"></svg><div id="nodes" class="nodes"></div></div></div>

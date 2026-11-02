@@ -2272,3 +2272,8 @@ input[type=checkbox] {
   .paired-workspace .pair-monitor { position:static; height:auto; max-height:none; box-shadow:none; }
   .pair-monitor #live-results,.pair-monitor #record-results { overflow:visible; }
 }
+/* Repatching keeps the original route live until a valid replacement is chosen. */
+.port.rewiring { border-color:#c39255; background:#fff0d9; }
+.cable.rewiring { stroke-dasharray:7 5; stroke-width:3.5; }
+#unplug-selected:not(:disabled) { background:#fff0d9; border-color:#b48a55; }
+@media(max-width:700px) { .patch-toolbar #clear { grid-column:auto; min-height:44px; } }

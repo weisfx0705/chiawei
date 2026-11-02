@@ -75,6 +75,17 @@ def run():
         audible()
         print('PASS No false audio from an unpatched output; headphone mute silences the actual graph',flush=True)
 
+        page.locator('#source-music').uncheck()
+        page.locator('[data-port="mic1"]').click()
+        audible()  # While selecting a replacement, the old PA route stays live.
+        page.locator('[data-port="rec-in1"]').click()
+        silent()  # The vocal is now at the recorder, no longer at the live PA.
+        page.locator('#listen-target').select_option('rec-iso1')
+        audible()
+        page.locator('#listen-target').select_option('live')
+        page.locator('#source-music').check()
+        print('PASS Live audio remains during selection and follows a successful cable replacement',flush=True)
+
         page.locator('[data-mode="split"]').click()
         page.locator('#example').click()
         page.locator('#source-music').uncheck()
