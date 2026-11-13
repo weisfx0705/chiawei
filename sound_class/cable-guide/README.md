@@ -33,3 +33,18 @@ https://www.youtube.com/watch?v=uKlaXb-fLrg&t=5s
 | `pov-280.webp` | 4:40 | Step 05：交替收成一束 |
 
 由瀏覽器已解碼的原始影片畫面擷取，核對呈現影格時間後保存，再轉為 WebP；不包含播放器覆蓋介面，沒有重繪、鏡像或改變手勢。八張圖片放在 Step 03／04／05，原有 QSC 正面截圖可展開對照。保留第一人稱影片的左右手方向，並附作者與時間連結。
+
+
+## 收納照片與新版頁面
+
+- `finished-connectors.webp`：Geistnote / Grimm Audio TPR 商品實拍，僅用於觀察兩端接頭在線束外側的位置；不把照片中的固定帶視為可退式束帶。
+  - https://geistnote.com/grimm-audios-tpr-balanced-cable-builder/
+  - https://cdn11.bigcommerce.com/s-iq99dfbppw/images/stencil/960w/products/314/1734/IMG_2020__35749.1678505468.JPG?c=2
+- `releasable-tie.webp`：KSS HV 可退式束帶鎖頭實拍，展示可按壓的釋放卡榫。
+  - https://www.kss.com.tw/index.php?action=products3-1&fid=3&sid=26&cid=31
+  - https://www.kss.com.tw/upload/product/0315-1-1BK.jpg
+- `hero-hands.webp`：Javier Mercedes 原影片 4:10 影格，作首屏實作畫面。
+- `lesson.css`、`lesson.js`：單元樣式與影片／步驟控制；無建置需求。
+- `taste/`：原樣保留 taste 技能的基礎樣式與微互動程式，教學頁調整另寫於 `lesson.css`。
+
+頁面直接建議可退式束帶，不以學校慣例作為說明。實拍照片保留原貌；未以生成圖改造接頭、線材或束帶。
