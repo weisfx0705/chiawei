@@ -14,6 +14,7 @@
 | 教材 | 說明 |
 | --- | --- |
 | [我的迷你演唱會](14.html) | 選器材、互動接線、PA / F4 Routing、ISO 與 LR 混音比較；操作說明見 [KTV Lab](ktv-lab/README.md) |
+| [音訊線材：順線與收線](15.html) | Randy Coppinger 收線影片、Over–Under 正反交替、8 步驟操作與雙人實作檢查表；原生 HTML/CSS/JS，無建置需求 |
 | [同步錄音團隊](sound-recording-presentation/README.md) | 26 頁互動簡報、訊噪比試聽、檢查表與聲音報表練習 |
 | [Zoom 錄音機自學頁](h4n_eseential/README.md) | H4n 與 H4essential 的機身辨識、接線、錄音與交檔流程 |
 | [聲音球體 Sound Spheres](sound-spheres/README.md) | 從內在念頭到外在聲景的分層聆聽與筆記練習 |
@@ -36,7 +37,7 @@ python3 -m http.server 8765 --bind 127.0.0.1
 
 - `index.html`、`index2.html`：兩門課的導覽入口。
 - `1.html` 至 `7.html`：數位音效設計入口所使用的單元。
-- `8.html` 至 `14.html`：影視錄音實務入口所使用的單元。
+- `8.html` 至 `15.html`：影視錄音實務入口所使用的單元。
 - `sound/`：課程音訊素材。
 - 教材子資料夾：各自保留頁面、樣式、互動程式與素材。
 

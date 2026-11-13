@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f5ec">
+  <meta name="description" content="音訊線材順線與收線教學：推薦 Over–Under 示範影片，拆解 XLR、TRS 軟線的解扭、正反交替收線、綁線、放線與現場走線，附實作檢查表。">
+  <title>音訊線材：順線與收線｜影視錄音實務 15</title>
+  <style>
+    :root{--paper:#f8f5ec;--white:#fffcf6;--ink:#293d38;--muted:#596b62;--line:#cdd6c9;--green:#246344;--mint:#deebdc;--orange:#a74724;--butter:#eee2a8}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.8 "PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}a{color:inherit;text-underline-offset:5px}button,input{font:inherit}button,a,input,summary{touch-action:manipulation}button{cursor:pointer}a,button{transition:background .15s,transform .15s}button:hover,.button:hover{transform:translateY(-2px)}button:active,.button:active{transform:translateY(1px)}:focus-visible{outline:3px solid var(--orange);outline-offset:5px}[hidden]{display:none!important}.wrap{width:min(1180px,calc(100% - 64px));margin:auto}.skip{position:absolute;top:-100px;background:var(--ink);color:white;padding:12px;z-index:5}.skip:focus{top:8px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:26px 0;border-bottom:1px solid var(--line);font-size:14px}.topbar a{text-decoration:none}.wordmark,.eyebrow,.label{font:600 12px/1.6 ui-monospace,monospace;letter-spacing:.13em}.wordmark{white-space:nowrap}.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;padding:70px 0 56px}.eyebrow{color:var(--green);margin:0 0 22px}.hero h1{font-size:clamp(38px,4.7vw,64px);line-height:1.22;letter-spacing:-.05em;margin:0 0 26px}.hero h1 span{display:block;color:var(--green)}.intro{font-size:18px;max-width:530px;color:var(--muted)}.button{display:inline-flex;align-items:center;justify-content:center;gap:20px;min-height:48px;padding:12px 24px;border:1px solid var(--ink);border-radius:6px;background:var(--ink);color:var(--white);text-decoration:none;font-weight:700}.button.secondary{background:transparent;color:var(--ink)}.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}.cable-art{background:var(--mint);border-radius:16px;padding:22px 20px 12px;position:relative}.art-top,.art-bottom{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:700}.cable-art svg{width:100%;height:auto;display:block}.art-bottom{border-top:1px solid #b6cbb8;padding-top:16px;font-size:14px}.goal-strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:25px 0;gap:24px}.goal-strip strong{display:block;font-size:20px}.goal-strip span{color:var(--muted);font-size:14px}.section{padding:76px 0;border-bottom:1px solid var(--line)}.section-head{display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-bottom:28px}h2{font-size:clamp(26px,3vw,36px);line-height:1.4;letter-spacing:-.03em;margin:0 0 12px}h3{font-size:23px;line-height:1.45;margin:0 0 16px}p{margin:0 0 16px}.muted{color:var(--muted)}.section-head p{margin:0;color:var(--muted)}.video-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:36px;align-items:start}.video-frame{aspect-ratio:16/9;background:#182a23;border-radius:12px;overflow:hidden;position:relative}.video-frame iframe{width:100%;height:100%;border:0}.video-start{border:0;padding:0;display:block;width:100%;height:100%;position:relative;background:#182a23;color:#fff}.video-start:hover{transform:none}.video-start img{width:100%;height:100%;object-fit:cover;opacity:.55}.play-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;font-size:18px;font-weight:700;text-shadow:0 1px 4px #000}.play-circle{display:grid;place-items:center;width:64px;height:64px;border:1px solid #fff;border-radius:50%;font-size:23px;background:#182a23a8}.video-caption{font-size:14px;margin:14px 0}.watch-notes{margin:18px 0;padding-left:24px}.watch-notes li{margin:9px 0}.note{background:var(--butter);border-left:3px solid #8b7730;padding:16px 20px;font-size:15px;margin-top:22px}.scope{font-size:15px;padding:18px 0;color:var(--muted)}.steps-layout{display:grid;grid-template-columns:260px 1fr;gap:32px}.step-nav{display:flex;flex-direction:column;gap:8px}.step-nav button{text-align:left;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--ink);padding:12px 16px;font-size:16px}.step-nav button[aria-current="step"]{border-color:var(--green);background:var(--mint);font-weight:700}.step-nav button span{display:inline-block;margin-right:15px;font:14px ui-monospace,monospace;color:var(--green)}.step-card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:34px;min-height:385px;margin-bottom:18px}.step-card .label{color:var(--orange);margin-bottom:16px}.step-card h3{font-size:29px}.step-card ul{padding-left:23px;margin:18px 0}.step-card li{margin:10px 0}.checkpoint{padding-top:18px;border-top:1px solid var(--line);margin-top:24px;font-size:16px}.checkpoint strong{color:var(--green)}.step-controls{display:flex;align-items:center;justify-content:space-between;gap:14px}.step-controls button{border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:6px;min-height:46px;padding:8px 20px}.step-controls button:disabled{opacity:.4;cursor:default;transform:none}.step-controls output{font-size:14px;color:var(--muted)}.pattern{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:28px}.pattern div{text-align:center;background:var(--mint);padding:18px 8px;border-radius:6px}.pattern div:nth-child(even){background:var(--butter)}.pattern b{display:block;font-size:20px}.pattern small{font:12px ui-monospace,monospace}.pattern-note{font-size:14px;color:var(--muted);margin-top:12px}.mistakes{display:grid;grid-template-columns:1fr 1fr;gap:0 36px}.mistake{padding:22px 0;border-top:1px solid var(--line)}.mistake h3{font-size:19px;margin-bottom:10px}.mistake p{font-size:16px;margin-bottom:0;color:var(--muted)}.practice-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:50px}.practice{background:var(--mint);padding:30px;border-radius:12px}.practice ol{padding-left:22px}.practice li{margin:12px 0}.checklist label{display:flex;align-items:flex-start;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer}.checklist input{flex-shrink:0;accent-color:var(--green);width:21px;height:21px;margin-top:5px}.checklist label:has(input:checked){color:var(--green)}.check-result{font-weight:700;color:var(--green);padding:20px 0 10px}.reset{background:transparent;border:0;color:var(--muted);padding:8px 0;text-decoration:underline;text-underline-offset:4px;font-size:14px}.sources{font-size:14px}.sources li{margin-bottom:10px;overflow-wrap:anywhere}.sources ol{padding-left:22px}.footer{display:flex;justify-content:space-between;gap:24px;padding:32px 0 42px;font-size:13px;color:var(--muted)}.noscript{padding:16px;background:var(--butter)}
+    @media(max-width:850px){.wrap{width:calc(100% - 40px)}.hero{gap:28px;padding-top:44px}.hero h1{font-size:42px}.video-grid{grid-template-columns:1fr}.steps-layout{grid-template-columns:210px 1fr;gap:20px}.step-card{padding:26px}.practice-grid{gap:28px}.wordmark{font-size:11px;letter-spacing:.05em}.section-head{display:block}.section-head p{margin-top:12px}}
+    @media(max-width:600px){body{font-size:16px}.wrap{width:calc(100% - 36px)}.topbar{font-size:13px;padding:20px 0}.wordmark{font-size:10px}.hero{grid-template-columns:1fr;padding:38px 0 32px;gap:30px}.hero h1{font-size:43px}.hero-actions{display:grid;grid-template-columns:1fr;width:100%}.intro{font-size:16px}.cable-art{max-width:420px;width:100%;justify-self:center}.goal-strip{gap:14px;padding:20px 0}.goal-strip strong{font-size:17px}.goal-strip span{font-size:12px}.section{padding:48px 0}.steps-layout{grid-template-columns:1fr}.step-nav{display:grid;grid-template-columns:1fr 1fr;gap:4px}.step-nav button{padding:10px 8px;font-size:14px}.step-nav button span{margin-right:8px}.step-card{padding:24px 20px;min-height:0}.step-card h3{font-size:25px}.pattern{gap:5px}.pattern b{font-size:16px}.pattern small{font-size:10px}.mistakes,.practice-grid{grid-template-columns:1fr}.practice{padding:24px}.footer{flex-direction:column;gap:12px}.video-caption{line-height:1.8}}
+    @media(max-width:600px){.pattern{grid-template-columns:1fr 1fr}.step-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}.step-controls output{grid-column:1/-1;grid-row:1;text-align:center}.step-controls button{white-space:nowrap}.step-controls #previous{grid-column:1}.step-controls #next{grid-column:2}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+    @media print{body{background:#fff;font-size:11pt}.wrap{width:100%}.topbar,.hero-actions,.video-frame,.step-nav,.step-controls,.reset{display:none!important}.hero{padding:20px 0}.hero h1{font-size:28pt}.section{padding:20px 0}.steps-layout,.practice-grid{display:block}.step-card[hidden]{display:block!important}.step-card{min-height:0;break-inside:avoid;padding:16px}.cable-art{max-width:260px}.checklist label{padding:8px 0}a{color:inherit}}
+  </style>
+</head>
+<body>
+<a class="skip" href="#steps">跳到操作步驟</a>
+<header class="topbar wrap"><a href="./index2.html">↖ 影視錄音實務</a><span class="wordmark">SOUND CLUB / FIELD NOTES 15</span></header>
+<main class="wrap">
+  <section class="hero" aria-labelledby="page-title">
+    <div>
+      <p class="eyebrow">AUDIO CABLE / 現場基本功</p>
+      <h1 id="page-title">把線收好，<span>下一場就順了。</span></h1>
+      <p class="intro">音訊線材的順線與收線：先解開扭轉，再一正、一反。讓一條 XLR 線從器材箱出發，也能整齊地回家。</p>
+      <div class="hero-actions"><a class="button" href="#video">先看示範影片 <span aria-hidden="true">↗</span></a><a class="button secondary" href="#steps">跟著 8 步驟練習</a></div>
+    </div>
+    <div class="cable-art">
+      <div class="art-top"><span>OVER / UNDER</span><span>正反交替收線</span></div>
+      <svg viewBox="0 0 480 350" role="img" aria-labelledby="cable-title cable-desc">
+        <title id="cable-title">收整的音訊線材</title><desc id="cable-desc">一束鬆鬆盤成圓形的線材，以綁帶固定，兩個接頭留在線圈外側。此為收納概念圖，手勢請參考影片。</desc>
+        <g fill="none" stroke="#293d38" stroke-width="11" stroke-linecap="round">
+          <ellipse cx="245" cy="167" rx="141" ry="113"/><ellipse cx="245" cy="169" rx="128" ry="101"/><ellipse cx="245" cy="171" rx="115" ry="89"/><ellipse cx="245" cy="173" rx="102" ry="77"/>
+          <path d="M241 54 C191 31 113 37 89 83 C69 120 65 176 45 224"/><path d="M249 96 C328 75 407 103 421 163 C435 212 404 251 423 281"/>
+        </g>
+        <path d="M242 54 C190 31 113 37 89 83" fill="none" stroke="#7ca98b" stroke-width="3" stroke-linecap="round"/>
+        <rect x="226" y="45" width="39" height="63" rx="7" fill="#e3b654" stroke="#293d38" stroke-width="2"/><path d="M232 57h27M232 94h27" stroke="#8a6c27" stroke-width="2"/>
+        <g transform="translate(43 223) rotate(21)"><rect x="-14" y="0" width="28" height="53" rx="5" fill="#66776c" stroke="#293d38" stroke-width="3"/><rect x="-17" y="34" width="34" height="22" rx="3" fill="#dce3d9" stroke="#293d38" stroke-width="3"/><path d="M-6 56v9M6 56v9M0 56v13" stroke="#293d38" stroke-width="3"/></g>
+        <g transform="translate(425 280) rotate(-24)"><rect x="-14" y="0" width="28" height="45" rx="5" fill="#66776c" stroke="#293d38" stroke-width="3"/><rect x="-17" y="30" width="34" height="22" rx="3" fill="#dce3d9" stroke="#293d38" stroke-width="3"/><circle cx="-6" cy="41" r="2.5" fill="#293d38"/><circle cx="6" cy="41" r="2.5" fill="#293d38"/><circle cx="0" cy="47" r="2.5" fill="#293d38"/></g>
+        <text x="245" y="169" text-anchor="middle" font-size="18" fill="#293d38" font-family="monospace">READY FOR</text><text x="245" y="195" text-anchor="middle" font-size="18" fill="#293d38" font-family="monospace">THE NEXT TAKE.</text>
+      </svg>
+      <div class="art-bottom"><span>鬆、順、圈徑一致。</span><span>接頭留在圈外 ↗</span></div>
+    </div>
+  </section>
+  <div class="goal-strip" aria-label="學習重點"><div><strong>順線</strong><span>放開纏結，釋放扭轉</span></div><div><strong>收線</strong><span>Over–Under 正反交替</span></div><div><strong>驗收</strong><span>重新放開，確認不卡線</span></div></div>
+
+  <section id="video" class="section" aria-labelledby="video-title">
+    <div class="section-head"><div><p class="eyebrow">01 / WATCH</p><h2 id="video-title">先看一次，再拿起線。</h2></div><p>準備一條軟質 XLR 線與一條魔鬼氈綁帶。</p></div>
+    <div class="video-grid">
+      <div><div class="video-frame" id="video-frame"><button class="video-start" id="load-video" type="button" aria-label="載入 How To Properly Roll Cable 教學影片"><img src="https://i.ytimg.com/vi/0yPcJD7RVuY/hqdefault.jpg" alt="" width="480" height="360" loading="lazy"><span class="play-label"><span class="play-circle" aria-hidden="true">▶</span>播放收線示範</span></button></div><p class="video-caption"><a href="https://www.youtube.com/watch?v=0yPcJD7RVuY" target="_blank" rel="noopener noreferrer">到 YouTube 觀看完整影片 ↗</a><br>若嵌入播放器無法使用，請由此開啟。</p></div>
+      <div><p class="label">推薦影片 · 英語示範</p><h3>How To Properly Roll Cable</h3><p class="muted">Randy Coppinger 的收線示範，也是 <a href="https://www.point-sourceaudio.com/2018/01/25/how-to-properly-coil-microphone-cables/" target="_blank" rel="noopener noreferrer">Point Source Audio 官方文章</a>推薦的影片。</p><ol class="watch-notes"><li>先觀察持線的手：線圈留在同一隻手。</li><li>比較相鄰兩圈：第二圈的手勢怎麼變？</li><li>留意線材是否自然落圈，而不是被硬扭。</li></ol><p class="note">看不清楚時，暫停或將播放速度調成 0.5×。下方是搭配影片的中文實作整理，另補上課堂順線與驗收流程，並非逐字翻譯。</p></div>
+    </div>
+  </section>
+
+  <section id="steps" class="section" aria-labelledby="steps-title">
+    <div class="section-head"><div><p class="eyebrow">02 / HANDS ON</p><h2 id="steps-title">順線、收線，拆成 8 個動作。</h2></div><p>以左手持圈、右手取線為例；左撇子可左右對調。</p></div>
+    <p class="scope">適用於一般柔軟、可手盤的 XLR 麥克風線與 TRS／TS 音訊線。線盤、多芯蛇線、光纖、較硬線材與領夾麥克風細線，請依原廠彎曲半徑及收納指示，不套用同一圈徑。</p>
+    <noscript><p class="noscript">下方已完整列出所有步驟；影片請使用 YouTube 連結開啟。</p></noscript>
+    <div class="steps-layout">
+      <nav class="step-nav" id="step-nav" aria-label="選擇操作步驟" hidden>
+        <button type="button" data-step="0" aria-controls="step-1" aria-current="step"><span>01</span>斷開與檢查</button><button type="button" data-step="1" aria-controls="step-2"><span>02</span>放開與順線</button><button type="button" data-step="2" aria-controls="step-3"><span>03</span>Over 正圈</button><button type="button" data-step="3" aria-controls="step-4"><span>04</span>Under 反圈</button><button type="button" data-step="4" aria-controls="step-5"><span>05</span>交替與整圈</button><button type="button" data-step="5" aria-controls="step-6"><span>06</span>綁線與收納</button><button type="button" data-step="6" aria-controls="step-7"><span>07</span>再次放線</button><button type="button" data-step="7" aria-controls="step-8"><span>08</span>現場走線</button>
+      </nav>
+      <div>
+        <article class="step-card" id="step-1"><p class="label">STEP 01 / PREPARE</p><h3>先斷開，再整理。</h3><p>確認錄音已停止，通知控台並靜音相關輸出。若使用 48V 幻象電源，先關閉，依設備原廠指示等待後再拔線。</p><ul><li>握住接頭外殼；XLR 有卡榫時先按下卡榫，不拉線身拔插頭。</li><li>拆除固定膠帶，確認兩端均已脫離設備，再把整條線取回。</li><li>查看外皮、接頭與接頭尾端。有破皮、鬆動或訊號時斷時續，先標記並交給老師檢查。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>線材兩端都自由，不會牽動麥克風、腳架或其他器材。</p></article>
+        <article class="step-card" id="step-2"><p class="label">STEP 02 / RELAX</p><h3>順線，是解扭，不是拉直。</h3><p>在乾淨、無人踩踏的空間，沿著線身把整條線慢慢放開。先解掉交叉與打結，再開始收。</p><ul><li>雙手輕扶線身，分段整理；遇到螺旋扭轉，讓自由端轉動，把扭力釋放掉。</li><li>遇到硬折或卡住就停下來，退回解開；不要從兩端用力拉，也不要踩住接頭拉線。</li><li>接頭輕放，避免拖地碰撞；圈若一直彈開，先放鬆、放大圈徑再試。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>線可以放鬆地躺著，不纏繞器材，也沒有被拉緊的結。</p></article>
+        <article class="step-card" id="step-3"><p class="label">STEP 03 / OVER</p><h3>第一圈，順著線性成圈。</h3><p>左手持接頭後方的線身，接頭留在線圈外側。右手沿線取一段，順著線材自然彎曲的方向，把第一圈送回左手。</p><ul><li>先用舒適的大圈練習。一般軟質麥克風線可從約 30–40 公分直徑試起；這是課堂起點，不是所有線材的固定規格。</li><li>左手鬆握圈頂，不夾死；右手讓線自然落圈，避免在接頭根部折彎。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>圈是圓順的，不呈麻花或尖角；不需用力也能維持形狀。</p></article>
+        <article class="step-card" id="step-4"><p class="label">STEP 04 / UNDER</p><h3>第二圈，換成反手接圈。</h3><p>右手再取相近長度，手心轉向外側、拇指朝下接線，再把手翻回來，讓這一段從下方形成反圈，交回左手。</p><ul><li>這一圈的翻轉與上一圈相反，兩圈最後仍疊在左手同一束裡。</li><li>動的是取線手的手勢；不要把整束線翻面，也不是把接頭穿過圈心。</li><li>手指只需輕輕引導。若必須硬擰才能合圈，先放開重做，對照影片手勢。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>正圈與反圈大小接近，線圈鬆鬆重疊，沒有被硬折成小圈。</p></article>
+        <article class="step-card" id="step-5"><p class="label">STEP 05 / ALTERNATE</p><h3>一正、一反，保持同樣大小。</h3><p>依序重複 Over → Under → Over → Under。手每次取相近長度，逐圈放入左手；需要時移動腳步靠近剩餘線材。</p><ul><li>口頭念「正、反、正、反」，先練穩定，再練速度。</li><li>某一圈突然歪斜或彈開，就退回那一圈調整，不把扭轉藏進線束。</li><li>最後剩下的線不夠一圈時，讓尾端自然留出，不勉強拉出一個小圈。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>線圈大小接近，接頭自然留在外側，沒有被拉緊。</p></article>
+        <article class="step-card" id="step-6"><p class="label">STEP 06 / STORE</p><h3>用綁帶固定，不拿線尾當繩子。</h3><p>用魔鬼氈綁帶束住線圈的一側，鬆緊以能保持整束、不壓扁外皮為準。</p><ul><li>兩個接頭留在線圈外側，不穿過中央，也不繞著整束線纏緊。</li><li>不要將線身打結，或靠接頭互插承受拉力。</li><li>確認乾燥、標示長度與編號，再依器材室規則收納；避免重物壓住接頭與線材。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>拿起時整束不散開，綁帶沒有勒出凹痕，標籤可以辨認。</p></article>
+        <article class="step-card" id="step-7"><p class="label">STEP 07 / PAY OUT</p><h3>重新放開，才知道收得好不好。</h3><p>鬆開綁帶，找到留在外側的一端。扶著整束線，一邊走、一邊讓線圈依序鬆開，接頭不穿過圈心。</p><ul><li>不要把線圈或金屬接頭甩向空間另一端。</li><li>遇到打結就停下來，退回解開；檢查是否取錯線端位置、接頭穿圈，或收線時漏掉交替。</li><li>放開後再收一次，比只看線束外觀更能確認手勢。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>整條線順利展開，沒有連續的小結，也不用靠拉扯通過。</p></article>
+        <article class="step-card" id="step-8"><p class="label">STEP 08 / ROUTE</p><h3>讓線路貼地，也讓人走得過。</h3><p>沿場地邊緣規劃路徑，避開門縫、輪子、腳架關節與主要動線。接頭附近保留適量活動餘裕，不讓重量拉扯插座。</p><ul><li>不得不跨越通道時，依現場規範使用合適的護線設備或固定方式，並清楚標示。</li><li>音訊線與電源線盡量分開走；必須交叉時，盡量接近直角，減少長距離平行。</li><li>接妥後做訊號檢查。若線已損壞，即使外觀收得漂亮也不能直接投入使用。</li></ul><p class="checkpoint"><strong>動作檢查：</strong>線不絆人、接頭不受拉力，線路可追蹤，訊號正常。</p></article>
+        <div class="step-controls" id="step-controls" hidden><button id="previous" type="button">← 上一步</button><output id="step-count" aria-live="polite" aria-atomic="true">步驟 1 / 8</output><button id="next" type="button">下一步 →</button></div>
+      </div>
+    </div>
+    <div class="pattern" aria-label="收線交替順序"><div><small>LOOP 01</small><b>Over 正圈</b></div><div><small>LOOP 02</small><b>Under 反圈</b></div><div><small>LOOP 03</small><b>Over 正圈</b></div><div><small>LOOP 04</small><b>Under 反圈</b></div></div>
+    <p class="pattern-note">記住的是交替手勢，不是把線排成平面的「8」字。收完的外觀仍是一束圓形線圈。</p>
+  </section>
+
+  <section class="section" aria-labelledby="mistakes-title">
+    <p class="eyebrow">03 / TROUBLESHOOT</p><h2 id="mistakes-title">線不聽話，先找原因。</h2>
+    <div class="mistakes"><div class="mistake"><h3>繞手肘，看起來很快？</h3><p>固定繞手掌與手肘容易把扭轉累積在線裡。放下來，改成鬆握線圈的正反交替手勢。</p></div><div class="mistake"><h3>線圈一直彈開？</h3><p>先檢查扭轉與圈徑；放開自由端、讓線鬆弛，再放大圈徑。不要為了整齊用力擰緊。</p></div><div class="mistake"><h3>收得整齊，放開卻打結？</h3><p>留意接頭是否曾穿過圈心，以及取線端是否被其他線圈壓住。解除交叉，再慢慢逐圈放開。</p></div><div class="mistake"><h3>所有線都收成一樣？</h3><p>不同外皮、粗細與結構有不同要求。領夾麥克風細線不緊纏發射器；線盤與多芯線先確認器材室規則。</p></div></div>
+  </section>
+
+  <section id="practice" class="section" aria-labelledby="practice-title">
+    <p class="eyebrow">04 / CHECK YOUR WORK</p><h2 id="practice-title">兩人一組，收完再放一次。</h2>
+    <div class="practice-grid"><div class="practice"><h3>課堂練習 · 建議 10 分鐘</h3><p>一人操作，一人觀察；完成後交換角色。這一輪先求順，不比速度。</p><ol><li>先看影片，指出 Over 與 Under 的手勢差異。</li><li>完成順線、收線、綁線，再慢慢放開。</li><li>告訴同伴哪一圈卡住，退回修正，再做一次。</li></ol><p><strong>驗收標準：</strong>不用硬拉就能展開；線材與接頭不受拉扯。</p></div>
+      <div><form class="checklist" id="checklist" aria-label="實作自我檢查"><label><input type="checkbox" name="check" value="disconnect"><span>已斷開兩端，檢查外皮、接頭與卡榫。</span></label><label><input type="checkbox" name="check" value="relax"><span>已解開纏結與扭轉，沒有硬拉線身。</span></label><label><input type="checkbox" name="check" value="alternate"><span>正圈、反圈交替，圈徑大致一致。</span></label><label><input type="checkbox" name="check" value="tie"><span>綁帶不勒緊，兩端沒有穿過圈心。</span></label><label><input type="checkbox" name="check" value="deploy"><span>重新放開後順暢，沒有打結或卡住。</span></label></form><p class="check-result" id="check-result" role="status" aria-live="polite">完成 0 / 5 項自我檢查</p><p class="muted" style="font-size:14px">勾選記錄只保留在本次頁面，不會送出或計分。</p><button class="reset" id="reset-checks" type="button" hidden>清空勾選，換下一位練習</button></div></div>
+  </section>
+
+  <section class="section sources" aria-labelledby="sources-title"><p class="eyebrow">REFERENCES</p><h2 id="sources-title">影片與延伸閱讀</h2><ol><li><a href="https://www.youtube.com/watch?v=0yPcJD7RVuY" target="_blank" rel="noopener noreferrer">Randy Coppinger — How To Properly Roll Cable</a>：本課推薦的收線示範影片。</li><li><a href="https://www.point-sourceaudio.com/2018/01/25/how-to-properly-coil-microphone-cables/" target="_blank" rel="noopener noreferrer">Point Source Audio — How to Properly Coil Microphone Cables</a>：正反交替收線、避免手肘纏線及細線收納。</li><li><a href="https://www.kincadeproductions.com/over-under-cable-coiling" target="_blank" rel="noopener noreferrer">Kincade Productions — Over &amp; Under Cable Coiling</a>：辨認線材種類與現場收線慣例。</li><li><a href="https://roswellproaudio.com/pages/how-to-turn-on-phantom-power" target="_blank" rel="noopener noreferrer">Roswell Pro Audio — How To Turn On Phantom Power</a>：拔插電容麥克風前的幻象電源處理。</li></ol><p class="muted">中文步驟、練習安排與圖解為本課整理；影片及縮圖權利屬原作者。資料核對：2026 年 11 月 13 日。</p></section>
+</main>
+<footer class="footer wrap"><span>義守大學電影與電視學系 · 陳嘉暐老師 · 影視錄音實務 15</span><a href="./index2.html">返回影視錄音實務 ↗</a></footer>
+<script>
+  (() => {
+    const cards = Array.from(document.querySelectorAll('.step-card'));
+    const buttons = Array.from(document.querySelectorAll('[data-step]'));
+    const previous = document.getElementById('previous');
+    const next = document.getElementById('next');
+    const count = document.getElementById('step-count');
+    let active = 0;
+    function showStep(index) {
+      active = Math.max(0, Math.min(cards.length - 1, index));
+      cards.forEach((card, i) => { card.hidden = i !== active; });
+      buttons.forEach((button, i) => {
+        if (i === active) button.setAttribute('aria-current', 'step');
+        else button.removeAttribute('aria-current');
+      });
+      previous.disabled = active === 0;
+      next.disabled = active === cards.length - 1;
+      count.textContent = `步驟 ${active + 1} / ${cards.length}：${cards[active].querySelector('h3').textContent}`;
+    }
+    document.getElementById('step-nav').hidden = false;
+    document.getElementById('step-controls').hidden = false;
+    buttons.forEach(button => button.addEventListener('click', () => showStep(Number(button.dataset.step))));
+    previous.addEventListener('click', () => showStep(active - 1));
+    next.addEventListener('click', () => showStep(active + 1));
+    showStep(0);
+    const checks = Array.from(document.querySelectorAll('#checklist input'));
+    const result = document.getElementById('check-result');
+    function updateChecks() {
+      const done = checks.filter(check => check.checked).length;
+      result.textContent = done === checks.length ? '完成 5 / 5 項！請讓同伴再確認一次放線結果。' : `完成 ${done} / ${checks.length} 項自我檢查`;
+    }
+    checks.forEach(check => check.addEventListener('change', updateChecks));
+    document.getElementById('reset-checks').hidden = false;
+    document.getElementById('reset-checks').addEventListener('click', () => {
+      document.getElementById('checklist').reset(); updateChecks();
+    });
+    document.getElementById('load-video').addEventListener('click', () => {
+      const frame = document.createElement('iframe');
+      frame.src = 'https://www.youtube-nocookie.com/embed/0yPcJD7RVuY?autoplay=1&rel=0';
+      frame.title = 'How To Properly Roll Cable — Randy Coppinger';
+      frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      frame.allowFullscreen = true;
+      frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      document.getElementById('video-frame').replaceChildren(frame);
+      frame.focus();
+    });
+  })();
+</script>
+</body>
+</html>
