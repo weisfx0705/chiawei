@@ -13,6 +13,7 @@
 - https://training.qsc.com/mod/book/tool/print/index.php?id=1715
 - https://www.youtube.com/watch?v=PJjMc-tTksU
 - 正圈參考畫面：1:41、1:48；反圈參考畫面：2:03、2:07。
-- 原影片截圖僅作生成時的姿勢參考，沒有納入網站；圖片不使用原影片的 UI、品牌或人物身分。
+- 圖解使用原影片作姿勢參考，不使用原人物身分。
+- 經使用者要求，另加入 QSC 1:41、1:48、2:03、2:07 的真人示範截圖：`qsc-101.webp`、`qsc-108.webp`、`qsc-123.webp`、`qsc-127.webp`，放在 Step 03／04。保留原始截圖、播放器時間與字幕，附來源及對應時間連結。
 
 網站不呼叫圖像 API，沒有任何瀏覽器端金鑰或其他憑證。
