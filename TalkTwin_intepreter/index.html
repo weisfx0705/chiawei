@@ -53,7 +53,7 @@
       <section class="panel avatar-panel" aria-labelledby="avatarHeading">
         <div class="panel-heading compact-heading">
           <div>
-            <p class="eyebrow">LIVE INTERPRETER</p>
+            <p class="eyebrow">CONSECUTIVE INTERPRETER</p>
             <h1 id="avatarHeading">你的即席雙向口譯官</h1>
           </div>
           <span class="mode-tag pair-tag" id="modeTag">中文 ⇄ English</span>
@@ -117,7 +117,7 @@
         <div class="live-caption" aria-live="polite">
           <span class="caption-label" id="captionLabel">READY</span>
           <p class="caption-source" id="captionSource" hidden></p>
-          <p id="liveCaption">選好兩種語言後，按「開始即席口譯」，講者說一句就翻一句。</p>
+          <p id="liveCaption">選好兩種語言後開始口譯。講完稍作停頓，等譯文播完再說下一句。</p>
         </div>
 
         <div class="voice-controls">
@@ -247,11 +247,11 @@
 
             <label class="field-block">
               <span class="field-title">斷句節奏</span>
-              <span class="field-help">決定要多快接話。講者句子長就選「耐心」。</span>
+              <span class="field-help">講者持續停頓多久後，開始翻譯。</span>
               <select id="pacingSelect">
-                <option value="fast">快 · 講者一停就翻</option>
-                <option value="balanced">平衡（建議）</option>
-                <option value="patient">耐心 · 等整句說完</option>
+                <option value="fast">快 · 0.7 秒</option>
+                <option value="balanced">平衡 · 1 秒（預設）</option>
+                <option value="patient">耐心 · 1.4 秒</option>
               </select>
             </label>
 
@@ -472,7 +472,7 @@
               </select>
               <button id="chooseSpeakerButton" type="button">選擇裝置</button>
             </div>
-            <small class="audio-device-help" id="speakerHelp">支援的瀏覽器可分別指定 Realtime、朗讀與提示音的播放裝置。</small>
+            <small class="audio-device-help" id="speakerHelp">支援的瀏覽器可指定譯音、朗讀與喇叭測試音的播放裝置。</small>
             <div class="audio-test-row">
               <button class="audio-test-button" id="testSpeakerButton" type="button">測試喇叭</button>
               <span class="audio-test-status" id="speakerTestStatus">尚未測試</span>
@@ -621,8 +621,8 @@
   <audio id="ttsAudio" playsinline hidden></audio>
   <audio id="testAudio" playsinline hidden></audio>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="static-api.js?v=1.0.2" defer></script>
+  <script src="static-api.js?v=1.0.3" defer></script>
   <script src="orb.js?v=1.0.1" defer></script>
-  <script src="app.js?v=1.0.3" defer></script>
+  <script src="app.js?v=1.0.4" defer></script>
 </body>
 </html>

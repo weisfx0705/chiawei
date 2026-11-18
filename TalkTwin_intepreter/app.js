@@ -4,7 +4,7 @@ const DEFAULT_PERSONA = `你是一位專業即席翻譯官。你的任務是協�
 
 # 工作方式
 - 進行逐句雙向翻譯：講者說中文時，你翻成英文；講者切換到英文時，你翻成中文。
-- 每次僅翻譯一個句子，等講者說完一句後再翻譯。
+- 等講者停頓後，依順序翻完這一輪收下的內容。
 - 只說出譯文，不要加引導語，也不要複誦原文。
 - 保持自然、親切、對話式，避免冗長講解。`;
 
@@ -135,22 +135,16 @@ const state = {
     audioContext: null,
     analyser: null,
     analyserFrame: null,
-    outputActive: false,
-    awaitingResponse: false,
-    lastOutputAudioAt: 0,
-    responseText: '',
-    responseFinalized: false,
+    response: null,
     typingNode: null,
-    voiceDraft: null,
-    lastUserItemId: '',
+    sourceItems: new Map(),
+    latestSourceId: null,
+    lastCommittedItemId: null,
+    pendingVoiceItemId: null,
     sessionConfig: null,
     sessionReadyResolve: null,
     sessionReadyReject: null,
     sessionReadyTimer: null,
-    soundContext: null,
-    dialToneTimer: null,
-    thinkingToneTimer: null,
-    thinkingToneInterval: null,
     env: { loud: 0, shape: 0 }
   }
 };
@@ -720,9 +714,8 @@ async function applySpeakerRoute({ quiet = false } = {}) {
   }
   try {
     for (const audio of [el.realtimeAudio, el.ttsAudio, el.testAudio]) await audio.setSinkId(sinkId);
-    for (const context of [state.tts.audioContext, state.realtime.soundContext]) {
-      if (context && typeof context.setSinkId === 'function') await context.setSinkId(sinkId);
-    }
+    const context = state.tts.audioContext;
+    if (typeof context?.setSinkId === 'function') await context.setSinkId(sinkId);
     state.speaker.activeId = sinkId;
     updateSpeakerHelp();
     return true;
@@ -745,9 +738,8 @@ async function resetSpeakerRouteToDefault() {
   [el.realtimeAudio, el.ttsAudio, el.testAudio].forEach((audio) => {
     if (typeof audio?.setSinkId === 'function') tasks.push(audio.setSinkId('').catch(() => {}));
   });
-  [state.tts.audioContext, state.realtime.soundContext].forEach((context) => {
-    if (typeof context?.setSinkId === 'function') tasks.push(context.setSinkId('').catch(() => {}));
-  });
+  const context = state.tts.audioContext;
+  if (typeof context?.setSinkId === 'function') tasks.push(context.setSinkId('').catch(() => {}));
   await Promise.all(tasks);
 }
 
@@ -2156,7 +2148,7 @@ async function sendCurrentMessage() {
   }
 
   syncProfileFromInputs();
-  const priorHistory = state.history.slice(-12);
+  const priorHistory = state.history.filter((item) => item.content).slice(-12);
   state.history.push({ role: 'user', content: message });
   addMessage('user', message);
   el.messageInput.value = '';
@@ -2379,6 +2371,7 @@ function clearChat() {
   el.repeatButton.disabled = true;
   el.chatLog.textContent = '';
   addMessage('assistant', '紀錄已清除。可以重新開始，也可以先到「翻譯設定」調整語言配對。', '口譯官');
+  setSourceCaption('');
   setCaption('READY', '可輸入文字，或開始 OpenAI Realtime 即時語音對話。');
   setAvatarMode('idle');
 }
@@ -2504,9 +2497,9 @@ function finishSpeaking(session) {
 function stopSpeaking() {
   state.speechSession += 1;
   stopTTSPlayback();
-  if (state.realtime.outputActive && isRealtimeReady()) {
-    try { state.realtime.channel.send(JSON.stringify({ type: 'response.cancel' })); } catch (error) { console.warn(error); }
-    state.realtime.outputActive = false;
+  if (isRealtimeReady() && state.realtime.response) {
+    cancelRealtimeResponse();
+    return;
   }
   stopMouthAnimation();
   el.stopVoiceButton.disabled = true;
@@ -2698,7 +2691,7 @@ function setupExpressiveMotion() {
   const scheduleGaze = () => {
     clearTimeout(state.gazeTimer);
     state.gazeTimer = window.setTimeout(() => {
-      if (!state.listening && !state.busy && !state.realtime.outputActive) {
+      if (!state.listening && !state.busy && !state.realtime.response?.playing) {
         setGaze((Math.random() - 0.5) * 4.4, (Math.random() - 0.5) * 2.6);
       }
       scheduleGaze();
@@ -2711,7 +2704,7 @@ function setupExpressiveMotion() {
     const y = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
     el.avatarArt.style.setProperty('--tilt-x', `${(x * 1.8).toFixed(2)}deg`);
     el.avatarArt.style.setProperty('--tilt-y', `${(-y * 1.45).toFixed(2)}deg`);
-    if (!state.realtime.outputActive) setGaze(x * 2.8, y * 1.8);
+    if (!state.realtime.response?.playing) setGaze(x * 2.8, y * 1.8);
   });
   el.avatarArt.addEventListener('pointerleave', () => {
     el.avatarArt.style.setProperty('--tilt-x', '0deg');
@@ -2748,6 +2741,15 @@ function isRealtimeEngaged() {
   return state.realtime.connecting || state.realtime.connected;
 }
 
+function updateRealtimeStatus() {
+  const realtime = state.realtime;
+  const microphone = shorten(state.microphone.activeLabel || '系統預設麥克風', 34);
+  const activity = realtime.response?.playing ? '播放譯文'
+    : realtime.response ? '正在翻譯'
+    : realtime.muted ? '麥克風已靜音' : '正在聆聽';
+  el.realtimeStatus.textContent = `${interpreterPairLabel()} · ${microphone} · ${activity}`;
+}
+
 function updateRealtimeUI() {
   const realtime = state.realtime;
   const realtimeEngaged = isRealtimeEngaged();
@@ -2762,10 +2764,7 @@ function updateRealtimeUI() {
     el.realtimeButton.disabled = true;
   } else if (realtime.connected) {
     el.realtimeCard.classList.add('connected');
-    const microphone = shorten(state.microphone.activeLabel || '系統預設麥克風', 34);
-    el.realtimeStatus.textContent = realtime.muted
-      ? `${microphone} 已靜音；口譯官暫時聽不到講者`
-      : `${interpreterPairLabel()} · ${microphone} · 正在聆聽`;
+    updateRealtimeStatus();
     el.realtimeButton.querySelector('span').textContent = '結束即席口譯';
     el.realtimeButton.disabled = false;
   } else {
@@ -2809,7 +2808,7 @@ function updateRealtimeUI() {
   }
   el.micButton.disabled = realtime.connected || realtime.connecting || state.busy || !state.recognition;
   if (realtime.connected) {
-    el.inputHint.textContent = '口譯已連線；直接說話即可，也可輸入文字';
+    el.inputHint.textContent = '口譯已連線。等譯文播放完畢，再說下一句或輸入文字。';
   } else if (!state.listening) {
     el.inputHint.textContent = state.recognition
       ? '可打字翻譯；現場口譯請按左側「開始即席口譯」'
@@ -2820,7 +2819,7 @@ function updateRealtimeUI() {
 
 async function toggleRealtimeSession() {
   if (state.realtime.connected || state.realtime.connecting) {
-    stopRealtimeSession({ playHangupTone: state.realtime.connected });
+    stopRealtimeSession();
     showToast('即席口譯已結束。');
     return;
   }
@@ -2858,7 +2857,6 @@ async function startRealtimeSession() {
   updateRealtimeUI();
   setAvatarMode('thinking');
   setCaption('CONNECTING', '正在建立 OpenAI Realtime 安全語音連線…');
-  startRealtimeDialTone();
 
   try {
     const stream = await getRealtimeMicrophoneStream();
@@ -2881,13 +2879,15 @@ async function startRealtimeSession() {
 
     peer.ontrack = async (event) => {
       const [remoteStream] = event.streams;
-      if (!remoteStream) return;
+      if (!remoteStream || state.realtime.peer !== peer) return;
       el.realtimeAudio.srcObject = remoteStream;
       await applySpeakerRoute({ quiet: true });
+      if (state.realtime.peer !== peer) return;
       el.realtimeAudio.play().catch((error) => console.warn('Realtime audio autoplay:', error));
       startRealtimeAudioAnalysis(remoteStream);
     };
     peer.onconnectionstatechange = () => {
+      if (state.realtime.peer !== peer) return;
       if (peer.connectionState === 'failed' || peer.connectionState === 'closed') {
         const wasConnected = state.realtime.connected;
         stopRealtimeSession();
@@ -2907,9 +2907,11 @@ async function startRealtimeSession() {
         session
       }));
     });
-    channel.addEventListener('message', handleRealtimeEvent);
+    channel.addEventListener('message', (event) => {
+      if (state.realtime.channel === channel) handleRealtimeEvent(event);
+    });
     channel.addEventListener('close', () => {
-      if (state.realtime.connected || state.realtime.connecting) stopRealtimeSession();
+      if (state.realtime.channel === channel && isRealtimeEngaged()) stopRealtimeSession();
     });
 
     const offer = await peer.createOffer();
@@ -2947,15 +2949,13 @@ async function startRealtimeSession() {
       peer.setRemoteDescription({ type: 'answer', sdp: answerSdp }),
       sessionReady
     ]);
-    stream.getAudioTracks().forEach((track) => { track.enabled = true; });
     state.realtime.connecting = false;
     state.realtime.connected = true;
-    stopRealtimeDialTone();
-    playRealtimeConnectedTone();
+    syncRealtimeMicrophone();
     updateRealtimeUI();
     setAvatarMode('listening');
-    setCaption('LIVE', '人格與背景知識已套用，直接開口說話即可。');
-    showToast('Realtime 已連線；人格與背景知識已確認套用。');
+    setSourceCaption('');
+    setCaption('LISTENING', '雙向口譯已就緒，請開始說話。');
   } catch (error) {
     if (error.message === 'Realtime 對話已結束。') return;
     console.error('Realtime connection failed:', error);
@@ -3011,22 +3011,20 @@ function normalizeSdp(value) {
   return `${lines.join('\r\n')}\r\n`;
 }
 
-function stopRealtimeSession({ playHangupTone = false } = {}) {
+function stopRealtimeSession() {
   const realtime = state.realtime;
-  stopRealtimeCallSounds();
-  if (playHangupTone) playRealtimeHangupTone();
+  const wasEngaged = isRealtimeEngaged();
   realtime.connecting = false;
   realtime.connected = false;
-  realtime.outputActive = false;
-  realtime.awaitingResponse = false;
-  realtime.lastOutputAudioAt = 0;
   realtime.muted = false;
   state.microphone.activeLabel = '';
-  realtime.responseText = '';
-  realtime.responseFinalized = false;
+  realtime.response = null;
   realtime.typingNode?.remove();
   realtime.typingNode = null;
-  realtime.voiceDraft = null;
+  for (const itemId of realtime.sourceItems.keys()) updateRealtimeSource(itemId, '');
+  realtime.latestSourceId = null;
+  realtime.lastCommittedItemId = null;
+  realtime.pendingVoiceItemId = null;
   realtime.sessionConfig = null;
   rejectRealtimeSessionReady(new Error('Realtime 對話已結束。'));
 
@@ -3045,7 +3043,8 @@ function stopRealtimeSession({ playHangupTone = false } = {}) {
   el.realtimeAudio.srcObject = null;
   setSpeechLevels(0);
   setMouthShape(0);
-  if (state.busy) setBusy(false);
+  if (wasEngaged) el.stopVoiceButton.disabled = true;
+  if (wasEngaged && state.busy) setBusy(false);
   if (!state.busy) setAvatarMode('idle');
   updateRealtimeUI();
 }
@@ -3053,137 +3052,56 @@ function stopRealtimeSession({ playHangupTone = false } = {}) {
 function toggleRealtimeMute() {
   if (!state.realtime.localStream || !state.realtime.connected) return;
   state.realtime.muted = !state.realtime.muted;
-  state.realtime.localStream.getAudioTracks().forEach((track) => {
-    track.enabled = !state.realtime.muted;
-  });
+  syncRealtimeMicrophone();
   updateRealtimeUI();
 }
 
-// Realtime cues are synthesized locally. Keeping them in Web Audio avoids an
-// extra network request (and means the interaction still works offline until
-// the actual API connection begins). They are deliberately quiet: the sounds
-// should feel like a phone state change, not compete with the conversation.
-function getRealtimeSoundContext() {
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return null;
+function usesManualRealtimeTurns() {
+  return state.realtime.sessionConfig?.audio?.input?.turn_detection?.create_response === false;
+}
 
+function syncRealtimeMicrophone() {
   const realtime = state.realtime;
-  if (!realtime.soundContext || realtime.soundContext.state === 'closed') {
-    const canRoute = typeof AudioContextClass.prototype?.setSinkId === 'function';
-    try {
-      realtime.soundContext = canRoute && state.speaker.activeId
-        ? new AudioContextClass({ sinkId: state.speaker.activeId })
-        : new AudioContextClass();
-    } catch (error) {
-      realtime.soundContext = new AudioContextClass();
-    }
-    if (canRoute) realtime.soundContext.setSinkId(state.speaker.activeId || '').catch(() => {});
-  }
-  if (realtime.soundContext.state === 'suspended') {
-    realtime.soundContext.resume().catch(() => {});
-  }
-  return realtime.soundContext;
+  // In consecutive interpreting, keep the translation out of the mic input.
+  const translating = usesManualRealtimeTurns() && Boolean(realtime.response);
+  const enabled = realtime.connected && !realtime.muted && !translating;
+  realtime.localStream?.getAudioTracks().forEach((track) => {
+    track.enabled = enabled;
+  });
 }
 
-function playRealtimeTone(frequency, {
-  delay = 0,
-  duration = 0.1,
-  volume = 0.07,
-  type = 'sine',
-  endFrequency = frequency
-} = {}) {
-  const context = getRealtimeSoundContext();
-  if (!context) return;
-
-  const start = context.currentTime + delay;
-  const oscillator = context.createOscillator();
-  const gain = context.createGain();
-  oscillator.type = type;
-  oscillator.frequency.setValueAtTime(Math.max(1, frequency), start);
-  oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
-  gain.gain.setValueAtTime(0.0001, start);
-  gain.gain.exponentialRampToValueAtTime(volume, start + Math.min(0.025, duration * 0.28));
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  oscillator.connect(gain).connect(context.destination);
-  oscillator.start(start);
-  oscillator.stop(start + duration + 0.03);
-}
-
-function startRealtimeDialTone() {
-  stopRealtimeDialTone();
-  const playPulse = () => {
-    playRealtimeTone(392, { duration: 0.09, volume: 0.055, type: 'triangle', endFrequency: 410 });
-    playRealtimeTone(494, { delay: 0.14, duration: 0.12, volume: 0.055, type: 'triangle', endFrequency: 512 });
+function beginRealtimeResponse(requestId = '') {
+  const response = {
+    requestId, id: '', text: '', playing: false, done: false, cancelled: false, error: ''
   };
-  playPulse();
-  state.realtime.dialToneTimer = window.setInterval(playPulse, 1800);
+  state.realtime.response = response;
+  syncRealtimeMicrophone();
+  setBusy(true);
+  setAvatarMode('thinking');
+  setCaption('THINKING', '正在翻譯…');
+  updateRealtimeStatus();
+  return response;
 }
 
-function stopRealtimeDialTone() {
-  if (state.realtime.dialToneTimer) window.clearInterval(state.realtime.dialToneTimer);
-  state.realtime.dialToneTimer = null;
-}
-
-function playRealtimeConnectedTone() {
-  playRealtimeTone(587, { duration: 0.09, volume: 0.075, type: 'sine', endFrequency: 610 });
-  playRealtimeTone(784, { delay: 0.105, duration: 0.16, volume: 0.085, type: 'sine', endFrequency: 830 });
-}
-
-function playRealtimeHangupTone() {
-  playRealtimeTone(554, { duration: 0.1, volume: 0.07, type: 'triangle', endFrequency: 470 });
-  playRealtimeTone(370, { delay: 0.11, duration: 0.17, volume: 0.08, type: 'triangle', endFrequency: 270 });
-}
-
-function startRealtimeThinkingSound() {
-  const realtime = state.realtime;
-  if (realtime.thinkingToneTimer || realtime.thinkingToneInterval) return;
-
-  // Fill perceptible conversational gaps without covering up fast replies.
-  realtime.thinkingToneTimer = window.setTimeout(() => {
-    realtime.thinkingToneTimer = null;
-    if (!realtime.connected || realtime.outputActive) return;
-    const playFlow = () => {
-      playRealtimeTone(238, { duration: 0.28, volume: 0.045, type: 'sine', endFrequency: 300 });
-      playRealtimeTone(332, { delay: 0.12, duration: 0.3, volume: 0.038, type: 'sine', endFrequency: 405 });
-      playRealtimeTone(270, { delay: 0.29, duration: 0.24, volume: 0.032, type: 'sine', endFrequency: 345 });
-    };
-    playFlow();
-    realtime.thinkingToneInterval = window.setInterval(playFlow, 1550);
-  }, 280);
-}
-
-function stopRealtimeThinkingSound() {
-  const realtime = state.realtime;
-  if (realtime.thinkingToneTimer) window.clearTimeout(realtime.thinkingToneTimer);
-  if (realtime.thinkingToneInterval) window.clearInterval(realtime.thinkingToneInterval);
-  realtime.thinkingToneTimer = null;
-  realtime.thinkingToneInterval = null;
-}
-
-function stopRealtimeCallSounds() {
-  stopRealtimeDialTone();
-  stopRealtimeThinkingSound();
+function requestRealtimeResponse() {
+  const requestId = `talktwin-response-${crypto.randomUUID()}`;
+  const response = beginRealtimeResponse(requestId);
+  try {
+    state.realtime.channel.send(JSON.stringify({ type: 'response.create', event_id: requestId }));
+  } catch (error) {
+    response.done = true;
+    response.error = error.message;
+    finishRealtimeResponse();
+  }
 }
 
 function sendRealtimeText(message) {
-  if (!isRealtimeReady() || state.busy) return;
+  const realtime = state.realtime;
+  if (!isRealtimeReady() || realtime.response || realtime.pendingVoiceItemId) return;
   syncProfileFromInputs();
-  state.history.push({ role: 'user', content: message });
-  addMessage('user', message);
-  el.messageInput.value = '';
-  setBusy(true);
-  setAvatarMode('thinking');
-  setCaption('THINKING', 'Realtime 正在組織回答…');
-  state.realtime.awaitingResponse = true;
-  state.realtime.outputActive = false;
-  state.realtime.lastOutputAudioAt = performance.now();
-  startRealtimeThinkingSound();
-  state.realtime.responseText = '';
-  state.realtime.responseFinalized = false;
-  state.realtime.typingNode = addTypingMessage();
 
   try {
-    state.realtime.channel.send(JSON.stringify({
+    realtime.channel.send(JSON.stringify({
       type: 'conversation.item.create',
       item: {
         type: 'message',
@@ -3191,15 +3109,90 @@ function sendRealtimeText(message) {
         content: [{ type: 'input_text', text: message }]
       }
     }));
-    state.realtime.channel.send(JSON.stringify({ type: 'response.create' }));
   } catch (error) {
-    state.realtime.awaitingResponse = false;
-    stopRealtimeThinkingSound();
-    state.realtime.typingNode?.remove();
-    state.realtime.typingNode = null;
-    setBusy(false);
     showToast(`Realtime 文字送出失敗：${error.message}`);
+    return;
   }
+
+  realtime.latestSourceId = null;
+  setSourceCaption('');
+  state.history.push({ role: 'user', content: message });
+  addMessage('user', message);
+  el.messageInput.value = '';
+  realtime.typingNode = addTypingMessage();
+  requestRealtimeResponse();
+}
+
+function cancelRealtimeResponse() {
+  const { response, channel } = state.realtime;
+  if (response.cancelled) return;
+  try {
+    if (!response.done) {
+      const event = { type: 'response.cancel' };
+      if (response.id) event.response_id = response.id;
+      channel.send(JSON.stringify(event));
+    }
+    if (response.playing) channel.send(JSON.stringify({ type: 'output_audio_buffer.clear' }));
+    response.cancelled = true;
+    el.stopVoiceButton.disabled = true;
+  } catch (error) {
+    showToast(`無法停止譯音：${error.message}`);
+  }
+}
+
+function finishRealtimeResponse() {
+  const realtime = state.realtime;
+  const response = realtime.response;
+  // response.done marks generation complete. WebRTC audio can still be playing.
+  if (!response?.done || response.playing) return;
+  realtime.response = null;
+  realtime.typingNode?.remove();
+  realtime.typingNode = null;
+  syncRealtimeMicrophone();
+  setBusy(false);
+  el.stopVoiceButton.disabled = true;
+  setSpeechLevels(0);
+  setMouthShape(0);
+  setAvatarMode('listening');
+  updateRealtimeStatus();
+
+  if (response.error) {
+    setCaption('ERROR', response.error);
+    showToast(`Realtime 錯誤：${response.error}`);
+  } else if (!response.cancelled && response.text) {
+    setCaption('TRANSLATION', response.text);
+  } else {
+    setCaption('LISTENING', '可以繼續說下一句。');
+  }
+}
+
+function trackRealtimeSource(itemId) {
+  const realtime = state.realtime;
+  if (!itemId || realtime.latestSourceId === itemId) return;
+  realtime.latestSourceId = itemId;
+  setSourceCaption('');
+  const showSource = Boolean(realtime.sessionConfig?.audio?.input?.transcription);
+  const message = addMessage('user', showSource ? '等待原文字幕…' : '🎙️ 語音', '原文');
+  if (!showSource) return;
+
+  // Reserve the history entry in speaking order, even if the transcript arrives late.
+  const historyEntry = { role: 'user', content: '' };
+  state.history.push(historyEntry);
+  realtime.sourceItems.set(itemId, {
+    paragraph: message.querySelector('.message-body p'),
+    historyEntry
+  });
+}
+
+function updateRealtimeSource(itemId, transcript) {
+  const realtime = state.realtime;
+  const item = realtime.sourceItems.get(itemId);
+  if (!item) return;
+  const text = String(transcript || '').trim();
+  item.paragraph.textContent = text || '原文字幕未取得';
+  item.historyEntry.content = text;
+  if (text && itemId === realtime.latestSourceId) setSourceCaption(text);
+  realtime.sourceItems.delete(itemId);
 }
 
 function handleRealtimeEvent(messageEvent) {
@@ -3211,157 +3204,124 @@ function handleRealtimeEvent(messageEvent) {
     return;
   }
 
+  const realtime = state.realtime;
   const type = event.type || '';
+  const manualTurns = usesManualRealtimeTurns();
   if (type === 'session.updated') {
     resolveRealtimeSessionReady();
     return;
   }
-  if (type === 'session.created' && state.realtime.connecting) {
+  if (type === 'session.created' && realtime.connecting) {
     setCaption('APPLYING', 'Realtime 已回應，正在確認人格與背景知識…');
     return;
   }
   if (type === 'input_audio_buffer.speech_started') {
-    stopRealtimeThinkingSound();
-    state.realtime.awaitingResponse = false;
-    state.realtime.outputActive = false;
-    setMouthShape(0);
+    if (manualTurns && realtime.response) return;
+    realtime.pendingVoiceItemId = event.item_id;
+    trackRealtimeSource(event.item_id);
+    if (manualTurns) setBusy(true);
     setAvatarMode('listening');
     setCaption('LISTENING', '正在聆聽講者…');
-    setSourceCaption('');
-    if (!state.realtime.voiceDraft) {
-      state.realtime.voiceDraft = addMessage('user', '🎙️ 講者發言中…', '原文');
-    }
     return;
   }
   if (type === 'input_audio_buffer.speech_stopped') {
+    if (event.item_id !== realtime.pendingVoiceItemId || realtime.response) return;
     setAvatarMode('thinking');
     setCaption('THINKING', '正在翻譯…');
-    state.realtime.awaitingResponse = true;
-    state.realtime.outputActive = false;
-    state.realtime.lastOutputAudioAt = performance.now();
-    startRealtimeThinkingSound();
     return;
   }
-  if (type === 'conversation.item.done' && event.item?.role === 'user') {
-    updateRealtimeUserTranscript(event.item);
+  if (type === 'input_audio_buffer.committed') {
+    if (!event.item_id || event.item_id === realtime.lastCommittedItemId) return;
+    realtime.lastCommittedItemId = event.item_id;
+    realtime.pendingVoiceItemId = null;
+    if (manualTurns && realtime.response) return;
+    trackRealtimeSource(event.item_id);
+    // Server VAD has already committed the audio. Request a single translation.
+    if (manualTurns) requestRealtimeResponse();
     return;
   }
-  if (type === 'response.created') {
-    if (state.realtime.voiceDraft) {
-      const paragraph = state.realtime.voiceDraft.querySelector('.message-body p');
-      if (paragraph) paragraph.textContent = '🎙️ 原文（未辨識）';
-      state.realtime.voiceDraft = null;
-    }
-    state.realtime.responseText = '';
-    state.realtime.responseFinalized = false;
-    state.realtime.awaitingResponse = true;
-    state.realtime.lastOutputAudioAt = performance.now();
-    setAvatarMode('thinking');
-    startRealtimeThinkingSound();
+  if (type === 'conversation.item.input_audio_transcription.completed') {
+    updateRealtimeSource(event.item_id, event.transcript);
     return;
   }
-  if (type === 'response.output_audio.delta' || type === 'response.audio.delta') {
-    stopRealtimeThinkingSound();
-    state.realtime.lastOutputAudioAt = performance.now();
-    state.realtime.outputActive = true;
-    setAvatarMode('talking');
-    return;
-  }
-  if (type === 'response.output_audio_transcript.delta' || type === 'response.audio_transcript.delta') {
-    stopRealtimeThinkingSound();
-    state.realtime.lastOutputAudioAt = performance.now();
-    state.realtime.outputActive = true;
-    state.realtime.responseText += event.delta || '';
-    setAvatarMode('talking');
-    setCaption('SPEAKING', state.realtime.responseText || '正在翻譯…');
-    el.stopVoiceButton.disabled = false;
-    return;
-  }
-  if (type === 'response.output_audio_transcript.done' || type === 'response.audio_transcript.done') {
-    const transcript = String(event.transcript || state.realtime.responseText || '').trim();
-    finalizeRealtimeReply(transcript);
-    return;
-  }
-  if (type === 'response.output_text.delta') {
-    stopRealtimeThinkingSound();
-    state.realtime.awaitingResponse = false;
-    state.realtime.responseText += event.delta || '';
-    setCaption('ANSWER', state.realtime.responseText);
-    return;
-  }
-  if (type === 'response.output_text.done') {
-    finalizeRealtimeReply(String(event.text || state.realtime.responseText || '').trim());
-    return;
-  }
-  if (type === 'response.output_audio.done' || type === 'response.audio.done') {
-    stopRealtimeThinkingSound();
-    window.setTimeout(() => {
-      state.realtime.outputActive = false;
-      setSpeechLevels(0);
-      setMouthShape(0);
-      if (state.realtime.connected) setAvatarMode('listening');
-    }, 260);
-    return;
-  }
-  if (type === 'response.done') {
-    stopRealtimeThinkingSound();
-    state.realtime.awaitingResponse = false;
-    const text = extractRealtimeResponseText(event.response) || state.realtime.responseText;
-    if (!state.realtime.responseFinalized && text.trim()) finalizeRealtimeReply(text.trim());
-    state.realtime.typingNode?.remove();
-    state.realtime.typingNode = null;
-    if (state.busy) setBusy(false);
-    return;
-  }
-  if (type === 'response.cancelled') {
-    stopRealtimeThinkingSound();
-    state.realtime.awaitingResponse = false;
-    state.realtime.outputActive = false;
-    state.realtime.typingNode?.remove();
-    state.realtime.typingNode = null;
-    if (state.busy) setBusy(false);
-    if (state.realtime.connected) setAvatarMode('listening');
+  if (type === 'conversation.item.input_audio_transcription.failed') {
+    updateRealtimeSource(event.item_id, '');
     return;
   }
   if (type === 'error') {
-    stopRealtimeThinkingSound();
-    state.realtime.awaitingResponse = false;
     const detail = event.error?.message || event.message || '未知錯誤';
-    if (state.realtime.connecting) rejectRealtimeSessionReady(new Error(detail));
-    state.realtime.typingNode?.remove();
-    state.realtime.typingNode = null;
-    if (state.busy) setBusy(false);
-    setCaption('ERROR', detail);
-    showToast(`Realtime 錯誤：${detail}`);
+    if (realtime.connecting) {
+      rejectRealtimeSessionReady(new Error(detail));
+    } else if (realtime.response && !realtime.response.id
+      && (!event.error?.event_id || event.error.event_id === realtime.response.requestId)) {
+      realtime.response.error = detail;
+      realtime.response.done = true;
+      finishRealtimeResponse();
+    } else {
+      showToast(`Realtime 錯誤：${detail}`);
+    }
+    return;
+  }
+  if (type === 'response.created') {
+    if (!realtime.response && !manualTurns) beginRealtimeResponse();
+    if (realtime.response && !realtime.response.id) realtime.response.id = event.response?.id;
+    return;
+  }
+
+  const response = realtime.response;
+  const responseId = event.response_id || event.response?.id;
+  if (!response || (responseId && responseId !== response.id)) return;
+  if (type === 'output_audio_buffer.started') {
+    response.playing = true;
+    el.stopVoiceButton.disabled = response.cancelled;
+    setAvatarMode('talking');
+    setCaption('SPEAKING', response.text || '正在播放譯文…');
+    updateRealtimeStatus();
+    return;
+  }
+  if (type === 'output_audio_buffer.stopped' || type === 'output_audio_buffer.cleared') {
+    response.playing = false;
+    finishRealtimeResponse();
+    return;
+  }
+  if (type === 'response.output_audio_transcript.delta' || type === 'response.audio_transcript.delta'
+    || type === 'response.output_text.delta') {
+    if (response.cancelled) return;
+    response.text += event.delta || '';
+    if (response.playing) setCaption('SPEAKING', response.text);
+    return;
+  }
+  if (type === 'response.output_audio_transcript.done' || type === 'response.audio_transcript.done'
+    || type === 'response.output_text.done') {
+    const text = event.transcript || event.text;
+    if (text && !response.cancelled) response.text = text;
+    return;
+  }
+  if (type === 'response.done') {
+    if (response.done) return;
+    response.done = true;
+    const status = event.response?.status;
+    response.cancelled ||= status === 'cancelled';
+    if (!response.cancelled && (status === 'failed' || status === 'incomplete')) {
+      response.error = event.response?.status_details?.error?.message || '這一輪譯文未完成，請再說一次。';
+    }
+    if (!response.cancelled && !response.error) {
+      response.text = (extractRealtimeResponseText(event.response) || response.text).trim();
+      if (response.text) {
+        finalizeRealtimeReply(response.text);
+        if (response.playing) setCaption('SPEAKING', response.text);
+      }
+    }
+    finishRealtimeResponse();
   }
 }
 
-function updateRealtimeUserTranscript(item) {
-  if (!item || item.id === state.realtime.lastUserItemId) return;
-  const content = Array.isArray(item.content) ? item.content : [];
-  const audioPart = content.find((part) => part?.type === 'input_audio' && part.transcript);
-  const transcript = String(audioPart?.transcript || '').trim();
-  if (!state.realtime.voiceDraft) return;
-  const paragraph = state.realtime.voiceDraft.querySelector('.message-body p');
-  if (paragraph && transcript) paragraph.textContent = transcript;
-  if (transcript) setSourceCaption(transcript);
-  state.realtime.lastUserItemId = item.id || '';
-  state.realtime.voiceDraft = null;
-  if (transcript) state.history.push({ role: 'user', content: transcript });
-}
-
 function finalizeRealtimeReply(text) {
-  if (state.realtime.responseFinalized || !text) return;
-  state.realtime.responseFinalized = true;
-  state.realtime.responseText = text;
   state.realtime.typingNode?.remove();
   state.realtime.typingNode = null;
   state.history.push({ role: 'assistant', content: text });
   state.lastReply = text;
-  el.repeatButton.disabled = false;
   addMessage('assistant', text, `譯文 · ${titleCase(state.settings?.realtime_voice || 'cedar')}`);
-  setCaption('SPEAKING', text);
-  if (state.busy) setBusy(false);
 }
 
 function extractRealtimeResponseText(response) {
@@ -3398,29 +3358,12 @@ async function startRealtimeAudioAnalysis(stream) {
   const frame = () => {
     if (!state.realtime.analyser || (!state.realtime.connected && !state.realtime.connecting)) return;
     const { loud, shape } = analyseSpeechFrame(analyser, timeData, freqData, state.realtime.env);
-    setSpeechLevels(loud);
-
-    if (loud > SPEECH.TALK_ON) {
-      state.realtime.lastOutputAudioAt = performance.now();
-      stopRealtimeThinkingSound();
-      state.realtime.outputActive = true;
-      setAvatarMode('talking');
-      setMouthShape(shape * 3);
+    const playing = state.realtime.response?.playing;
+    setSpeechLevels(playing ? loud : 0);
+    setMouthShape(playing ? shape * 3 : 0);
+    if (playing && loud > SPEECH.TALK_ON) {
       gazeTick += 1;
-      if (gazeTick % 10 === 0) setGaze((Math.random() - 0.5) * 1.3, (Math.random() - 0.5) * 0.7);
-    } else if (state.realtime.outputActive) {
-      setMouthShape(0);
-      // Realtime can pause mid-response while it waits for the next audio
-      // segment. Treat that silence as a conversational gap, then stop the
-      // cue instantly when the next audible syllable arrives.
-      if (
-        state.realtime.awaitingResponse
-        && performance.now() - state.realtime.lastOutputAudioAt > 520
-      ) {
-        state.realtime.outputActive = false;
-        setAvatarMode('thinking');
-        startRealtimeThinkingSound();
-      }
+      if (gazeTick % 10 === 0) setGaze((Math.random() - 0.5) * 1.3, (Math.random() - 0.5) * 2.6);
     }
     state.realtime.analyserFrame = requestAnimationFrame(frame);
   };
