@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f7f5ee">
-  <meta name="description" content="用 Sennheiser G3 自動掃頻、手動選台或輸入 MHz，讓發射器與接收器對到同一頻率。">
+  <meta name="description" content="用 Sennheiser G3 自動掃頻、手動選台或輸入 MHz，讓發射器（子機）與接收器（母機）對到同一頻率。">
   <title>Sennheiser G3 無線麥克風設定｜影視錄音實務 16</title>
-  <link rel="stylesheet" href="./field-audio/lesson.css?v=2">
-  <script defer src="./field-audio/g3.js?v=2"></script>
+  <link rel="stylesheet" href="./field-audio/lesson.css?v=3">
+  <script defer src="./field-audio/g3.js?v=3"></script>
 </head>
 <body class="g3">
 <a class="skip" href="#main">跳到教學內容</a>
@@ -20,33 +20,33 @@
     <div class="hero-copy">
       <p class="kicker"><i></i> 現場錄音手冊 <span>/</span> WIRELESS AUDIO</p>
       <h1 id="title">Sennheiser G3<span>無線麥克風設定</span></h1>
-      <p class="lead">領夾接 SK，錄音機接 EK。兩台的頻段要相容，螢幕上的 MHz 要相同。</p>
+      <p class="lead"><b>發射器（子機）</b>在演員身上，接領夾麥克風。<br><b>接收器（母機）</b>在錄音室這端，接錄音機。</p>
       <div class="hero-actions"><a class="cta" href="#setup">自動與手動設定 ↓</a><a class="text-link" href="#practice">練習調頻 ↗</a></div>
     </div>
     <figure class="gear-figure">
       <div class="figure-top"><span>實機辨識</span><span>EW 100 G3</span></div>
-      <img src="./field-audio/g3-kit.webp" alt="左邊的 EK 接輸出線，右邊的 SK 接領夾麥克風" width="982" height="1000" fetchpriority="high">
-      <figcaption><span>左 · <b>EK 100 G3</b> 接收器</span><span>右 · <b>SK 100 G3</b> 發射器</span></figcaption>
+      <img src="./field-audio/g3-kit.webp" alt="左邊的接收器（母機）接輸出線，右邊的發射器（子機）接領夾麥克風" width="982" height="1000" fetchpriority="high">
+      <figcaption><span>左 · <b>接收器（母機）</b></span><span>右 · <b>發射器（子機）</b></span></figcaption>
     </figure>
   </section>
   <section class="paper-block" id="setup"><div class="wrap">
     <h2>頻率怎麼設？</h2>
-    <p class="menu-tip"><kbd>SET</kbd> 進選單或確認，<kbd>▲▼</kbd> 選項目。</p>
+    <p class="menu-tip">先確認兩台頻段相容。<kbd>SET</kbd> 確認，<kbd>▲▼</kbd> 選項目。</p>
     <div class="routes rf-methods">
       <article>
         <h3>自動掃頻 <small>到新場地時用</small></h3>
         <ol>
-          <li>關閉待配對的 SK，讓現場其他使用中的發射器繼續工作。</li>
-          <li>EK 選 <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd>。選可用的 Bank、Channel，按 <kbd>SET</kbd> 儲存。</li>
-          <li>打開 SK。EK 選 <kbd>Sync</kbd>，兩台紅外線窗相對，看到 <b>✓</b> 就對好了。</li>
+          <li>只關閉待配對的發射器（子機），其他使用中的那幾組保持開機。</li>
+          <li>接收器（母機）選 <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd>。選可用的 Bank、Channel，按 <kbd>SET</kbd> 儲存。</li>
+          <li>打開發射器（子機）。接收器（母機）選 <kbd>Sync</kbd>，對準兩台紅外線窗，看到 <b>✓</b> 即完成。</li>
         </ol>
       </article>
       <article>
         <h3>手動設頻 <small>已有指定頻率時用</small></h3>
         <ol>
-          <li>在 EK 選 <kbd>Advanced</kbd> → <kbd>Tune</kbd>，短按 <kbd>SET</kbd>。</li>
+          <li>接收器（母機）選 <kbd>Advanced</kbd> → <kbd>Tune</kbd>，短按 <kbd>SET</kbd>。</li>
           <li><kbd>▲▼</kbd> 調 MHz，按 <kbd>SET</kbd> 換到 kHz。每格 25 kHz，調好再按 <kbd>SET</kbd> 儲存。</li>
-          <li>在 SK 重做一次。兩台顯示相同 MHz 後，開口試音。</li>
+          <li>在發射器（子機）重做一次。兩台顯示相同 MHz 後，開口試音。</li>
         </ol>
         <details class="inline-help"><summary>拿到的是 Bank／Channel？</summary><p>兩台都進 <kbd>Frequency Preset</kbd>，選同一個 Bank 和 Channel，各按 <kbd>SET</kbd>，再核對 MHz。</p></details>
         <details class="inline-help"><summary>想指定 U 裡的儲存位置？</summary><p>在 <kbd>Tune</kbd> 長按 <kbd>SET</kbd>，先選 U 的 Channel，再輸入頻率。從原廠 Bank 直接進 Tune，會先切到 U.1。</p></details>
@@ -55,17 +55,17 @@
     <p class="field-note"><b>同場多支麥</b> 同頻段選同一個原廠 Bank，每支使用不同的空 Channel。</p>
   </div></section>
   <section class="wrap lab-layout" id="practice" aria-labelledby="practice-title">
-    <div class="section-intro"><h2 id="practice-title">換你對頻。</h2><p id="practice-hint">EK 已設好。用 SK 的三顆按鍵調到同一頻率。</p><p class="subtle">頻率是模擬值。實機請用現場分配的空頻率。</p></div>
+    <div class="section-intro"><h2 id="practice-title">換你對頻。</h2><p id="practice-hint">接收器（母機）已設好。用發射器（子機）的按鍵調到同一頻率。</p><p class="subtle">頻率是模擬值。實機請用現場分配的空頻率。</p></div>
     <div class="device" id="trainer">
       <div class="drill-switch" role="group" aria-label="演練方式">
         <button type="button" data-drill="auto" aria-controls="auto-drill" aria-pressed="false">自動掃頻</button>
         <button type="button" data-drill="manual" aria-controls="manual-drill" aria-pressed="true">手動調頻</button>
       </div>
       <div id="manual-drill">
-        <div class="tune-target"><span>EK 接收器 · 目標</span><b>538.150 MHz</b></div>
+        <div class="tune-target"><span>接收器（母機）· 目標</span><b>538.150 MHz</b></div>
         <div class="lcd">
-          <div class="lcd-top"><span>SK 發射器</span><span>U.1 · Tune</span></div>
-          <output class="tune-value" aria-label="SK 頻率" aria-live="polite"><span id="tune-mhz">537</span>.<span id="tune-khz">100</span><small> MHz</small></output>
+          <div class="lcd-top"><span>發射器（子機）</span><span>U.1 · Tune</span></div>
+          <output class="tune-value" aria-label="發射器（子機）頻率" aria-live="polite"><span id="tune-mhz">537</span>.<span id="tune-khz">100</span><small> MHz</small></output>
         </div>
         <p class="quiz-note" id="tune-note" role="status">按 SET 開始調 MHz。</p>
         <div class="tune-controls">
@@ -76,7 +76,7 @@
         </div>
       </div>
       <div id="auto-drill" hidden>
-        <div class="device-head"><span><i class="lamp"></i> EK 100 G3</span><span>接收器模擬</span></div>
+        <div class="device-head"><span><i class="lamp"></i> 接收器（母機）</span><span>掃頻練習</span></div>
         <div class="lcd"><div class="lcd-top"><span id="step-count">01 / 04</span><span>ew 100 G3</span></div><strong id="lcd-title">準備掃頻</strong><div id="lcd-detail"></div></div>
         <p class="quiz-prompt" id="quiz-prompt"></p><div id="answers" class="answers"></div>
         <p id="quiz-note" class="quiz-note" role="status"></p>
@@ -89,16 +89,20 @@
     <div class="section-intro"><h2>對好了，試錄十秒。</h2><p>讓演員說最大聲的一句，再走到最遠的位置。戴耳機回放，聽有沒有破音或斷音。</p></div>
     <div class="folds">
       <details><summary>RF 沒訊號</summary><p>查電池、RF Mute 和兩台的 MHz。走遠才斷音時，檢查遮擋，用能壓住底噪的最低 Squelch 門檻。</p></details>
-      <details><summary>有 RF，說話時 AF 不動</summary><p>RF 看無線訊號，AF 看聲音。檢查 SK 的領夾插頭、MUTE 與 Sensitivity。</p></details>
-      <details><summary>錄音太大或太小</summary><p>先調 SK 的 Sensitivity，讓 AF PEAK 只在最響處閃一下。再用 EK 的 AF Out 配合錄音機的 MIC／LINE 輸入。</p></details>
+      <details><summary>有 RF，說話時 AF 不動</summary><p>RF 看無線訊號，AF 看聲音。檢查發射器（子機）的領夾插頭、MUTE 與 Sensitivity。</p></details>
+      <details><summary>錄音太大或太小</summary><p>先調發射器（子機）的 Sensitivity，讓 AF PEAK 只在最響處閃一下。再調接收器（母機）的 AF Out，配合錄音機的 MIC／LINE 輸入。</p></details>
     </div>
   </div></section>
   <div class="wrap references"><details class="source-fold"><summary>原廠手冊與教材來源</summary>
-    <ul><li><a href="https://www.radiofacilities.com/wp-content/uploads/Sennheiser-G3-100-Series-Battery-Receiver.pdf">EK 100 G3 接收器手冊 ↗</a> · <a href="https://s3.amazonaws.com/sonicc/uploads/Sennheiser-SK-100-G3-Bodypack-Transmitter-Instruction-Manual-Sheet.pdf">SK 100 G3 發射器手冊 ↗</a></li>
+    <ul><li><a href="https://www.radiofacilities.com/wp-content/uploads/Sennheiser-G3-100-Series-Battery-Receiver.pdf">接收器（母機）手冊 ↗</a> · <a href="https://s3.amazonaws.com/sonicc/uploads/Sennheiser-SK-100-G3-Bodypack-Transmitter-Instruction-Manual-Sheet.pdf">發射器（子機）手冊 ↗</a></li>
     <li><a href="https://moodle.isu.edu.tw/mod/page/view.php?id=128898">老師的 Moodle 筆記 ↗</a> · <a href="https://help.sennheiser.com/hc/en-us/articles/23203500167314-Evolution-Wireless-G2-G3-and-G4-systems-RF-Scan-and-Sync-Procedure">原廠掃頻與對頻指南 ↗</a></li>
     <li>攝影 Stephan Ridgway，已裁切、旋轉與轉檔。<a href="https://commons.wikimedia.org/wiki/File:Sennheiser_G3_W100_Wireless_System_including_a_Rode_Reporter_microphone_(9676892219).jpg">原圖 ↗</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0 ↗</a></li></ul>
   </details></div>
 </main>
-<footer class="foot"><div class="wrap"><a href="./index2.html">↖ 回課程列表</a><span>義守大學電影與電視學系 · 陳嘉暐</span><a href="./17.html">17　片場音樂回放 →</a></div></footer>
+<footer class="foot"><div class="wrap">
+  <a class="course-back" href="./index2.html"><span aria-hidden="true">←</span> 上一頁｜回到影視錄音實務</a>
+  <span>義守大學電影與電視學系　陳嘉暐老師教材製作</span>
+  <a href="./17.html">17　片場音樂回放 →</a>
+</div></footer>
 </body>
 </html>

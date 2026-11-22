@@ -2,15 +2,15 @@
 
 const exercises = [
   {
-    screen: "準備掃頻", detail: "第一組使用中，第二支 SK 已開機",
+    screen: "準備掃頻", detail: "第一組使用中，第二組的發射器（子機）已開機",
     question: "掃描前，先關哪一支？",
     choices: [
-      ["把現場的發射器全部關掉", "已在工作的那組要繼續發射，才能掃到它佔用的頻道。"],
-      ["只關待配對的第二支 SK", "正確。已在工作的第一組保持開機。", true]
+      ["把現場的發射器（子機）全部關掉", "已在工作的那組要繼續發射，才能掃到它佔用的頻道。"],
+      ["只關第二組的發射器（子機）", "正確。已在工作的第一組保持開機。", true]
     ]
   },
   {
-    screen: "Easy Setup", detail: "第二台 EK 已開機",
+    screen: "Easy Setup", detail: "第二組的接收器（母機）已開機",
     question: "哪個選項會重新掃描？",
     choices: [
       ["Scan New List", "正確。接著選可用頻道。", true],
@@ -26,11 +26,11 @@ const exercises = [
     ]
   },
   {
-    screen: "B03 / Ch02 · Stored", detail: "第二台 EK 已儲存",
-    question: "怎麼把頻率傳給 SK？",
+    screen: "B03 / Ch02 · Stored", detail: "接收器（母機）已儲存頻道",
+    question: "怎麼把頻率傳給發射器（子機）？",
     choices: [
-      ["開 SK，在 EK 選 Sync，對準紅外線窗", "同步完成。開口看 AF，再試錄回放。", true],
-      ["提高 EK 的 AF Out", "AF Out 調的是輸出音量。"]
+      ["打開發射器（子機），在接收器（母機）選 Sync，對準紅外線窗", "同步完成。開口看 AF，再試錄回放。", true],
+      ["提高接收器（母機）的 AF Out", "AF Out 調的是輸出音量。"]
     ]
   }
 ];
@@ -97,7 +97,7 @@ for (const button of drillButtons) {
     manual.hidden = !isManual;
     auto.hidden = isManual;
     document.querySelector("#practice-hint").textContent = isManual
-      ? "EK 已設好。用 SK 的三顆按鍵調到同一頻率。"
+      ? "接收器（母機）已設好。用發射器（子機）的按鍵調到同一頻率。"
       : "第一組已在工作。現在替第二位演員找一個空頻道。";
     for (const choice of drillButtons) choice.setAttribute("aria-pressed", String(choice === button));
   });
