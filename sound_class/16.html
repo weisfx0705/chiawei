@@ -13,7 +13,7 @@
 <a class="skip" href="#main">跳到教學內容</a>
 <header class="mast"><div class="wrap mast-inner">
   <a class="course" href="./index2.html"><span aria-hidden="true">↖</span> 影視錄音實務</a>
-  <nav aria-label="本課導覽"><a href="#setup">選頻方法</a><a href="#practice">對頻練習</a><a href="#trouble">試音</a></nav>
+  <nav aria-label="本課導覽"><a href="#setup">選頻方法</a><a href="#menus">選單速查</a><a href="#practice">對頻練習</a><a href="#trouble">試音</a></nav>
 </div></header>
 <main id="main">
   <section class="wrap hero hero-rf" aria-labelledby="title">
@@ -53,6 +53,32 @@
       </article>
     </div>
     <p class="field-note"><b>同場多支麥</b> 同頻段選同一個原廠 Bank，每支使用不同的空 Channel。</p>
+  </div></section>
+  <section class="paper-block" id="menus" aria-labelledby="menus-title"><div class="wrap">
+    <h2 id="menus-title">子機與母機選單速查</h2>
+    <div class="routes rf-methods">
+      <article>
+        <h3>發射器（子機）</h3>
+        <ul>
+          <li><kbd>Sensitivity</kbd> 輸入增益。調整麥克風或 LINE 訊號進入子機的音量。請演員用最大聲的音量試講，避免 AF PEAK 持續亮起。</li>
+          <li><kbd>Auto Lock</kbd> 自動鎖定按鍵，避免演員走位時誤觸。</li>
+          <li><kbd>Advanced</kbd> 進階設定，包含以下兩項。
+            <ul>
+              <li><kbd>Mute Mode</kbd> 決定靜音開關的功能。選 <b>AF On/Off</b> 只關音訊，RF 照常發射。選 <b>RF On/Off</b> 會關掉無線發射。選 <b>Disabled</b> 則停用靜音開關。</li>
+              <li><kbd>Pilot Tone</kbd> 識別音，幫助母機辨認子機訊號。G3 子機與母機搭配時兩端都開。跨品牌搭配時，先確認是否相容，再決定是否關閉。</li>
+            </ul>
+          </li>
+        </ul>
+      </article>
+      <article>
+        <h3>接收器（母機）</h3>
+        <ul>
+          <li><kbd>Squelch</kbd> 靜噪門檻。關掉這組子機，從 <b>Low</b> 開始。還有嘶聲才調高，停在能壓住嘶聲的最低一檔。門檻越高，弱 RF 訊號越容易被切掉。</li>
+          <li><kbd>Easy Setup</kbd> 頻道快設。選 <kbd>Scan New List</kbd> 掃描現場，找可用的頻道。</li>
+          <li><kbd>AF Out</kbd> 輸出音量。小輸出接近 <b>MIC OUT</b>，大輸出接近 <b>LINE OUT</b>。依錄音機選用的 <b>MIC／LINE</b> 輸入調整，再看電平表確認有沒有過載。</li>
+        </ul>
+      </article>
+    </div>
   </div></section>
   <section class="wrap lab-layout" id="practice" aria-labelledby="practice-title">
     <div class="section-intro"><h2 id="practice-title">換你對頻。</h2><p id="practice-hint">接收器（母機）已設好。用發射器（子機）的按鍵調到同一頻率。</p><p class="subtle">頻率是模擬值。實機請用現場分配的空頻率。</p></div>
