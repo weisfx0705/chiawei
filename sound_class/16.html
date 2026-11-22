@@ -7,7 +7,7 @@
   <meta name="description" content="用 Sennheiser G3 自動掃頻、手動選台或輸入 MHz，讓發射器（子機）與接收器（母機）對到同一頻率。">
   <title>Sennheiser G3 無線麥克風設定｜影視錄音實務</title>
   <link rel="stylesheet" href="./field-audio/lesson.css?v=3">
-  <link rel="stylesheet" href="./field-audio/g3-lab.css?v=1">
+  <link rel="stylesheet" href="./field-audio/g3-lab.css?v=2">
   <script defer src="./field-audio/g3.js?v=3"></script>
   <script defer src="./field-audio/g3-lab.js?v=1"></script>
 </head>
@@ -106,8 +106,12 @@
         <p>母機 <kbd>AF Out</kbd> 原則上維持 <b>0 dB</b>。先調子機的 <kbd>Sensitivity</kbd>，再確認錄音機的 <b>MIC／LINE</b> 輸入選擇和增益。電平還是配合不了時，最後才微調母機輸出。</p>
       </article>
       <article>
-        <h3>避免演員誤觸靜音或改到設定</h3>
-        <p>演員可能碰到子機的 MUTE 撥桿。交機前到 <kbd>Advanced</kbd> → <kbd>Mute Mode</kbd> 選 <b>Disabled</b>，避免撥桿切掉聲音。</p>
+        <div class="g3-mute-callout">
+          <h3>交機前，停用子機的 MUTE 撥桿</h3>
+          <p class="g3-mute-path"><kbd>Advanced</kbd> <span aria-hidden="true">→</span> <kbd>Mute Mode</kbd> <span aria-hidden="true">→</span> <strong>Disabled</strong></p>
+          <p>設成 <b>Disabled</b> 後，演員就算碰到撥桿，對白也會繼續送到母機。</p>
+          <p><b>交機前驗證</b>　請演員說話，自己撥一次 MUTE。確認母機 <b>AF 電平表還在跳</b>，耳機裡也聽得到對白，再把子機交給演員。</p>
+        </div>
         <details class="inline-help">
           <summary>AF 和 RF 的靜音有什麼差別？</summary>
           <p><b>AF On/Off</b> 只關音訊，RF 照常發射。<b>RF On/Off</b> 會關掉無線發射。<b>Disabled</b> 停用靜音撥桿。</p>
