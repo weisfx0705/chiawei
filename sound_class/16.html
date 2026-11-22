@@ -4,68 +4,100 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f7f5ee">
-  <meta name="description" content="影視錄音實務第 16 課。用 Sennheiser SK 100 G3 和 EK 100 G3 掃頻、紅外線對頻、調整增益，並在演員走位時驗收。">
+  <meta name="description" content="用 Sennheiser G3 自動掃頻、手動選台或輸入 MHz，讓發射器與接收器對到同一頻率。">
   <title>Sennheiser G3 無線麥克風設定｜影視錄音實務 16</title>
-  <link rel="stylesheet" href="./field-audio/lesson.css">
-  <script defer src="./field-audio/g3.js"></script>
+  <link rel="stylesheet" href="./field-audio/lesson.css?v=2">
+  <script defer src="./field-audio/g3.js?v=2"></script>
 </head>
 <body class="g3">
 <a class="skip" href="#main">跳到教學內容</a>
 <header class="mast"><div class="wrap mast-inner">
   <a class="course" href="./index2.html"><span aria-hidden="true">↖</span> 影視錄音實務 <b>16</b></a>
-  <nav aria-label="本課導覽"><a href="#setup">實機步驟</a><a href="#practice">對頻演練</a><a href="#trouble">故障判讀</a></nav>
+  <nav aria-label="本課導覽"><a href="#setup">選頻方法</a><a href="#practice">對頻練習</a><a href="#trouble">試音</a></nav>
 </div></header>
 <main id="main">
   <section class="wrap hero hero-rf" aria-labelledby="title">
     <div class="hero-copy">
       <p class="kicker"><i></i> 現場錄音手冊 <span>/</span> WIRELESS AUDIO</p>
       <h1 id="title">Sennheiser G3<span>無線麥克風設定</span></h1>
-      <p class="lead">把領夾麥克風別好，打開兩台腰包。開拍前，你怎麼知道這句台詞真的進了錄音機？</p>
-      <p class="signal-line"><b>領夾麥克風</b><i>→</i> SK 發射器 <i>⇢</i> EK 接收器 <i>→</i> 錄音機</p>
-      <div class="hero-actions"><a class="cta" href="#setup">拿著機器跟做 <span aria-hidden="true">↓</span></a><a class="text-link" href="#practice">先練習對頻 <span aria-hidden="true">↗</span></a></div>
+      <p class="lead">領夾接 SK，錄音機接 EK。兩台的頻段要相容，螢幕上的 MHz 要相同。</p>
+      <div class="hero-actions"><a class="cta" href="#setup">自動與手動設定 ↓</a><a class="text-link" href="#practice">練習調頻 ↗</a></div>
     </div>
     <figure class="gear-figure">
       <div class="figure-top"><span>實機辨識</span><span>EW 100 G3</span></div>
-      <img src="./field-audio/g3-kit.webp" alt="左邊 EK 100 G3 接著錄音機輸出線，右邊 SK 100 G3 接著領夾麥克風" width="982" height="1000" fetchpriority="high">
+      <img src="./field-audio/g3-kit.webp" alt="左邊的 EK 接輸出線，右邊的 SK 接領夾麥克風" width="982" height="1000" fetchpriority="high">
       <figcaption><span>左 · <b>EK 100 G3</b> 接收器</span><span>右 · <b>SK 100 G3</b> 發射器</span></figcaption>
     </figure>
   </section>
-  <section class="paper-block" id="setup"><div class="wrap section-grid">
-    <div class="section-intro"><p class="kicker"><i></i> 實機操作</p><h2>從空頻道，<br>到第一句台詞。</h2><p>兩人一組。一人帶著 SK 走位，一人在 EK 和錄音機旁監聽。</p><p class="keynote"><kbd>SET</kbd> 選取、確認或儲存<br><kbd>▲ ▼</kbd> 移動或改值<br><kbd>ON/OFF</kbd> 在選單中短按可返回</p></div>
-    <ol class="steps">
-      <li><div><h3>從線材認出兩台腰包</h3><p>SK 的輸入接領夾麥克風，EK 的輸出接錄音機或相機。輕輕鎖緊 3.5 mm 接頭的螺環。在兩台機身確認型號與相容頻段，各裝兩顆 AA 電池，再把耳機接在最後要錄音的機器上。</p></div></li>
-      <li><div><h3>把準備配對的發射器關掉，再讓 EK 掃頻</h3><p>在拍攝地點安置接收器，其他已在使用的無線系統照常運作。從 EK 按鍵進入下列路徑，查出當時空著的預設頻道。</p><p class="path"><kbd>SET</kbd> → <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd></p></div></li>
-      <li><div><h3>選 Bank、選 Channel，儲存後再開 SK</h3><p>用上下鍵找出有足夠空頻道的原廠 Bank，再選一個空 Channel。按 <kbd>SET</kbd> 看到 <b>Stored</b>。同頻段多組一起用時，統一用同一個原廠 Bank，每支演員麥分配不同的空 Channel。把演員名和 Bank／Channel 記在聲音報表。</p></div></li>
-      <li><div><h3>用紅外線把設定傳給發射器</h3><p>開啟這一組 SK。在 EK 選 <kbd>Sync</kbd>，打開腰包電池蓋，讓兩台的紅外線窗近距離正對。EK 出現 <b>✓</b> 表示傳送完成。出現 <b>×</b> 就重新對準再試。核對兩台頻率相同，再看 EK 的 <b>RF</b> 格數。</p></div></li>
-      <li><div><h3>先調發射器，再接收，最後聽回錄</h3><p>請演員說本場最大聲的一句。在 SK 的 <kbd>Sensitivity</kbd> 調整輸入，讓大聲處才接近滿格。若一直亮 AF PEAK，就往更負的 dB 調。然後用 EK 的 <kbd>AF Out</kbd> 配合錄音機的 MIC／LINE 輸入與增益，留出大笑或喊話的空間。</p><p>讓演員轉身、坐下，走到最遠點。試錄十秒，停機回放，聽字尾有沒有失真、斷音或衣物摩擦，再決定能不能開拍。</p></div></li>
-    </ol>
+  <section class="paper-block" id="setup"><div class="wrap">
+    <h2>頻率怎麼設？</h2>
+    <p class="menu-tip"><kbd>SET</kbd> 進選單或確認，<kbd>▲▼</kbd> 選項目。</p>
+    <div class="routes rf-methods">
+      <article>
+        <h3>自動掃頻 <small>到新場地時用</small></h3>
+        <ol>
+          <li>關閉待配對的 SK，讓現場其他使用中的發射器繼續工作。</li>
+          <li>EK 選 <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd>。選可用的 Bank、Channel，按 <kbd>SET</kbd> 儲存。</li>
+          <li>打開 SK。EK 選 <kbd>Sync</kbd>，兩台紅外線窗相對，看到 <b>✓</b> 就對好了。</li>
+        </ol>
+      </article>
+      <article>
+        <h3>手動設頻 <small>已有指定頻率時用</small></h3>
+        <ol>
+          <li>在 EK 選 <kbd>Advanced</kbd> → <kbd>Tune</kbd>，短按 <kbd>SET</kbd>。</li>
+          <li><kbd>▲▼</kbd> 調 MHz，按 <kbd>SET</kbd> 換到 kHz。每格 25 kHz，調好再按 <kbd>SET</kbd> 儲存。</li>
+          <li>在 SK 重做一次。兩台顯示相同 MHz 後，開口試音。</li>
+        </ol>
+        <details class="inline-help"><summary>拿到的是 Bank／Channel？</summary><p>兩台都進 <kbd>Frequency Preset</kbd>，選同一個 Bank 和 Channel，各按 <kbd>SET</kbd>，再核對 MHz。</p></details>
+        <details class="inline-help"><summary>想指定 U 裡的儲存位置？</summary><p>在 <kbd>Tune</kbd> 長按 <kbd>SET</kbd>，先選 U 的 Channel，再輸入頻率。從原廠 Bank 直接進 Tune，會先切到 U.1。</p></details>
+      </article>
+    </div>
+    <p class="field-note"><b>同場多支麥</b> 同頻段選同一個原廠 Bank，每支使用不同的空 Channel。</p>
   </div></section>
   <section class="wrap lab-layout" id="practice" aria-labelledby="practice-title">
-    <div class="section-intro"><p class="kicker"><i></i> 對頻演練</p><h2 id="practice-title">換你接第二支麥。</h2><p>第一位演員已完成配對。你要替第二位演員找一個空頻道，並把設定送到他身上的腰包。</p><p class="subtle">這是根據 G3 選單設計的情境題。畫面中的 Bank 與 Channel 是本題資料。</p></div>
-    <div class="device" id="trainer"><div class="device-head"><span><i class="lamp"></i> EK 100 G3</span><span>接收器模擬</span></div>
-      <div class="lcd"><div class="lcd-top"><span id="step-count">01 / 04</span><span>ew 100 G3</span></div><strong id="lcd-title">準備掃描</strong><div id="lcd-detail">第一組使用中 · 第二支 SK 已開機</div></div>
-      <p class="quiz-prompt" id="quiz-prompt">第二支 SK 在你手上，應先怎麼做？</p>
-      <div id="answers" class="answers"></div><p id="quiz-note" class="quiz-note" role="status" aria-live="polite">選擇你在現場會做的操作。</p>
-      <div class="device-footer"><button class="small-control" id="restart" type="button">重新練習</button><button class="advance" id="advance" type="button" hidden>下一步 →</button></div>
-      <noscript><p>啟用 JavaScript 即可作答。上方五個實機步驟可直接對照機身。</p></noscript>
+    <div class="section-intro"><h2 id="practice-title">換你對頻。</h2><p id="practice-hint">EK 已設好。用 SK 的三顆按鍵調到同一頻率。</p><p class="subtle">頻率是模擬值。實機請用現場分配的空頻率。</p></div>
+    <div class="device" id="trainer">
+      <div class="drill-switch" role="group" aria-label="演練方式">
+        <button type="button" data-drill="auto" aria-controls="auto-drill" aria-pressed="false">自動掃頻</button>
+        <button type="button" data-drill="manual" aria-controls="manual-drill" aria-pressed="true">手動調頻</button>
+      </div>
+      <div id="manual-drill">
+        <div class="tune-target"><span>EK 接收器 · 目標</span><b>538.150 MHz</b></div>
+        <div class="lcd">
+          <div class="lcd-top"><span>SK 發射器</span><span>U.1 · Tune</span></div>
+          <output class="tune-value" aria-label="SK 頻率" aria-live="polite"><span id="tune-mhz">537</span>.<span id="tune-khz">100</span><small> MHz</small></output>
+        </div>
+        <p class="quiz-note" id="tune-note" role="status">按 SET 開始調 MHz。</p>
+        <div class="tune-controls">
+          <button type="button" id="tune-down" aria-label="降低頻率" disabled>▼</button>
+          <button type="button" id="tune-set">SET</button>
+          <button type="button" id="tune-up" aria-label="提高頻率" disabled>▲</button>
+          <button type="button" id="tune-reset" class="small-control">重練</button>
+        </div>
+      </div>
+      <div id="auto-drill" hidden>
+        <div class="device-head"><span><i class="lamp"></i> EK 100 G3</span><span>接收器模擬</span></div>
+        <div class="lcd"><div class="lcd-top"><span id="step-count">01 / 04</span><span>ew 100 G3</span></div><strong id="lcd-title">準備掃頻</strong><div id="lcd-detail"></div></div>
+        <p class="quiz-prompt" id="quiz-prompt"></p><div id="answers" class="answers"></div>
+        <p id="quiz-note" class="quiz-note" role="status"></p>
+        <div class="device-footer"><button class="small-control" id="restart" type="button">重新練習</button><button class="advance" id="advance" type="button" hidden>下一步 →</button></div>
+      </div>
+      <noscript><p>啟用 JavaScript 可操作模擬器。實機設定步驟在上方。</p></noscript>
     </div>
   </section>
   <section class="paper-block" id="trouble"><div class="wrap section-grid">
-    <div class="section-intro"><p class="kicker"><i></i> 片場排查</p><h2>看哪一段<br>先失去訊號。</h2><p><b>RF</b> 是接收到的無線電強度，<b>AF</b> 是聲音電平。兩個表分開看，才能知道下一步該碰哪台機器。</p></div>
+    <div class="section-intro"><h2>對好了，試錄十秒。</h2><p>讓演員說最大聲的一句，再走到最遠的位置。戴耳機回放，聽有沒有破音或斷音。</p></div>
     <div class="folds">
-      <details open><summary>EK 的 RF 沒反應</summary><p>檢查 SK 的電池和 RF Mute，確認兩台頻段相容、頻率相同。靠近測試，重新 Sync，再沿預定走位拉開距離。</p></details>
-      <details><summary>有 RF，說話時 AF 沒動</summary><p>先看 SK 的 AF。若沒動，檢查領夾插頭、螺環與 Sensitivity。若 SK 有反應，再確認 MUTE、兩台的 Pilot Tone 設定，以及接到的是這位演員的那一組。</p></details>
-      <details><summary>EK 有 AF，錄音機無聲或破音</summary><p>檢查 EK 輸出線、錄音軌是否啟用、MIC／LINE 和錄音機增益。SK 已經爆音時，先降低發射端輸入靈敏度。若只有錄音機紅燈，才回頭調 EK 的 AF Out 或錄音機輸入。</p></details>
-      <details><summary>靠近正常，走遠卻斷音</summary><p>請演員走一遍，觀察身體遮擋、天線位置和 RF 格數。依原廠建議，關閉該組發射器後，讓 <b>Squelch</b> 從 Low 起調，採用足以抑制嘶聲的最低門檻。門檻太高會縮短有效距離。</p></details>
-      <details><summary>機身選單速查</summary><dl class="menu-list"><dt>Mute Mode</dt><dd>在 SK 的 Advanced 裡設定撥桿。AF On/Off 切音訊，RF On/Off 切無線發射，Disabled 停用撥桿。</dd><dt>Pilot Tone</dt><dd>這組 G3 發射與接收端使用相符的導頻設定。Sync 會傳送頻率、名稱和 Pilot Tone 設定。</dd><dt>Auto Lock</dt><dd>交給演員前可鎖定按鍵。需調整時，按 SET，選 Unlock，再以 SET 確認。</dd><dt>Current List / Tune</dt><dd>Current List 可回看上一次掃描結果。換場重新掃描。Tune 為手調頻率，本練習使用原廠預設 Bank。</dd></dl></details>
+      <details><summary>RF 沒訊號</summary><p>查電池、RF Mute 和兩台的 MHz。走遠才斷音時，檢查遮擋，用能壓住底噪的最低 Squelch 門檻。</p></details>
+      <details><summary>有 RF，說話時 AF 不動</summary><p>RF 看無線訊號，AF 看聲音。檢查 SK 的領夾插頭、MUTE 與 Sensitivity。</p></details>
+      <details><summary>錄音太大或太小</summary><p>先調 SK 的 Sensitivity，讓 AF PEAK 只在最響處閃一下。再用 EK 的 AF Out 配合錄音機的 MIC／LINE 輸入。</p></details>
     </div>
   </div></section>
-  <section class="wrap references" aria-labelledby="sources"><h2 id="sources">教材與原廠資料</h2>
-    <ul><li>陳嘉暐，《影視錄音實務》文件教材。<a href="https://moodle.isu.edu.tw/mod/page/view.php?id=128898">無線麥克風設定（校內 Moodle）↗</a></li>
-    <li>Sennheiser 支援中心說明如何掃頻、紅外線同步及多組選台。<a href="https://help.sennheiser.com/hc/en-us/articles/23203500167314-Evolution-Wireless-G2-G3-and-G4-systems-RF-Scan-and-Sync-Procedure">原廠掃頻與對頻指南 ↗</a></li>
-    <li>在 Sennheiser 原廠手冊查閱 Squelch、AF Out、Sensitivity 與 Mute Mode。<a href="https://www.radiofacilities.com/wp-content/uploads/Sennheiser-G3-100-Series-Battery-Receiver.pdf">EK 100 G3 接收器手冊（PDF）↗</a> · <a href="https://s3.amazonaws.com/sonicc/uploads/Sennheiser-SK-100-G3-Bodypack-Transmitter-Instruction-Manual-Sheet.pdf">SK 100 G3 發射器手冊（PDF）↗</a></li>
-    <li>器材攝影 Stephan Ridgway，已旋轉、裁切及轉檔。<a href="https://commons.wikimedia.org/wiki/File:Sennheiser_G3_W100_Wireless_System_including_a_Rode_Reporter_microphone_(9676892219).jpg">Wikimedia Commons 原圖 ↗</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0 ↗</a></li></ul>
-  </section>
+  <div class="wrap references"><details class="source-fold"><summary>原廠手冊與教材來源</summary>
+    <ul><li><a href="https://www.radiofacilities.com/wp-content/uploads/Sennheiser-G3-100-Series-Battery-Receiver.pdf">EK 100 G3 接收器手冊 ↗</a> · <a href="https://s3.amazonaws.com/sonicc/uploads/Sennheiser-SK-100-G3-Bodypack-Transmitter-Instruction-Manual-Sheet.pdf">SK 100 G3 發射器手冊 ↗</a></li>
+    <li><a href="https://moodle.isu.edu.tw/mod/page/view.php?id=128898">老師的 Moodle 筆記 ↗</a> · <a href="https://help.sennheiser.com/hc/en-us/articles/23203500167314-Evolution-Wireless-G2-G3-and-G4-systems-RF-Scan-and-Sync-Procedure">原廠掃頻與對頻指南 ↗</a></li>
+    <li>攝影 Stephan Ridgway，已裁切、旋轉與轉檔。<a href="https://commons.wikimedia.org/wiki/File:Sennheiser_G3_W100_Wireless_System_including_a_Rode_Reporter_microphone_(9676892219).jpg">原圖 ↗</a> · <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0 ↗</a></li></ul>
+  </details></div>
 </main>
 <footer class="foot"><div class="wrap"><a href="./index2.html">↖ 回課程列表</a><span>義守大學電影與電視學系 · 陳嘉暐</span><a href="./17.html">17　片場音樂回放 →</a></div></footer>
 </body>

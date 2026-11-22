@@ -6,17 +6,18 @@ const playSymbol = document.querySelector("#play-symbol");
 const status = document.querySelector("#audio-status");
 const modes = [...document.querySelectorAll("[data-mode]")];
 const lp = document.querySelector("#lp");
+const boost = document.querySelector("#boost");
 const hp = document.querySelector("#hp");
 const fallback = document.querySelector("#fallback");
-const masterGain = 0.72;
+const eqPlot = document.querySelector("#eq-plot");
 const duration = 15;
 const notes = [
-  "聽現場麥克風。吉他、鈸和鼓都從喇叭漏進來，留意「鼓聲好清楚喔」的字尾。",
-  "現場喇叭經過低通，對白原樣錄進麥克風。移動 High Cut，聽吉他從哪裡開始蓋住聲音。",
-  "後期只聽處理過的對白軌。提高 Low Cut，再降回來，比較漏進來的鼓和說話者的厚度。",
-  "保留清理過的對白，對拍加入一條完整原曲，再鋪上海浪。聽原曲的鈸聲和語尾能否同時辨識。"
+  "先聽鈸和吉他，留意它們有沒有蓋過字尾。",
+  "把低頻增益從 0 拉到 +4 dB，聽鼓點有沒有更清楚。",
+  "只聽低切後的現場對白。把 Low Cut 拉高，聽人聲何時開始變薄。",
+  "清理過的對白，加上獨立的全頻原曲和海浪。"
 ];
-let selected = 0;
+let selected = Number(modes.find(b => b.getAttribute("aria-pressed") === "true").dataset.mode);
 let context;
 let graph;
 let buffers;
@@ -28,86 +29,103 @@ let frame = 0;
 let starting = false;
 let revision = 0;
 
-function gain(value) {
-  const node = context.createGain();
-  node.gain.value = value;
-  return node;
+function mixSettings() {
+  return {mode: selected, lowHz: Number(lp.value), highHz: Number(hp.value), boostDb: Number(boost.value)};
 }
 
-// Two biquads make a fourth-order Butterworth crossover, 24 dB/octave.
-// Web Audio interprets Q in decibels on lowpass and highpass biquads.
-function makeFilter(type, frequency) {
-  const sections = [0.5411961001, 1.306562965].map(quality => {
-    const node = context.createBiquadFilter();
-    node.type = type;
-    node.frequency.value = frequency;
-    node.Q.value = 20 * Math.log10(quality);
+function makeGraph(ctx, settings) {
+  function gain(value) {
+    const node = ctx.createGain();
+    node.gain.value = value;
     return node;
-  });
-  sections[0].connect(sections[1]);
-  return sections;
-}
-
-function makeGraph() {
+  }
   const music = gain(1), voice = gain(0.91), sea = gain(1);
-  const speaker = gain(1), microphone = gain(1), output = gain(masterGain);
+  const speaker = gain(1), microphone = gain(1), output = gain(0.72);
   const rawSpeaker = gain(0), lowSpeaker = gain(0);
   const rawMic = gain(0), cleanMic = gain(0), score = gain(0), waves = gain(0);
-  const low = makeFilter("lowpass", Number(lp.value));
-  const high = makeFilter("highpass", Number(hp.value));
+  const filters = createPlaybackFilters(ctx, settings);
 
   music.connect(rawSpeaker).connect(speaker);
-  music.connect(low[0]);
-  low[1].connect(lowSpeaker).connect(speaker);
-  // A direct arrival and two short reflections model music leaking into a mic.
+  music.connect(filters.low[0]);
+  filters.shelf.connect(lowSpeaker).connect(speaker);
+
+  // Direct arrival and two reflections from the on-set speaker to the microphone.
   for (const [seconds, amplitude] of [[0.011, 0.53], [0.039, 0.21], [0.071, 0.10]]) {
-    const delay = context.createDelay(0.1);
+    const delay = ctx.createDelay(0.1);
     delay.delayTime.value = seconds;
     speaker.connect(delay).connect(gain(amplitude)).connect(microphone);
   }
   voice.connect(microphone);
   microphone.connect(rawMic).connect(output);
-  microphone.connect(high[0]);
-  high[1].connect(cleanMic).connect(output);
+  microphone.connect(filters.high[0]);
+  filters.high[filters.high.length - 1].connect(cleanMic).connect(output);
   music.connect(score).connect(output);
   sea.connect(waves).connect(output);
-  output.connect(context.destination);
-  return { inputs: [music, voice, sea], rawSpeaker, lowSpeaker, rawMic, cleanMic, score, waves, low, high };
+  output.connect(ctx.destination);
+
+  const mix = {inputs: [music, voice, sea], rawSpeaker, lowSpeaker, rawMic, cleanMic, score, waves, ...filters};
+  applyPlaybackMix(mix, settings, 0);
+  return mix;
 }
 
-function setValue(param, value) {
-  param.setTargetAtTime(value, context.currentTime, 0.013);
+function applyPlaybackMix(mix, settings, smoothing = 0.013) {
+  const now = mix.rawMic.context.currentTime;
+  function set(param, value) {
+    if (smoothing === 0) param.value = value;
+    else param.setTargetAtTime(value, now, smoothing);
+  }
+  const stageOn = settings.mode > 0;
+  const postOn = settings.mode >= 2;
+  set(mix.rawSpeaker.gain, stageOn ? 0 : 1);
+  set(mix.lowSpeaker.gain, stageOn ? 1 : 0);
+  // In C and D the entire microphone signal goes through the high-pass.
+  set(mix.rawMic.gain, postOn ? 0 : 1);
+  set(mix.cleanMic.gain, postOn ? 1 : 0);
+  set(mix.score.gain, settings.mode === 3 ? 0.37 : 0);
+  set(mix.waves.gain, settings.mode === 3 ? 0.21 : 0);
+  set(mix.shelf.gain, settings.boostDb);
+  for (const part of mix.low) set(part.frequency, settings.lowHz);
+  for (const part of mix.high) set(part.frequency, settings.highHz);
 }
 
-function updateMix() {
-  if (!graph) return;
-  setValue(graph.rawSpeaker.gain, selected === 0 ? 1 : 0);
-  setValue(graph.lowSpeaker.gain, selected === 0 ? 0 : 1);
-  setValue(graph.rawMic.gain, selected < 2 ? 1 : 0);
-  setValue(graph.cleanMic.gain, selected >= 2 ? 1 : 0);
-  setValue(graph.score.gain, selected === 3 ? 0.37 : 0);
-  setValue(graph.waves.gain, selected === 3 ? 0.21 : 0);
-  for (const section of graph.low) setValue(section.frequency, Number(lp.value));
-  for (const section of graph.high) setValue(section.frequency, Number(hp.value));
+function renderEQ() {
+  drawPlaybackEQ(eqPlot, mixSettings(), context ? context.sampleRate : 48000);
 }
 
-function selectMode(index) {
-  selected = index;
-  modes.forEach((b, i) => b.setAttribute("aria-pressed", String(i === selected)));
-  lp.disabled = selected === 0;
-  hp.disabled = selected < 2;
+function refreshMixer() {
+  const settings = mixSettings();
+  const stageOn = selected > 0, postOn = selected >= 2;
+  lp.disabled = !stageOn;
+  boost.disabled = !stageOn;
+  hp.disabled = !postOn;
+  for (const slider of [lp, boost, hp]) {
+    const suffix = slider === boost ? " dB" : " Hz";
+    const prefix = slider === boost && settings.boostDb > 0 ? "+" : "";
+    const display = prefix + slider.value + suffix;
+    document.querySelector("#" + slider.id + "-out").value = display;
+    slider.setAttribute("aria-valuetext", display);
+  }
+  document.querySelector("#stage-key").classList.toggle("bypassed", !stageOn);
+  document.querySelector("#post-key").classList.toggle("bypassed", !postOn);
+  document.querySelector("#stage-state").textContent = stageOn ? (settings.boostDb ? "低通＋增益" : "低通") : "全頻";
+  document.querySelector("#post-state").textContent = postOn ? "高通" : "原音";
+  const stageText = stageOn ? "喇叭低通 " + lp.value + " Hz，低頻增益 " + boost.value + " dB。" : "喇叭播放全頻。";
+  const postText = postOn ? "對白高通 " + hp.value + " Hz。" : "對白保留原音。";
+  eqPlot.setAttribute("aria-label", "EQ 頻率響應圖。" + stageText + postText);
+  if (graph) applyPlaybackMix(graph, settings);
+  renderEQ();
+}
+
+modes.forEach((button, i) => button.addEventListener("click", () => {
+  selected = i;
+  modes.forEach((b, j) => b.setAttribute("aria-pressed", String(j === selected)));
   document.querySelector("#mode-note").textContent = notes[selected];
-  updateMix();
-}
-modes.forEach((b, i) => b.addEventListener("click", () => selectMode(i)));
-for (const slider of [lp, hp]) {
-  slider.addEventListener("input", () => {
-    document.querySelector("#" + slider.id + "-out").value = slider.value + " Hz";
-    slider.setAttribute("aria-valuetext", slider.value + " 赫茲");
-    updateMix();
-  });
-  slider.setAttribute("aria-valuetext", slider.value + " 赫茲");
-}
+  refreshMixer();
+}));
+for (const slider of [lp, boost, hp]) slider.addEventListener("input", refreshMixer);
+if (window.ResizeObserver) new ResizeObserver(renderEQ).observe(eqPlot);
+else window.addEventListener("resize", renderEQ);
+refreshMixer();
 
 async function prepareBuffers() {
   if (buffers) return buffers;
@@ -152,7 +170,7 @@ function startSources() {
   playButton.setAttribute("aria-pressed", "true");
   playLabel.textContent = "暫停試聽";
   playSymbol.textContent = "Ⅱ";
-  status.textContent = "正在循環播放 15 秒範例。";
+  status.textContent = "15 秒循環播放中。";
   tick();
 }
 function pauseLab() {
@@ -186,18 +204,19 @@ async function togglePlay() {
       const Audio = window.AudioContext || window.webkitAudioContext;
       if (!Audio) throw new Error("Web Audio unavailable");
       context = new Audio();
-      graph = makeGraph();
+      graph = makeGraph(context, mixSettings());
+      renderEQ();
     }
     await Promise.all([context.resume(), prepareBuffers()]);
     if (request !== revision) return;
-    updateMix();
+    applyPlaybackMix(graph, mixSettings());
     starting = false;
     startSources();
   } catch {
     if (request !== revision) return;
     pauseLab();
     fallback.closest("details").open = true;
-    status.textContent = "互動音軌暫時無法載入。可使用下方的一般播放器，或再按一次試聽。";
+    status.textContent = "音軌暫時無法載入。可改用下方播放器，或再試一次。";
   }
 }
 playButton.addEventListener("click", togglePlay);
