@@ -13,7 +13,7 @@
 <a class="skip" href="#main">跳到教學內容</a>
 <header class="mast"><div class="wrap mast-inner">
   <a class="course" href="./index2.html"><span aria-hidden="true">↖</span> 影視錄音實務</a>
-  <nav aria-label="本課導覽"><a href="#setup">選頻方法</a><a href="#menus">選單速查</a><a href="#practice">對頻練習</a><a href="#trouble">試音</a></nav>
+  <nav aria-label="本課導覽"><a href="#setup">選頻方法</a><a href="#menus">試音設定</a><a href="#practice">對頻練習</a><a href="#trouble">試錄</a></nav>
 </div></header>
 <main id="main">
   <section class="wrap hero hero-rf" aria-labelledby="title">
@@ -37,7 +37,7 @@
         <h3>自動掃頻 <small>到新場地時用</small></h3>
         <ol>
           <li>只關閉待配對的發射器（子機），其他使用中的那幾組保持開機。</li>
-          <li>接收器（母機）選 <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd>。選可用的 Bank、Channel，按 <kbd>SET</kbd> 儲存。</li>
+          <li>接收器（母機）選 <kbd>Easy Setup</kbd> → <kbd>Scan New List</kbd>，掃描現場找可用頻道。選好 Bank、Channel，按 <kbd>SET</kbd> 儲存。</li>
           <li>打開發射器（子機）。接收器（母機）選 <kbd>Sync</kbd>，對準兩台紅外線窗，看到 <b>✓</b> 即完成。</li>
         </ol>
       </article>
@@ -53,30 +53,27 @@
       </article>
     </div>
     <p class="field-note"><b>同場多支麥</b> 同頻段選同一個原廠 Bank，每支使用不同的空 Channel。</p>
+    <details class="inline-help">
+      <summary>有 RF，卻收不到聲音？</summary>
+      <p>先檢查領夾麥克風是否插牢。G3 子機和母機的 <kbd>Advanced</kbd> → <kbd>Pilot Tone</kbd> 原則上都保持 <b>On</b>，讓母機辨認子機。跨品牌配對才視相容性考慮關閉。</p>
+    </details>
   </div></section>
   <section class="paper-block" id="menus" aria-labelledby="menus-title"><div class="wrap">
-    <h2 id="menus-title">子機與母機選單速查</h2>
+    <h2 id="menus-title">把子機交給演員前</h2>
     <div class="routes rf-methods">
       <article>
-        <h3>發射器（子機）</h3>
-        <ul>
-          <li><kbd>Sensitivity</kbd> 輸入增益。調整麥克風或 LINE 訊號進入子機的音量。請演員用最大聲的音量試講，避免 AF PEAK 持續亮起。</li>
-          <li><kbd>Auto Lock</kbd> 自動鎖定按鍵，避免演員走位時誤觸。</li>
-          <li><kbd>Advanced</kbd> 進階設定，包含以下兩項。
-            <ul>
-              <li><kbd>Mute Mode</kbd> 決定靜音開關的功能。選 <b>AF On/Off</b> 只關音訊，RF 照常發射。選 <b>RF On/Off</b> 會關掉無線發射。選 <b>Disabled</b> 則停用靜音開關。</li>
-              <li><kbd>Pilot Tone</kbd> 識別音，幫助母機辨認子機訊號。G3 子機與母機搭配時兩端都開。跨品牌搭配時，先確認是否相容，再決定是否關閉。</li>
-            </ul>
-          </li>
-        </ul>
+        <h3>先試好子機的 Sensitivity</h3>
+        <p>子機還在手上時，先請演員用台詞裡最大聲的音量試講。用 <kbd>Sensitivity</kbd> 調整領夾麥克風或 LINE 訊號的輸入增益。<b>AF PEAK</b> 持續亮起時，把靈敏度往更負的 dB 值調，再試一次。</p>
+        <p>母機 <kbd>AF Out</kbd> 原則上維持 <b>0 dB</b>。先調子機的 <kbd>Sensitivity</kbd>，再確認錄音機的 <b>MIC／LINE</b> 輸入選擇和增益。電平還是配合不了時，最後才微調母機輸出。</p>
       </article>
       <article>
-        <h3>接收器（母機）</h3>
-        <ul>
-          <li><kbd>Squelch</kbd> 靜噪門檻。關掉這組子機，從 <b>Low</b> 開始。還有嘶聲才調高，停在能壓住嘶聲的最低一檔。門檻越高，弱 RF 訊號越容易被切掉。</li>
-          <li><kbd>Easy Setup</kbd> 頻道快設。選 <kbd>Scan New List</kbd> 掃描現場，找可用的頻道。</li>
-          <li><kbd>AF Out</kbd> 輸出音量。小輸出接近 <b>MIC OUT</b>，大輸出接近 <b>LINE OUT</b>。依錄音機選用的 <b>MIC／LINE</b> 輸入調整，再看電平表確認有沒有過載。</li>
-        </ul>
+        <h3>避免演員誤觸靜音或改到設定</h3>
+        <p>演員可能碰到子機的 MUTE 撥桿。交機前到 <kbd>Advanced</kbd> → <kbd>Mute Mode</kbd> 選 <b>Disabled</b>，避免撥桿切掉聲音。</p>
+        <details class="inline-help">
+          <summary>AF 和 RF 的靜音有什麼差別？</summary>
+          <p><b>AF On/Off</b> 只關音訊，RF 照常發射。<b>RF On/Off</b> 會關掉無線發射。<b>Disabled</b> 停用靜音撥桿。</p>
+        </details>
+        <p><kbd>Auto Lock</kbd> 會自動鎖定按鍵。看到 <b>Locked</b> 時，先按 <kbd>SET</kbd>，再按 <kbd>▲</kbd> 或 <kbd>▼</kbd> 叫出 <b>Unlock?</b>，最後按 <kbd>SET</kbd> 暫時解鎖。</p>
       </article>
     </div>
   </div></section>
@@ -114,9 +111,9 @@
   <section class="paper-block" id="trouble"><div class="wrap section-grid">
     <div class="section-intro"><h2>對好了，試錄十秒。</h2><p>讓演員說最大聲的一句，再走到最遠的位置。戴耳機回放，聽有沒有破音或斷音。</p></div>
     <div class="folds">
-      <details><summary>RF 沒訊號</summary><p>查電池、RF Mute 和兩台的 MHz。走遠才斷音時，檢查遮擋，用能壓住底噪的最低 Squelch 門檻。</p></details>
+      <details><summary>RF 沒訊號</summary><p>查電池、RF Mute 和兩台的 MHz。走遠才斷音時，先檢查身體或布景是否遮住訊號。若要確認母機的 <kbd>Squelch</kbd>，先關掉這組子機，選能壓住嘶聲的最低一檔，再開機走位試錄。</p></details>
       <details><summary>有 RF，說話時 AF 不動</summary><p>RF 看無線訊號，AF 看聲音。檢查發射器（子機）的領夾插頭、MUTE 與 Sensitivity。</p></details>
-      <details><summary>錄音太大或太小</summary><p>先調發射器（子機）的 Sensitivity，讓 AF PEAK 只在最響處閃一下。再調接收器（母機）的 AF Out，配合錄音機的 MIC／LINE 輸入。</p></details>
+      <details><summary>錄音太大或太小</summary><p>先看子機的 <kbd>Sensitivity</kbd>，再查錄音機輸入。兩處都調過還配合不了，才動母機的 <kbd>AF Out</kbd>。低輸出較接近 MIC 電平，高輸出較接近 LINE 電平。</p></details>
     </div>
   </div></section>
   <div class="wrap references"><details class="source-fold"><summary>原廠手冊與教材來源</summary>
