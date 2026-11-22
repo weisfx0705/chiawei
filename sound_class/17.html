@@ -8,7 +8,7 @@
   <title>片場音樂回放 Playback Engineering｜影視錄音實務 17</title>
   <link rel="stylesheet" href="./field-audio/lesson.css?v=3">
   <script defer src="./field-audio/playback-eq.js?v=2"></script>
-  <script defer src="./field-audio/playback.js?v=2"></script>
+  <script defer src="./field-audio/playback.js?v=4"></script>
 </head>
 <body class="playback">
 <a class="skip" href="#main">跳到教學內容</a>
@@ -56,9 +56,14 @@
       <p class="mode-description" id="mode-note" aria-live="polite">把低頻增益從 0 拉到 +4 dB，聽鼓點有沒有更清楚。</p>
       <p class="console-tip">手機建議戴耳機聽低頻。</p><p class="audio-status" id="audio-status" role="status"></p>
       <details class="native-player"><summary>波形、台詞與備用播放器</summary>
-        <div class="tracks" role="img" aria-label="十五秒原曲與對白波形"><div class="track-labels"><b>原曲</b><b>對白</b></div><div class="wave-zone"><img src="./field-audio/cue-waves.png" alt="" width="1100" height="156"><i id="playhead"></i></div></div>
-        <p>固定參數，每 15 秒依序播放 A、B、C、D。</p><audio controls preload="none" id="fallback" aria-label="四段固定參數試聽"><source src="./field-audio/comparison.mp3?v=2" type="audio/mpeg"></audio>
-        <p>甲「你聽，海浪退下去的時候，鼓聲好清楚喔。」<br>乙「有啊。我們再等四拍，然後一起走。」</p>
+        <div class="tracks" role="img" aria-label="十五秒的原曲與五句對白波形，最後幾拍留給音樂。"><div class="track-labels"><b>原曲</b><b>對白</b></div><div class="wave-zone"><img src="./field-audio/cue-waves.png?v=4" alt="" width="1100" height="156"><i id="playhead"></i></div></div>
+        <p>固定參數，每 15 秒依序播放 A、B、C、D。</p><audio controls preload="none" id="fallback" aria-label="同一段對白的四種混音版本"><source src="./field-audio/comparison.mp3?v=4" type="audio/mpeg"></audio>
+        <p><b>男生</b>「你喜歡聽這種音樂喔？」<br>
+          <b>女生</b>「嗯。」<br>
+          <b>男生</b>「但是你聽得懂他們在唱什麼嗎？」<br>
+          <b>女生</b>「當然聽得懂啊。」<br>
+          <b>男生</b>「喔，我也聽得懂。」</p>
+        <p>（兩人繼續跟著音樂搖。）</p>
       </details>
       <noscript><p>請展開備用播放器試聽。</p></noscript>
     </section>
@@ -84,7 +89,7 @@
   <div class="wrap references"><details class="source-fold"><summary>教材與試聽素材</summary><ul>
     <li><a href="https://moodle.isu.edu.tw/mod/url/view.php?id=167682">老師的 Moodle 教材 ↗</a> · <a href="https://manual.audacityteam.org/man/low_pass_filter.html">低通原理 ↗</a> · <a href="https://manual.audacityteam.org/man/high_pass_filter.html">高通原理 ↗</a></li>
     <li><a href="https://vfs.edu/content/production-sound-mixer">片場補錄台詞（溫哥華電影學院）↗</a></li>
-    <li>試聽用原創節奏、合成海浪與 Gemini 合成對白。喇叭低通為 24 dB/oct，對白高通為 96 dB/oct。</li>
+    <li>《藍色大門》片段台詞依陳嘉暐老師口述整理，由 Gemini 合成配音。節奏與海浪為課堂示範製作。喇叭低通為 24 dB/oct，對白高通為 96 dB/oct。</li>
   </ul></details></div>
 </main>
 <footer class="foot"><div class="wrap">

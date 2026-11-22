@@ -12,7 +12,7 @@ const fallback = document.querySelector("#fallback");
 const eqPlot = document.querySelector("#eq-plot");
 const duration = 15;
 const notes = [
-  "先聽鈸和吉他，留意它們有沒有蓋過字尾。",
+  "先聽鈸和吉他，留意男生最後一句「我也聽得懂」的字尾。",
   "把低頻增益從 0 拉到 +4 dB，聽鼓點有沒有更清楚。",
   "只聽低切後的現場對白。把 Low Cut 拉高，聽人聲何時開始變薄。",
   "清理過的對白，加上獨立的全頻原曲和海浪。"
@@ -130,8 +130,8 @@ refreshMixer();
 async function prepareBuffers() {
   if (buffers) return buffers;
   if (!loadingBuffers) {
-    loadingBuffers = Promise.all(["band", "dialogue", "surf"].map(async name => {
-      const response = await fetch("./field-audio/" + name + ".wav");
+    loadingBuffers = Promise.all(["band.wav", "dialogue.wav?v=4", "surf.wav"].map(async file => {
+      const response = await fetch("./field-audio/" + file);
       if (!response.ok) throw new Error("Audio asset unavailable");
       return context.decodeAudioData(await response.arrayBuffer());
     })).then(decoded => {
